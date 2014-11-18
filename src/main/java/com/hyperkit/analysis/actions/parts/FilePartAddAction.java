@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Enumeration;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bibliothek.gui.Dockable;
@@ -44,7 +45,21 @@ public class FilePartAddAction extends PartAction<FilePart>
 				}
 			}
 			
-			getPart().triggerEvent(new FilePartAddEvent(getPart(), new ASDFile(file)));
+			ASDFile asdFile = new ASDFile(file);
+			
+			System.out.println(asdFile.getLength());
+			System.out.println(asdFile.getMinTimestampMeasured() + " - " + asdFile.getMaxTimestampMeasured());
+			System.out.println(asdFile.getMinVoltageMeasured() + " - " + asdFile.getMaxVoltageMeasured());
+			System.out.println(asdFile.getMinCurrentMeasured() + " - " + asdFile.getMaxCurrentMeasured());
+			
+			if (asdFile.getLength() > 0)
+			{
+				getPart().triggerEvent(new FilePartAddEvent(getPart(), new ASDFile(file)));
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(getPart().getComponent(), "File could not be loaded!");
+			}
 		}
 	}
 

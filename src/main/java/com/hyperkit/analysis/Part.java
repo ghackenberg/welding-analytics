@@ -91,7 +91,7 @@ public abstract class Part
 	}
 	public final boolean handleEvent(Event event)
 	{
-		boolean  result = true;
+		boolean result = true;
 		
 		Class<?> type = event.getClass();
 		
@@ -105,13 +105,17 @@ public abstract class Part
 				
 				break;
 			}
-			catch (NoSuchMethodException e)
-			{
-				type = type.getSuperclass();
-			}
 			catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 			{
 				e.printStackTrace();
+				
+				result = false;
+				
+				break;
+			}
+			catch (NoSuchMethodException e)
+			{
+				type = type.getSuperclass();
 			}
 		}
 		

@@ -11,6 +11,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
+import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.ChartPart;
 
@@ -75,6 +76,14 @@ public class CurrentTimeseriesChartPart extends ChartPart
 		{
 			dataset.addSeries(file.getName(), file.getCurrentTimeseries(step));
 		}
+		
+		return true;
+	}
+	public boolean handleEvent(PropertyPartChangeEvent event)
+	{
+		dataset.removeSeries(event.getASDFile().getName());
+		
+		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getCurrentTimeseries(step));
 		
 		return true;
 	}

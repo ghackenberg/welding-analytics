@@ -11,6 +11,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
+import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.ChartPart;
 
@@ -34,7 +35,7 @@ public class VoltageDensityChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		return ChartFactory.createXYAreaChart("Voltage probability density function", "Voltage", "Probability", dataset, PlotOrientation.VERTICAL, true, true, true);
+		return ChartFactory.createXYLineChart("Voltage probability density function", "Voltage", "Probability", dataset, PlotOrientation.VERTICAL, true, true, true);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)
@@ -75,6 +76,14 @@ public class VoltageDensityChartPart extends ChartPart
 		{
 			dataset.addSeries(file.getName(), file.getVoltageDensity(step));
 		}
+		
+		return true;
+	}
+	public boolean handleEvent(PropertyPartChangeEvent event)
+	{
+		dataset.removeSeries(event.getASDFile().getName());
+		
+		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getVoltageDensity(step));
 		
 		return true;
 	}
