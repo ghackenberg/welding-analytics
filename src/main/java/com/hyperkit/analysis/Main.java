@@ -21,6 +21,7 @@ import bibliothek.gui.dock.station.split.SplitDockGrid;
 
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
+import com.hyperkit.analysis.parts.HelpPart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
 import com.hyperkit.analysis.parts.charts.CurrentTimeseriesChartPart;
@@ -60,6 +61,7 @@ public class Main
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
 		Part part_property = new PropertyPart();
+		Part part_help = new HelpPart();
 		
 		// Steps
 		
@@ -100,6 +102,7 @@ public class Main
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
 		grid.addDockable(1, 1, 2, 1, part_voltage_density.getDockable());
 		grid.addDockable(3, 1, 2, 1, part_current_density.getDockable());
+		grid.addDockable(5, 0, 1, 2, part_help.getDockable());
 
 		// Station
 		SplitDockStation station = new SplitDockStation();
