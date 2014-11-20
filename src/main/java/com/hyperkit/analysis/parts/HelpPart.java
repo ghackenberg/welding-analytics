@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.io.File;
 
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 
 import org.apache.commons.io.FileUtils;
 

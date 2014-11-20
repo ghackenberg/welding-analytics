@@ -163,7 +163,7 @@ public class PropertyPart extends Part
 				}
 			);
 			
-			panel.setLayout(new GridLayout(7, 3));
+			panel.setLayout(new GridLayout(7, 3, 10, 10));
 			
 			panel.add(new JLabel("Property"));
 			panel.add(new JLabel("Minimum"));

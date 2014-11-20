@@ -1,9 +1,14 @@
 package com.hyperkit.analysis;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
@@ -21,7 +26,6 @@ import bibliothek.gui.dock.station.split.SplitDockGrid;
 
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
-import com.hyperkit.analysis.parts.HelpPart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
 import com.hyperkit.analysis.parts.charts.CurrentTimeseriesChartPart;
@@ -61,7 +65,7 @@ public class Main
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
 		Part part_property = new PropertyPart();
-		Part part_help = new HelpPart();
+		//Part part_help = new HelpPart();
 		
 		// Steps
 		
@@ -77,6 +81,30 @@ public class Main
 			}
 		);
 		
+		// Help
+		
+		ImageIcon icon_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/help.png"));
+		ImageIcon icon_resized = new ImageIcon(icon_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		
+		JButton button_help = new JButton(icon_resized);
+		button_help.addActionListener(
+			new ActionListener()
+			{	
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					try
+					{
+						Desktop.getDesktop().open(new java.io.File("User Documentation.pdf"));
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				}
+			}
+		);
+		
 		// Headbar
 		
 		JToolBar headbar = new JToolBar("Headbar");
@@ -84,6 +112,8 @@ public class Main
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		headbar.add(new JLabel("Step number:"));
 		headbar.add(step);
+		headbar.add(new JLabel("User documentation:"));
+		headbar.add(button_help);
 		
 		// Footbar
 		
@@ -102,7 +132,7 @@ public class Main
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
 		grid.addDockable(1, 1, 2, 1, part_voltage_density.getDockable());
 		grid.addDockable(3, 1, 2, 1, part_current_density.getDockable());
-		grid.addDockable(5, 0, 1, 2, part_help.getDockable());
+		//grid.addDockable(5, 0, 1, 2, part_help.getDockable());
 
 		// Station
 		SplitDockStation station = new SplitDockStation();
@@ -115,7 +145,7 @@ public class Main
 		
 		// Frame
 		
-		JFrame frame = new JFrame("Hyperkit Software - Analysis");
+		JFrame frame = new JFrame("Hyperkit Software - Analysis Solution");
 		frame.setLayout(new BorderLayout());
 		frame.add(headbar, BorderLayout.PAGE_START);
 		frame.add(station.getComponent(), BorderLayout.CENTER);
