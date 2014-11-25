@@ -1,0 +1,1 @@
+java -jar target\com.hyperkit.analysis-1.0.jar
