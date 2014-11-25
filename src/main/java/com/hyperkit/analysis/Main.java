@@ -145,7 +145,7 @@ public class Main
 		
 		// Frame
 		
-		JFrame frame = new JFrame("Hyperkit Software - Analysis Solution");
+		JFrame frame = new JFrame("Hyperkit Analysis Solution");
 		frame.setLayout(new BorderLayout());
 		frame.add(headbar, BorderLayout.PAGE_START);
 		frame.add(station.getComponent(), BorderLayout.CENTER);

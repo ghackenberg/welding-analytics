@@ -47,11 +47,6 @@ public class FilePartAddAction extends PartAction<FilePart>
 			
 			ASDFile asdFile = new ASDFile(file);
 			
-			System.out.println(asdFile.getLength());
-			System.out.println(asdFile.getMinTimestampMeasured() + " - " + asdFile.getMaxTimestampMeasured());
-			System.out.println(asdFile.getMinVoltageMeasured() + " - " + asdFile.getMaxVoltageMeasured());
-			System.out.println(asdFile.getMinCurrentMeasured() + " - " + asdFile.getMaxCurrentMeasured());
-			
 			if (asdFile.getLength() > 0)
 			{
 				getPart().triggerEvent(new FilePartAddEvent(getPart(), new ASDFile(file)));
