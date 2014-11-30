@@ -44,13 +44,6 @@ public class VoltageDensityChartPart extends ChartPart
 		
 		files.add(event.getASDFile());
 		
-		/*
-		for (int i = 0; i < files.size(); i++)
-		{
-			getChart().getXYPlot().getRenderer().setSeriesPaint(i, files.get(i).getColor());
-		}
-		*/
-		
 		return true;
 	}
 	public boolean handleEvent(FilePartRemoveEvent event)
@@ -58,13 +51,6 @@ public class VoltageDensityChartPart extends ChartPart
 		dataset.removeSeries(event.getASDFile().getName());
 		
 		files.remove(event.getASDFile());
-		
-		/*
-		for (int i = 0; i < files.size(); i++)
-		{
-			getChart().getXYPlot().getRenderer().setSeriesPaint(i, files.get(i).getColor());
-		}
-		*/
 		
 		return true;
 	}

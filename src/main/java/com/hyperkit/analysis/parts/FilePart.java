@@ -9,6 +9,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.actions.parts.FilePartAddAction;
 import com.hyperkit.analysis.actions.parts.FilePartRemoveAction;
@@ -42,7 +43,7 @@ public class FilePart extends Part
 				@Override
 				public void valueChanged(ListSelectionEvent e)
 				{
-					triggerEvent(new FilePartSelectEvent(self, list.getSelectedValue()));
+					Bus.getInstance().broadcastEvent(new FilePartSelectEvent(self, list.getSelectedValue()));
 				}
 			}
 		);

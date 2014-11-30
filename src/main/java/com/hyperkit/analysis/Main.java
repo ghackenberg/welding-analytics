@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
@@ -24,6 +25,7 @@ import bibliothek.gui.DockController;
 import bibliothek.gui.dock.SplitDockStation;
 import bibliothek.gui.dock.station.split.SplitDockGrid;
 
+import com.hyperkit.analysis.events.ProgressChangeEvent;
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
@@ -60,12 +62,28 @@ public class Main
 		// Part
 		
 		Part part_file = new FilePart();
-		Part part_voltage_timeseries = new VoltageTimeseriesChartPart(STEP_INIT);
-		Part part_current_timeseries = new CurrentTimeseriesChartPart(STEP_INIT);
+		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
+		Part part_current_timeseries = new CurrentTimeseriesChartPart();
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
 		Part part_property = new PropertyPart();
-		//Part part_help = new HelpPart();
+		
+		// Progress
+		
+		JProgressBar progress = new JProgressBar(0, 100);
+		progress.setStringPainted(true);
+		
+		Bus.getInstance().addHandler(new Handler()
+			{
+				@SuppressWarnings("unused")
+				public boolean handleEvent(ProgressChangeEvent event)
+				{
+					progress.setValue(event.getProgress());
+					
+					return true;
+				}
+			}
+		);
 		
 		// Steps
 		
@@ -110,6 +128,8 @@ public class Main
 		JToolBar headbar = new JToolBar("Headbar");
 		headbar.setFloatable(false);
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
+		headbar.add(new JLabel("Load progress:"));
+		headbar.add(progress);
 		headbar.add(new JLabel("Step number:"));
 		headbar.add(step);
 		headbar.add(new JLabel("User documentation:"));

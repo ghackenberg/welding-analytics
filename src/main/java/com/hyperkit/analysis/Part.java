@@ -2,8 +2,6 @@ package com.hyperkit.analysis;
 
 import java.awt.Component;
 import java.awt.Image;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +13,7 @@ import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.DefaultDockable;
 import bibliothek.gui.dock.action.DefaultDockActionSource;
 
-public abstract class Part
+public abstract class Part extends Handler
 {
 	
 	private String title;
@@ -34,7 +32,7 @@ public abstract class Part
 		this.title = title;
 		this.icon = icon;
 		
-		Bus.getInstance().addPart(this);
+		Bus.getInstance().addHandler(this);
 	}
 	
 	public final boolean addAction(Action action)
@@ -84,42 +82,5 @@ public abstract class Part
 		return component;
 	}
 	protected abstract Component createComponent();
-	
-	public final boolean triggerEvent(Event event)
-	{
-		return Bus.getInstance().broadcastEvent(event);
-	}
-	public final boolean handleEvent(Event event)
-	{
-		boolean result = true;
-		
-		Class<?> type = event.getClass();
-		
-		while (Event.class.isAssignableFrom(type) && ! type.isAssignableFrom(Event.class))
-		{
-			try
-			{
-				Method method = getClass().getMethod("handleEvent", type);
-				
-				result = result && (boolean) method.invoke(this, event);
-				
-				break;
-			}
-			catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-			{
-				e.printStackTrace();
-				
-				result = false;
-				
-				break;
-			}
-			catch (NoSuchMethodException e)
-			{
-				type = type.getSuperclass();
-			}
-		}
-		
-		return result;
-	}
 
 }

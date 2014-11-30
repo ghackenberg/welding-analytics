@@ -1,6 +1,6 @@
 package com.hyperkit.analysis.files;
 
-import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -9,48 +9,92 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import au.com.bytecode.opencsv.CSVReader;
-
+import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.File;
+import com.hyperkit.analysis.events.ProgressChangeEvent;
 
 public class ASDFile extends File
 {
 	
 	private static final int TIMESTAMP_INDEX = 0;
-	private static final int CURRENT_INDEX = 1;
-	private static final int VOLTAGE_INDEX = 2;
+	private static final int VOLTAGE_INDEX = 1;
+	private static final int CURRENT_INDEX = 2;
 	
 	private String name;
-	
-	private Color color;
 	
 	private List<double[]> data;
 
 	private double minTimestampMeasured = Double.MAX_VALUE;
-	private double maxTimestampMeasured = Double.MIN_VALUE;
+	private double maxTimestampMeasured = -Double.MAX_VALUE;
 	
 	private double minVoltageMeasured = Double.MAX_VALUE;
-	private double maxVoltageMeasured = Double.MIN_VALUE;
+	private double maxVoltageMeasured = -Double.MAX_VALUE;
 	
 	private double minCurrentMeasured = Double.MAX_VALUE;
-	private double maxCurrentMeasured = Double.MIN_VALUE;
+	private double maxCurrentMeasured = -Double.MAX_VALUE;
 
 	private double minTimestampDisplayed = Double.MAX_VALUE;
-	private double maxTimestampDisplayed = Double.MIN_VALUE;
+	private double maxTimestampDisplayed = -Double.MAX_VALUE;
 	
 	private double minVoltageDisplayed = Double.MAX_VALUE;
-	private double maxVoltageDisplayed = Double.MIN_VALUE;
+	private double maxVoltageDisplayed = -Double.MAX_VALUE;
 	
 	private double minCurrentDisplayed = Double.MAX_VALUE;
-	private double maxCurrentDisplayed = Double.MIN_VALUE;
+	private double maxCurrentDisplayed = -Double.MAX_VALUE;
 
-	public ASDFile(java.io.File file)
+	public ASDFile(java.io.File file) throws IOException
 	{
 		super(file);
 		
 		name = file.getAbsolutePath();
+		data = new ArrayList<>();
 		
-        color = new Color(Color.HSBtoRGB((float) Math.random(), 1f, 0.75f));
+		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(0));
+		
+		long size = getFile().length();
+		long position = 0;
+		
+		int progress = 0;
+		
+		BufferedReader reader = new BufferedReader(new FileReader(getFile()));
+		
+		String line;
+		
+		while ((line = reader.readLine()) != null)
+		{
+			position += line.length() + 1;
+			
+			try
+			{
+				String[] parts = line.split("\t");
+				
+				if (parts.length == 3)
+				{
+					double first = parseDouble(parts[0]);
+					double second = parseDouble(parts[1]);
+					double third = parseDouble(parts[2]);
+					
+					data.add(new double[] {first, second, third});
+				}
+			}
+			catch (NumberFormatException | ParseException e)
+			{
+				
+			}
+			
+			int temp = (int) Math.floor(1.0 * position / size * 100);
+			
+			if (temp != progress)
+			{
+				progress = temp;
+				
+				Bus.getInstance().broadcastEvent(new ProgressChangeEvent(progress));
+			}
+		}
+		
+		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(100));
+		
+		reader.close();
 	}
 	
 	public String getName()
@@ -58,9 +102,9 @@ public class ASDFile extends File
 		return name;
 	}
 	
-	public Color getColor()
+	public List<double[]> getData()
 	{
-		return color;
+		return data;
 	}
 	
 	public int getLength()
@@ -98,7 +142,7 @@ public class ASDFile extends File
 	
 	public double getMaxTimestampMeasured()
 	{
-		if (maxTimestampMeasured == Double.MIN_VALUE)
+		if (maxTimestampMeasured == -Double.MAX_VALUE)
 		{
 			for (double[] item : getData())
 			{
@@ -124,7 +168,7 @@ public class ASDFile extends File
 	
 	public double getMaxVoltageMeasured()
 	{
-		if (maxVoltageMeasured == Double.MIN_VALUE)
+		if (maxVoltageMeasured == -Double.MAX_VALUE)
 		{
 			for (double[] item : getData())
 			{
@@ -150,7 +194,7 @@ public class ASDFile extends File
 	
 	public double getMaxCurrentMeasured()
 	{
-		if (maxCurrentMeasured == Double.MIN_VALUE)
+		if (maxCurrentMeasured == -Double.MAX_VALUE)
 		{
 			for (double[] item : getData())
 			{
@@ -175,7 +219,7 @@ public class ASDFile extends File
 	
 	public double getMaxTimestampDisplayed()
 	{
-		if (maxTimestampDisplayed == Double.MIN_VALUE)
+		if (maxTimestampDisplayed == -Double.MAX_VALUE)
 		{
 			return getMaxTimestampMeasured();
 		}
@@ -199,7 +243,7 @@ public class ASDFile extends File
 	
 	public double getMaxVoltageDisplayed()
 	{
-		if (maxVoltageDisplayed == Double.MIN_VALUE)
+		if (maxVoltageDisplayed == -Double.MAX_VALUE)
 		{
 			return getMaxVoltageMeasured();
 		}
@@ -223,7 +267,7 @@ public class ASDFile extends File
 	
 	public double getMaxCurrentDisplayed()
 	{
-		if (maxCurrentDisplayed == Double.MIN_VALUE)
+		if (maxCurrentDisplayed == -Double.MAX_VALUE)
 		{
 			return getMaxCurrentMeasured();
 		}
@@ -263,77 +307,75 @@ public class ASDFile extends File
 		maxCurrentDisplayed = value;
 	}
 	
-	public double[][] getVoltageTimeseries(int steps)
+	public double[][] getVoltageTimeseries()
 	{
 		List<double[]> data = getData();
 		
-		double min = getMinTimestampDisplayed();
-		double max = getMaxTimestampDisplayed();
-		
-		double[][] timeseries = new double[2][steps];
-		
-		for (int i = 0; i < steps; i++)
-		{
-			timeseries[0][i] = min + (max - min) / steps * (i + 0.5);
-		}
+		int length = 0;
 
-		double[] count = new double[steps];
-		
-		for (double[] line : data)
+		for (int i = 0; i < data.size(); i++)
 		{
-			double time = line[TIMESTAMP_INDEX];
+			double timestamp = data.get(i)[TIMESTAMP_INDEX];
 			
-			if (time >= min && time <= max)
+			if (timestamp >= getMinTimestampDisplayed() && timestamp <= getMaxTimestampDisplayed())
 			{
-				int bin = (int) Math.floor((time - min) / (max - min) * (steps - 1));
-				
-				timeseries[1][bin] += line[VOLTAGE_INDEX];
-				
-				count[bin]++;
+				length++;
 			}
 		}
 		
-		for (int i = 0; i < steps; i++)
+		int index = 0;
+		
+		double[][] timeseries = new double[2][length];
+		
+		for (double[] line : data)
 		{
-			timeseries[1][i] /= count[i];
+			double timestamp = line[TIMESTAMP_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= getMinTimestampDisplayed() && timestamp <= getMaxTimestampDisplayed())
+			{
+				timeseries[0][index] = timestamp;
+				timeseries[1][index] = voltage;
+				
+				index++;
+			}
 		}
 		
 		return timeseries;
 	}
 	
-	public double[][] getCurrentTimeseries(int steps)
+	public double[][] getCurrentTimeseries()
 	{
 		List<double[]> data = getData();
 		
-		double min = getMinTimestampDisplayed();
-		double max = getMaxTimestampDisplayed();
-		
-		double[][] timeseries = new double[2][steps];
-		
-		for (int i = 0; i < steps; i++)
-		{
-			timeseries[0][i] = min + (max - min) / steps * (i + 0.5);
-		}
+		int length = 0;
 
-		double[] count = new double[steps];
-		
-		for (double[] line : data)
+		for (int i = 0; i < data.size(); i++)
 		{
-			double time = line[TIMESTAMP_INDEX];
+			double timestamp = data.get(i)[TIMESTAMP_INDEX];
 			
-			if (time >= min && time <= max)
+			if (timestamp >= getMinTimestampDisplayed() && timestamp <= getMaxTimestampDisplayed())
 			{
-				int bin = (int) Math.floor((time - min) / (max - min) * (steps - 1));
-				
-				timeseries[1][bin] += line[CURRENT_INDEX];
-				
-				count[bin]++;
+				length++;
 			}
 		}
 		
-		for (int i = 0; i < steps; i++)
+		int index = 0;
+		
+		double[][] timeseries = new double[2][length];
+		
+		for (double[] line : data)
 		{
-			timeseries[1][i] /= count[i];
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			
+			if (timestamp >= getMinTimestampDisplayed() && timestamp <= getMaxTimestampDisplayed())
+			{
+				timeseries[0][index] = timestamp;
+				timeseries[1][index] = current;
+				
+				index++;
+			}
 		}
 		
 		return timeseries;
@@ -449,45 +491,21 @@ public class ASDFile extends File
 		return name;
 	}
 	
-	private List<double[]> getData()
+	private double parseDouble(String string) throws NumberFormatException, ParseException
 	{
-		if (data == null)
+		String[] parts = string.split("e");
+		
+		if (parts.length != 2)
 		{
-			try
-			{
-				data = new ArrayList<>();
-				
-				CSVReader reader = new CSVReader(new FileReader(getFile()), '\t');
-				
-				NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
-				
-				String[] line;
-				
-				while ((line = reader.readNext()) != null)
-				{
-					try
-					{
-						double first = format.parse(line[0]).doubleValue();
-						double second = format.parse(line[1]).doubleValue();
-						double third = format.parse(line[2]).doubleValue();
-						
-						data.add(new double[] {first, second, third});
-					}
-					catch (NumberFormatException | ParseException e)
-					{
-						
-					}
-				}
-				
-				reader.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
+			throw new NumberFormatException("Number format should be <x>e<y>.");
 		}
 		
-		return data;
+		NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
+		
+		double number = format.parse(parts[0]).doubleValue();
+		double exponent = format.parse(parts[1]).intValue();
+		
+		return number * Math.pow(10, exponent);
 	}
 
 }

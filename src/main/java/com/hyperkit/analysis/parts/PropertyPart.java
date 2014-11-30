@@ -13,7 +13,9 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
+import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
@@ -22,6 +24,7 @@ public class PropertyPart extends Part
 {
 	
 	private JPanel panel;
+	private ASDFile file;
 
 	public PropertyPart()
 	{
@@ -36,17 +39,19 @@ public class PropertyPart extends Part
 		return panel;
 	}
 	
-	public boolean handleEvent(FilePartSelectEvent e)
+	public boolean handleEvent(FilePartSelectEvent event)
 	{
 		panel.removeAll();
 		
-		if (e.getASDFile() != null)
-		{			
+		if (event.getASDFile() != null)
+		{
+			file = event.getASDFile();
+			
 			NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
 			
 			PropertyPart self = this;
 			
-			ASDFile file = e.getASDFile();
+			ASDFile file = event.getASDFile();
 			
 			double minTimestampMeasured = file.getMinTimestampMeasured();
 			double maxTimestampMeasured = file.getMaxTimestampMeasured();
@@ -98,7 +103,7 @@ public class PropertyPart extends Part
 					{
 						file.setMinTimestampDisplayed((double) minTimestampSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -110,7 +115,7 @@ public class PropertyPart extends Part
 					{
 						file.setMaxTimestampDisplayed((double) maxTimestampSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -122,7 +127,7 @@ public class PropertyPart extends Part
 					{
 						file.setMinVoltageDisplayed((double) minVoltageSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -134,7 +139,7 @@ public class PropertyPart extends Part
 					{
 						file.setMaxVoltageDisplayed((double) maxVoltageSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -146,7 +151,7 @@ public class PropertyPart extends Part
 					{
 						file.setMinCurrentDisplayed((double) minCurrentSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -158,7 +163,7 @@ public class PropertyPart extends Part
 					{
 						file.setMaxCurrentDisplayed((double) maxCurrentSpinner.getValue());
 						
-						triggerEvent(new PropertyPartChangeEvent(self, file));
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
 					}
 				}
 			);
@@ -191,6 +196,19 @@ public class PropertyPart extends Part
 		}
 		
 		panel.revalidate();
+		
+		return true;
+	}
+	
+	public boolean handleEvent(FilePartRemoveEvent event)
+	{
+		if (file != null && file == event.getASDFile())
+		{
+			file = null;
+			
+			panel.removeAll();
+			panel.repaint();
+		}
 		
 		return true;
 	}

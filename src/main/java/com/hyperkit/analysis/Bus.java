@@ -13,24 +13,24 @@ public class Bus
 		return instance;
 	}
 	
-	private Set<Part> parts = new HashSet<>();
+	private Set<Handler> handlers = new HashSet<>();
 	
-	public boolean addPart(Part part)
+	public boolean addHandler(Handler handler)
 	{
-		return parts.add(part);
+		return handlers.add(handler);
 	}
-	public boolean removePart(Part part)
+	public boolean removeHandler(Handler handler)
 	{
-		return parts.remove(part);
+		return handlers.remove(handler);
 	}
 	
 	public boolean broadcastEvent(Event event)
 	{
 		boolean result = true;
 		
-		for (Part part : parts)
+		for (Handler handler : handlers)
 		{
-			result = result && part.handleEvent(event);
+			result = result && handler.handleEvent(event);
 		}
 		
 		return result;

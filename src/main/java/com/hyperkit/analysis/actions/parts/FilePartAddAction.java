@@ -1,6 +1,7 @@
 package com.hyperkit.analysis.actions.parts;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.swing.JFileChooser;
@@ -9,6 +10,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bibliothek.gui.Dockable;
 
+import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.actions.PartAction;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.files.ASDFile;
@@ -16,7 +18,7 @@ import com.hyperkit.analysis.parts.FilePart;
 
 public class FilePartAddAction extends PartAction<FilePart>
 {
-
+	
 	public FilePartAddAction(FilePart part)
 	{
 		super(part, "Add file", "Add file", FilePartAddAction.class.getClassLoader().getResource("icons/actions/parts/file_add.png"));
@@ -41,20 +43,39 @@ public class FilePartAddAction extends PartAction<FilePart>
 			{
 				if (file_existing.nextElement().getFile().equals(file))
 				{
+					JOptionPane.showMessageDialog(getPart().getComponent(), "File is loaded already!");
+					
 					return;
 				}
 			}
 			
-			ASDFile asdFile = new ASDFile(file);
+			Thread thread = new Thread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						try
+						{
+							ASDFile asdFile = new ASDFile(file);
+							
+							if (asdFile.getLength() > 0)
+							{
+								Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), asdFile));
+							}
+							else
+							{
+								JOptionPane.showMessageDialog(getPart().getComponent(), "File does not contain readable data!");
+							}
+						}
+						catch (IOException exception)
+						{
+							JOptionPane.showMessageDialog(getPart().getComponent(), "File could not be loaded!");
+						}
+					}
+				}
+			);
 			
-			if (asdFile.getLength() > 0)
-			{
-				getPart().triggerEvent(new FilePartAddEvent(getPart(), new ASDFile(file)));
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(getPart().getComponent(), "File could not be loaded!");
-			}
+			thread.start();
 		}
 	}
 
