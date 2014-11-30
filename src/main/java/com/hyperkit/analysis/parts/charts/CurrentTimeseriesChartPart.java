@@ -33,7 +33,7 @@ public class CurrentTimeseriesChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		JFreeChart chart = ChartFactory.createXYLineChart("Current timeseries", "Time", "Current", dataset, PlotOrientation.VERTICAL, true, true, true);
+		JFreeChart chart = ChartFactory.createXYLineChart("Current timeseries", "Time (in s)", "Current (in A)", dataset, PlotOrientation.VERTICAL, true, true, true);
 		
 		chart.getXYPlot().setRenderer(new SamplingXYLineRenderer());
 		

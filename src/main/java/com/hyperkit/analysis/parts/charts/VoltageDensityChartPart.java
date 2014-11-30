@@ -35,7 +35,7 @@ public class VoltageDensityChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		return ChartFactory.createXYLineChart("Voltage probability density function", "Voltage", "Probability", dataset, PlotOrientation.VERTICAL, true, true, true);
+		return ChartFactory.createXYLineChart("Voltage probability density function", "Voltage (in V)", "Probability (in %)", dataset, PlotOrientation.VERTICAL, true, true, true);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)

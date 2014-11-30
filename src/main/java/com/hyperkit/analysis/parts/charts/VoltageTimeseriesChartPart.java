@@ -33,7 +33,7 @@ public class VoltageTimeseriesChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		JFreeChart chart = ChartFactory.createXYLineChart("Voltage timeseries", "Time", "Voltage", dataset, PlotOrientation.VERTICAL, true, true, true);
+		JFreeChart chart = ChartFactory.createXYLineChart("Voltage timeseries", "Time (in s)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
 		
 		chart.getXYPlot().setRenderer(new SamplingXYLineRenderer());
 		

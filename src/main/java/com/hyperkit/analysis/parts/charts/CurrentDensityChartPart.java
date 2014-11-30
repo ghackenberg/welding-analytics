@@ -35,7 +35,7 @@ public class CurrentDensityChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		return ChartFactory.createXYLineChart("Current probability density function", "Current", "Probability", dataset, PlotOrientation.VERTICAL, true, true, true);
+		return ChartFactory.createXYLineChart("Current probability density function", "Current (in A)", "Probability (in %)", dataset, PlotOrientation.VERTICAL, true, true, true);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)
