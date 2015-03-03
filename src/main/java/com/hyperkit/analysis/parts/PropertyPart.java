@@ -1,10 +1,15 @@
 package com.hyperkit.analysis.parts;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -53,6 +58,8 @@ public class PropertyPart extends Part
 			
 			ASDFile file = event.getASDFile();
 			
+			JButton colorButton = new JButton(file.getIcon());
+			
 			double minTimestampMeasured = file.getMinTimestampMeasured();
 			double maxTimestampMeasured = file.getMaxTimestampMeasured();
 			double minVoltageMeasured = file.getMinVoltageMeasured();
@@ -95,6 +102,24 @@ public class PropertyPart extends Part
 			JSpinner minCurrentSpinner = new JSpinner(new SpinnerNumberModel(minCurrentDisplayed, minCurrentMeasured, maxCurrentMeasured, (maxCurrentMeasured - minCurrentMeasured) / 100));
 			JSpinner maxCurrentSpinner = new JSpinner(new SpinnerNumberModel(maxCurrentDisplayed, minCurrentMeasured, maxCurrentMeasured, (maxCurrentMeasured - minCurrentMeasured) / 100));
 			
+			colorButton.addActionListener(new ActionListener()
+				{
+					@Override
+					public void actionPerformed(ActionEvent e)
+					{
+						Color newColor = JColorChooser.showDialog(colorButton, "Choose color", file.getColor());
+						
+						if (newColor != null)
+						{
+							file.setColor(newColor);
+							
+							colorButton.setIcon(file.getIcon());
+							
+							Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+						}
+					}
+				}
+			);
 			minTimestampSpinner.addChangeListener(
 				new ChangeListener()
 				{
@@ -168,7 +193,15 @@ public class PropertyPart extends Part
 				}
 			);
 			
-			panel.setLayout(new GridLayout(7, 3, 10, 10));
+			panel.setLayout(new GridLayout(9, 3, 10, 10));
+			
+			panel.add(new JLabel("Property"));
+			panel.add(new JLabel("Value"));
+			panel.add(new JLabel());
+			
+			panel.add(new JLabel("Color"));
+			panel.add(colorButton);
+			panel.add(new JLabel());
 			
 			panel.add(new JLabel("Property"));
 			panel.add(new JLabel("Minimum"));

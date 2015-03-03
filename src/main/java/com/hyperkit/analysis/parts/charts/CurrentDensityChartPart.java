@@ -1,7 +1,8 @@
 package com.hyperkit.analysis.parts.charts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -19,7 +20,7 @@ public class CurrentDensityChartPart extends ChartPart
 {
 	
 	private int step;
-	private List<ASDFile> files;
+	private Map<String, ASDFile> files;
 	private DefaultXYDataset dataset;
 
 	public CurrentDensityChartPart(int step)
@@ -27,7 +28,7 @@ public class CurrentDensityChartPart extends ChartPart
 		super("Current probability density function");
 		
 		this.step = step;
-		this.files = new ArrayList<>();
+		this.files = new HashMap<>();
 	}
 
 	@Override
@@ -40,9 +41,13 @@ public class CurrentDensityChartPart extends ChartPart
 	
 	public boolean handleEvent(FilePartAddEvent event)
 	{
+		getChart().getXYPlot().getRenderer().setSeriesPaint(dataset.getSeriesCount(), event.getASDFile().getColor());
+		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getCurrentDensity(step));
 		
-		files.add(event.getASDFile());
+		files.put(event.getASDFile().getName(), event.getASDFile());
+		
+		update();
 		
 		return true;
 	}
@@ -52,26 +57,40 @@ public class CurrentDensityChartPart extends ChartPart
 		
 		files.remove(event.getASDFile());
 		
+		update();
+		
 		return true;
 	}
 	public boolean handleEvent(StepChangeEvent event)
 	{
 		step = event.getStep();
 		
-		for (ASDFile file : files)
+		for (Entry<String, ASDFile> file : files.entrySet())
 		{
-			dataset.addSeries(file.getName(), file.getCurrentDensity(step));
+			dataset.addSeries(file.getKey(), file.getValue().getCurrentDensity(step));
 		}
+		
+		update();
 		
 		return true;
 	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset.removeSeries(event.getASDFile().getName());
-		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getCurrentDensity(step));
 		
+		update();
+		
 		return true;
+	}
+	
+	private void update()
+	{
+		for (int series = 0; series < dataset.getSeriesCount(); series++)
+		{
+			Comparable<?> key = dataset.getSeriesKey(series);
+			
+			getChart().getXYPlot().getRenderer().setSeriesPaint(series, files.get(key).getColor());
+		}
 	}
 
 }

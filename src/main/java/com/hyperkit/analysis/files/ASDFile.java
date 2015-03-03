@@ -1,5 +1,8 @@
 package com.hyperkit.analysis.files;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -25,6 +31,8 @@ public class ASDFile extends File
 	private static final int CURRENT_INDEX = 2;
 	
 	private String name;
+	private Color color;
+	private Icon icon;
 	
 	private List<double[]> data;
 
@@ -51,6 +59,9 @@ public class ASDFile extends File
 		super(file);
 		
 		name = file.getAbsolutePath();
+		color = new Color(Color.HSBtoRGB((float) Math.random(), 1f, 0.9f));
+		updateIcon();
+		
 		data = new ArrayList<>();
 		
 		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(0));
@@ -104,6 +115,23 @@ public class ASDFile extends File
 	public String getName()
 	{
 		return name;
+	}
+	
+	public Color getColor()
+	{
+		return color;
+	}
+	
+	public void setColor(Color color)
+	{
+		this.color = color;
+		
+		updateIcon();
+	}
+	
+	public Icon getIcon()
+	{
+		return icon;
 	}
 	
 	public List<double[]> getData()
@@ -838,6 +866,18 @@ public class ASDFile extends File
 		double exponent = format.parse(parts[1]).intValue();
 		
 		return number * Math.pow(10, exponent);
+	}
+	
+	private void updateIcon()
+	{
+		BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+		
+		Graphics2D graphics = image.createGraphics();
+		
+		graphics.setColor(color);
+		graphics.fillRect(0, 0, 16, 16);
+		
+		icon = new ImageIcon(image);
 	}
 
 }

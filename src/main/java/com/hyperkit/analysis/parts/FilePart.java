@@ -16,7 +16,9 @@ import com.hyperkit.analysis.actions.parts.FilePartRemoveAction;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
+import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
+import com.hyperkit.analysis.renderers.FileListCellRenderer;
 
 public class FilePart extends Part
 {
@@ -37,6 +39,7 @@ public class FilePart extends Part
 		
 		list = new JList<ASDFile>(model);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setCellRenderer(new FileListCellRenderer());
 		list.addListSelectionListener(
 			new ListSelectionListener()
 			{
@@ -73,6 +76,12 @@ public class FilePart extends Part
 	public boolean handleEvent(FilePartRemoveEvent event)
 	{
 		return model.removeElement(event.getASDFile());
+	}
+	public boolean handleEvent(PropertyPartChangeEvent event)
+	{
+		list.repaint();
+		
+		return true;
 	}
 
 }

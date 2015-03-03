@@ -154,13 +154,13 @@ public class Main
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
 		grid.addDockable(1, 0, 2, 1, part_voltage_timeseries.getDockable());
 		grid.addDockable(3, 0, 2, 1, part_current_timeseries.getDockable());
-		grid.addDockable(5, 0, 2, 1, part_point_cloud_actual.getDockable());
 		
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
-		grid.addDockable(1, 1, 2, 1, part_voltage_density.getDockable());
-		grid.addDockable(3, 1, 2, 1, part_current_density.getDockable());
-		grid.addDockable(5, 1, 2, 1, part_point_cloud_statistical.getDockable());
-
+		grid.addDockable(1, 1, 1, 1, part_voltage_density.getDockable());
+		grid.addDockable(2, 1, 1, 1, part_current_density.getDockable());
+		grid.addDockable(3, 1, 1, 1, part_point_cloud_actual.getDockable());
+		grid.addDockable(4, 1, 1, 1, part_point_cloud_statistical.getDockable());
+		
 		// Station
 		SplitDockStation station = new SplitDockStation();
 		station.dropTree(grid.toTree());

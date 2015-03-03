@@ -1,7 +1,7 @@
 package com.hyperkit.analysis.parts.charts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -17,14 +17,14 @@ import com.hyperkit.analysis.parts.ChartPart;
 public class PointCloudActualChartPart extends ChartPart
 {
 	
-	private List<ASDFile> files;
+	private Map<String, ASDFile> files;
 	private DefaultXYDataset dataset;
 
 	public PointCloudActualChartPart()
 	{
-		super("Point cloud");
+		super("Point cloud (actual)");
 		
-		this.files = new ArrayList<>();
+		this.files = new HashMap<>();
 	}
 
 	@Override
@@ -37,9 +37,13 @@ public class PointCloudActualChartPart extends ChartPart
 	
 	public boolean handleEvent(FilePartAddEvent event)
 	{
+		getChart().getXYPlot().getRenderer().setSeriesPaint(dataset.getSeriesCount(), event.getASDFile().getColor());
+		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getCurrentVoltage());
 		
-		files.add(event.getASDFile());
+		files.put(event.getASDFile().getName(), event.getASDFile());
+		
+		update();
 		
 		return true;
 	}
@@ -49,15 +53,27 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		files.remove(event.getASDFile());
 		
+		update();
+		
 		return true;
 	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset.removeSeries(event.getASDFile().getName());
-
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getCurrentVoltage());
+		
+		update();
 		
 		return true;
 	}
 
+	private void update()
+	{
+		for (int series = 0; series < dataset.getSeriesCount(); series++)
+		{
+			Comparable<?> key = dataset.getSeriesKey(series);
+			
+			getChart().getXYPlot().getRenderer().setSeriesPaint(series, files.get(key).getColor());
+		}
+	}
+	
 }

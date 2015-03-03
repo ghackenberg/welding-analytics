@@ -1,7 +1,7 @@
 package com.hyperkit.analysis.parts.charts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -18,14 +18,14 @@ import com.hyperkit.analysis.parts.ChartPart;
 public class VoltageTimeseriesChartPart extends ChartPart
 {
 	
-	private List<ASDFile> files;
+	private Map<String, ASDFile> files;
 	private DefaultXYDataset dataset;
 
 	public VoltageTimeseriesChartPart()
 	{
 		super("Voltage timeseries");
 		
-		this.files = new ArrayList<>();
+		this.files = new HashMap<>();
 	}
 
 	@Override
@@ -42,9 +42,13 @@ public class VoltageTimeseriesChartPart extends ChartPart
 	
 	public boolean handleEvent(FilePartAddEvent event)
 	{
+		getChart().getXYPlot().getRenderer().setSeriesPaint(dataset.getSeriesCount(), event.getASDFile().getColor());
+		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getVoltageTimeseries());
 		
-		files.add(event.getASDFile());
+		files.put(event.getASDFile().getName(), event.getASDFile());
+		
+		update();
 		
 		return true;
 	}
@@ -54,15 +58,27 @@ public class VoltageTimeseriesChartPart extends ChartPart
 		
 		files.remove(event.getASDFile());
 		
+		update();
+		
 		return true;
 	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset.removeSeries(event.getASDFile().getName());
-		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getVoltageTimeseries());
 		
+		update();
+		
 		return true;
+	}
+	
+	private void update()
+	{
+		for (int series = 0; series < dataset.getSeriesCount(); series++)
+		{
+			Comparable<?> key = dataset.getSeriesKey(series);
+			
+			getChart().getXYPlot().getRenderer().setSeriesPaint(series, files.get(key).getColor());
+		}
 	}
 
 }
