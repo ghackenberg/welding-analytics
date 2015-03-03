@@ -31,7 +31,8 @@ import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
 import com.hyperkit.analysis.parts.charts.CurrentTimeseriesChartPart;
-import com.hyperkit.analysis.parts.charts.PointCloudChartPart;
+import com.hyperkit.analysis.parts.charts.PointCloudActualChartPart;
+import com.hyperkit.analysis.parts.charts.PointCloudStatisticalChartPart;
 import com.hyperkit.analysis.parts.charts.VoltageDensityChartPart;
 import com.hyperkit.analysis.parts.charts.VoltageTimeseriesChartPart;
 
@@ -65,9 +66,10 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
 		Part part_current_timeseries = new CurrentTimeseriesChartPart();
+		Part part_point_cloud_actual = new PointCloudActualChartPart();
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
-		Part part_point_cloud = new PointCloudChartPart(STEP_INIT);
+		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
 		Part part_property = new PropertyPart();
 		
 		// Progress
@@ -150,13 +152,14 @@ public class Main
 		SplitDockGrid grid = new SplitDockGrid();
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
-		grid.addDockable(1, 0, 3, 1, part_voltage_timeseries.getDockable());
-		grid.addDockable(4, 0, 3, 1, part_current_timeseries.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_voltage_timeseries.getDockable());
+		grid.addDockable(3, 0, 2, 1, part_current_timeseries.getDockable());
+		grid.addDockable(5, 0, 2, 1, part_point_cloud_actual.getDockable());
 		
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
 		grid.addDockable(1, 1, 2, 1, part_voltage_density.getDockable());
 		grid.addDockable(3, 1, 2, 1, part_current_density.getDockable());
-		grid.addDockable(5, 1, 2, 1, part_point_cloud.getDockable());
+		grid.addDockable(5, 1, 2, 1, part_point_cloud_statistical.getDockable());
 
 		// Station
 		SplitDockStation station = new SplitDockStation();

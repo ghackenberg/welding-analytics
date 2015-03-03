@@ -15,14 +15,14 @@ import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.ChartPart;
 
-public class PointCloudChartPart extends ChartPart
+public class PointCloudStatisticalChartPart extends ChartPart
 {
 	
 	private int step;
 	private List<ASDFile> files;
 	private DefaultXYDataset dataset;
 
-	public PointCloudChartPart(int step)
+	public PointCloudStatisticalChartPart(int step)
 	{
 		super("Point cloud");
 		
@@ -35,7 +35,7 @@ public class PointCloudChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		return ChartFactory.createXYLineChart("Point cloud", "Current (in A)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
+		return ChartFactory.createXYLineChart("Point cloud (statistical)", "Current (in A)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)

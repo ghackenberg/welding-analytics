@@ -487,7 +487,7 @@ public class ASDFile extends File
 		return density;
 	}
 	
-	public double[][] getPointCloud()
+	public double[][] getCurrentVoltage()
 	{
 		List<double[]> data = getData();
 		
