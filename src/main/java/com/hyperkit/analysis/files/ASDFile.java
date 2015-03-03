@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.File;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
@@ -752,6 +754,67 @@ public class ASDFile extends File
 		// Return result
 		
 		return result;
+	}
+	
+	public SimpleRegression getRegression()
+	{
+		List<double[]> data = getData();
+		
+		// Find limits
+		
+		double minTimestamp = getMinTimestampDisplayed();
+		double maxTimestamp = getMaxTimestampDisplayed();
+		
+		double minCurrent = getMinCurrentDisplayed();
+		double maxCurrent = getMaxCurrentDisplayed();
+		
+		double minVoltage = getMinVoltageDisplayed();
+		double maxVoltage = getMaxVoltageDisplayed();
+		
+		// Calculate count
+		
+		int count = 0;
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				count++;
+			}
+		}
+		
+		// Build data
+		
+		double[][] intermediate = new double[count][2];
+		
+		int index = 0;
+
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				intermediate[index][0] = current;
+				intermediate[index][1] = voltage;
+				
+				index++;
+			}
+		}
+		
+		// Build regression
+		
+		SimpleRegression regression = new SimpleRegression(true);
+		
+		regression.addData(intermediate);
+		
+		return regression;
 	}
 	
 	@Override
