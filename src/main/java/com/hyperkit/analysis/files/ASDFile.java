@@ -518,7 +518,7 @@ public class ASDFile extends File
 			}
 		}
 		
-		count = Math.min(count, 20000);
+		count = Math.min(count, 10000);
 		
 		// Create point cloud
 		
