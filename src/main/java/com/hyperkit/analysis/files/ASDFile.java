@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.File;
@@ -483,6 +485,273 @@ public class ASDFile extends File
 		}
 		
 		return density;
+	}
+	
+	public double[][] getPointCloud()
+	{
+		List<double[]> data = getData();
+		
+		// Find limits
+		
+		double minTimestamp = getMinTimestampDisplayed();
+		double maxTimestamp = getMaxTimestampDisplayed();
+		
+		double minCurrent = getMinCurrentDisplayed();
+		double maxCurrent = getMaxCurrentDisplayed();
+		
+		double minVoltage = getMinVoltageDisplayed();
+		double maxVoltage = getMaxVoltageDisplayed();
+		
+		// Find count
+
+		int count = 0;
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				count++;
+			}
+		}
+		
+		count = Math.min(count, 20000);
+		
+		// Create point cloud
+		
+		double[][] result = new double[2][count];
+		
+		// Fill dataset
+		
+		int index = 0;
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				result[0][index] = current;
+				result[1][index] = voltage;
+				
+				index++;
+			}
+			
+			if (index == count)
+			{
+				break;
+			}
+		}
+		
+		// Return result
+		
+		return result;
+	}
+	
+	public double[][] getCurrentVoltageMin(int steps)
+	{
+		List<double[]> data = getData();
+		
+		// Find limits
+		
+		double minTimestamp = getMinTimestampDisplayed();
+		double maxTimestamp = getMaxTimestampDisplayed();
+		
+		double minCurrent = getMinCurrentDisplayed();
+		double maxCurrent = getMaxCurrentDisplayed();
+		
+		double minVoltage = getMinVoltageDisplayed();
+		double maxVoltage = getMaxVoltageDisplayed();
+		
+		// Create map
+		
+		Map<Integer, Double> intermediate = new HashMap<>();
+		
+		// Calculate map
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				int bin = (int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * (steps - 1));
+				
+				if (!intermediate.containsKey(bin))
+				{
+					intermediate.put(bin, voltage);
+				}
+				else
+				{
+					intermediate.put(bin, Math.min(intermediate.get(bin), voltage));
+				}
+			}
+		}
+		
+		// Create array
+		
+		double[][] result = new double[2][intermediate.size()];
+		
+		// Calculate array
+		
+		int index = 0;
+		
+		for (int step = 0; step < steps; step++)
+		{
+			if (intermediate.containsKey(step))
+			{
+				result[0][index] = minCurrent + (maxCurrent - minCurrent) / steps * (step + 0.5);
+				result[1][index] = intermediate.get(step);
+				
+				index++;
+			}
+		}
+		
+		// Return result
+		
+		return result;
+	}
+	
+	public double[][] getCurrentVoltageMax(int steps)
+	{
+		List<double[]> data = getData();
+		
+		// Find limits
+		
+		double minTimestamp = getMinTimestampDisplayed();
+		double maxTimestamp = getMaxTimestampDisplayed();
+		
+		double minCurrent = getMinCurrentDisplayed();
+		double maxCurrent = getMaxCurrentDisplayed();
+		
+		double minVoltage = getMinVoltageDisplayed();
+		double maxVoltage = getMaxVoltageDisplayed();
+		
+		// Create map
+		
+		Map<Integer, Double> intermediate = new HashMap<>();
+		
+		// Calculate map
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				int bin = (int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * (steps - 1));
+				
+				if (!intermediate.containsKey(bin))
+				{
+					intermediate.put(bin, voltage);
+				}
+				else
+				{
+					intermediate.put(bin, Math.max(intermediate.get(bin), voltage));
+				}
+			}
+		}
+		
+		// Create array
+		
+		double[][] result = new double[2][intermediate.size()];
+		
+		// Calculate array
+		
+		int index = 0;
+		
+		for (int step = 0; step < steps; step++)
+		{
+			if (intermediate.containsKey(step))
+			{
+				result[0][index] = minCurrent + (maxCurrent - minCurrent) / steps * (step + 0.5);
+				result[1][index] = intermediate.get(step);
+				
+				index++;
+			}
+		}
+		
+		// Return result
+		
+		return result;
+	}
+	
+	public double[][] getCurrentVoltageAvg(int steps)
+	{
+		List<double[]> data = getData();
+		
+		// Find limits
+		
+		double minTimestamp = getMinTimestampDisplayed();
+		double maxTimestamp = getMaxTimestampDisplayed();
+		
+		double minCurrent = getMinCurrentDisplayed();
+		double maxCurrent = getMaxCurrentDisplayed();
+		
+		double minVoltage = getMinVoltageDisplayed();
+		double maxVoltage = getMaxVoltageDisplayed();
+		
+		// Create map
+		
+		Map<Integer, Double> intermediate = new HashMap<>();
+		Map<Integer, Integer> counts = new HashMap<>();
+		
+		// Calculate map
+		
+		for (double[] line : data)
+		{
+			double timestamp = line[TIMESTAMP_INDEX];
+			double current = line[CURRENT_INDEX];
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			{
+				int bin = (int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * (steps - 1));
+				
+				if (!intermediate.containsKey(bin))
+				{
+					intermediate.put(bin, voltage);
+					counts.put(bin, 1);
+				}
+				else
+				{
+					intermediate.put(bin, intermediate.get(bin) + voltage);
+					counts.put(bin, counts.get(bin) + 1);
+				}
+			}
+		}
+		
+		// Create array
+		
+		double[][] result = new double[2][intermediate.size()];
+		
+		// Calculate array
+		
+		int index = 0;
+		
+		for (int step = 0; step < steps; step++)
+		{
+			if (intermediate.containsKey(step))
+			{
+				result[0][index] = minCurrent + (maxCurrent - minCurrent) / steps * (step + 0.5);
+				result[1][index] = intermediate.get(step) / counts.get(step);
+				
+				index++;
+			}
+		}
+		
+		// Return result
+		
+		return result;
 	}
 	
 	@Override
