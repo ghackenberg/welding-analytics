@@ -1,4 +1,4 @@
-package com.hyperkit.analysis.renderers;
+package com.hyperkit.analysis.adapters;
 
 import java.awt.Component;
 

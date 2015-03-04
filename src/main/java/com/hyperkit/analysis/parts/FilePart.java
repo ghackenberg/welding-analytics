@@ -13,12 +13,12 @@ import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.actions.parts.FilePartAddAction;
 import com.hyperkit.analysis.actions.parts.FilePartRemoveAction;
+import com.hyperkit.analysis.adapters.FileListCellRenderer;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
-import com.hyperkit.analysis.renderers.FileListCellRenderer;
 
 public class FilePart extends Part
 {
