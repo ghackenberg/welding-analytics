@@ -14,6 +14,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.hyperkit.analysis.adapters.FileXYSeriesLabelGenerator;
+import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
@@ -28,13 +29,16 @@ public class PointCloudActualChartPart extends ChartPart
 	private Map<String, ASDFile> file_map;
 	private DefaultXYDataset dataset_points;
 	private DefaultXYDataset dataset_lines;
+	private int point;
 
-	public PointCloudActualChartPart()
+	public PointCloudActualChartPart(int point)
 	{
 		super("Point cloud (actual)");
 		
 		file_list = new ArrayList<>();
 		file_map = new HashMap<>();
+		
+		this.point = point;
 	}
 
 	@Override
@@ -78,7 +82,7 @@ public class PointCloudActualChartPart extends ChartPart
 		file_map.put(event.getASDFile().getName() + " (Points)", event.getASDFile());
 		file_map.put(event.getASDFile().getName() + " (Regression)", event.getASDFile());
 		
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage());
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();
@@ -99,9 +103,28 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		return true;
 	}
+	public boolean handleEvent(PointChangeEvent event)
+	{
+		// Update diagram series
+		
+		point = event.getPoint();
+		
+		for (ASDFile file : file_list)
+		{
+			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point));
+		}
+		
+		// Update colors
+		
+		update();
+		
+		// Return true
+		
+		return true;
+	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage());
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();

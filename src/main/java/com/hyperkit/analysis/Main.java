@@ -25,6 +25,7 @@ import bibliothek.gui.DockController;
 import bibliothek.gui.dock.SplitDockStation;
 import bibliothek.gui.dock.station.split.SplitDockGrid;
 
+import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
@@ -43,6 +44,11 @@ public class Main
 	private static final int STEP_MIN = 100;
 	private static final int STEP_MAX = 10000;
 	private static final int STEP_SIZE = 100;
+	
+	private static final int POINT_INIT = 10000;
+	private static final int POINT_MIN = 10000;
+	private static final int POINT_MAX = 100000;
+	private static final int POINT_SIZE = 10000;
 	
 	public static void main(String[] arguments)
 	{
@@ -66,7 +72,7 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
 		Part part_current_timeseries = new CurrentTimeseriesChartPart();
-		Part part_point_cloud_actual = new PointCloudActualChartPart();
+		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT);
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
 		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
@@ -99,6 +105,20 @@ public class Main
 				public void stateChanged(ChangeEvent e)
 				{
 					Bus.getInstance().broadcastEvent(new StepChangeEvent((int) step.getValue()));
+				}
+			}
+		);
+		
+		// Points
+		
+		JSpinner point = new JSpinner(new SpinnerNumberModel(POINT_INIT, POINT_MIN, POINT_MAX, POINT_SIZE));
+		point.addChangeListener(
+			new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					Bus.getInstance().broadcastEvent(new PointChangeEvent((int) point.getValue()));
 				}
 			}
 		);
@@ -136,6 +156,8 @@ public class Main
 		headbar.add(progress);
 		headbar.add(new JLabel("Step number:"));
 		headbar.add(step);
+		headbar.add(new JLabel("Point count:"));
+		headbar.add(point);
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		

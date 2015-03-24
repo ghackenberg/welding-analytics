@@ -517,7 +517,7 @@ public class ASDFile extends File
 		return density;
 	}
 	
-	public double[][] getCurrentVoltage()
+	public double[][] getCurrentVoltage(int point)
 	{
 		List<double[]> data = getData();
 		
@@ -548,7 +548,7 @@ public class ASDFile extends File
 			}
 		}
 		
-		count = Math.min(count, 10000);
+		count = Math.min(count, point);
 		
 		// Create point cloud
 		
