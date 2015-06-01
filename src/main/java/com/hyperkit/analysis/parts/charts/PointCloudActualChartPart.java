@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -62,6 +63,9 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		plot.mapDatasetToRangeAxis(0, 0);
 		plot.mapDatasetToRangeAxis(1, 0);
+		
+		((NumberAxis) plot.getRangeAxis()).setAutoRangeIncludesZero(false);
+		((NumberAxis) plot.getDomainAxis()).setAutoRangeIncludesZero(false);
 		
 		return chart;
 	}

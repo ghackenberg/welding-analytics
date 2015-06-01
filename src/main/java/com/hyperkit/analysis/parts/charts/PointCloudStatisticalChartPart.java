@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -43,7 +44,12 @@ public class PointCloudStatisticalChartPart extends ChartPart
 	{
 		dataset = new DefaultXYDataset();
 		
-		return ChartFactory.createXYLineChart("Point cloud (statistical)", "Current (in A)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
+		JFreeChart chart = ChartFactory.createXYLineChart("Point cloud (statistical)", "Current (in A)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
+		
+		((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRangeIncludesZero(false);
+		((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRangeIncludesZero(false);
+		
+		return chart;
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)
