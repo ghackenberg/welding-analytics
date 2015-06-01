@@ -31,6 +31,8 @@ public class FileXYSeriesLabelGenerator implements XYSeriesLabelGenerator
 		
 		NumberFormat format = NumberFormat.getInstance(Locale.US);
 		
+		format.setMinimumFractionDigits(5);
+		
 		String text = "y=" + format.format(regression.getIntercept()) + "+" + format.format(regression.getSlope()) + "*x";
 		
 		return file.getName() + " (" + text + ")";
