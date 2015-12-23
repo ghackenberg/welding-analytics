@@ -1,1 +1,1 @@
-java -jar target\com.hyperkit.analysis-1.1.jar
+java -jar target\com.hyperkit.analysis-1.1.1.jar
