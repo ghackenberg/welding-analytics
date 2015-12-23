@@ -5,7 +5,7 @@
 	<groupId>com.hyperkit</groupId>
 	<artifactId>com.hyperkit.analysis</artifactId>
 	
-	<version>1.1</version>
+	<version>1.1.1</version>
 	<packaging>jar</packaging>
 	
 	<build>

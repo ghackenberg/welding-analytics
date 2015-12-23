@@ -84,17 +84,21 @@ public class ASDFile extends File
 				String[] parts = line.split("\t");
 				
 				if (parts.length == 3)
-				{
+				{	
 					double first = parseDouble(parts[0]);
 					double second = parseDouble(parts[1]);
 					double third = parseDouble(parts[2]);
 					
 					data.add(new double[] {first, second, third});
 				}
+				else
+				{
+					// silent
+				}
 			}
 			catch (NumberFormatException | ParseException e)
 			{
-				
+				// silent
 			}
 			
 			int temp = (int) Math.floor(1.0 * position / size * 100);
@@ -853,19 +857,28 @@ public class ASDFile extends File
 	
 	private double parseDouble(String string) throws NumberFormatException, ParseException
 	{
-		String[] parts = string.split("e");
-		
-		if (parts.length != 2)
-		{
-			throw new NumberFormatException("Number format should be <x>e<y>.");
-		}
-		
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
 		
-		double number = format.parse(parts[0]).doubleValue();
-		double exponent = format.parse(parts[1]).intValue();
-		
-		return number * Math.pow(10, exponent);
+		if (!string.contains("e"))
+		{
+			return format.parse(string).doubleValue();
+		}
+		else
+		{
+			String[] parts = string.split("e");
+			
+			if (parts.length == 2)
+			{
+				double number = format.parse(parts[0]).doubleValue();
+				double exponent = format.parse(parts[1]).intValue();
+				
+				return number * Math.pow(10, exponent);
+			}
+			else
+			{
+				throw new NumberFormatException("Number format should be <x>e<y>.");
+			}
+		}
 	}
 	
 	private void updateIcon()
