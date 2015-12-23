@@ -122,6 +122,14 @@ public class ASDFile extends File
 		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(100));
 		
 		reader.close();
+		
+		double average = 0;
+		
+		for (int step = 0; step < getLength(); step++) {
+			average += (getVoltageMeasured(step) * getCurrentMeasured(step)) / getLength();
+		}
+		
+		System.out.println(file.getAbsolutePath() + " p_arith = " + average);
 	}
 	
 	public String getName()
