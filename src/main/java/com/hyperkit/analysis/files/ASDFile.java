@@ -91,6 +91,14 @@ public class ASDFile extends File
 					
 					data.add(new double[] {first, second, third});
 				}
+				else if (parts.length == 4)
+				{
+					double first = parseDouble(parts[0]);
+					double second = parseDouble(parts[3]);
+					double third = parseDouble(parts[2]);
+					
+					data.add(new double[] {first, second, third});
+				}
 				else
 				{
 					// silent
