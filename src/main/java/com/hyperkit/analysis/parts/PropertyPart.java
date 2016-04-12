@@ -294,12 +294,14 @@ public class PropertyPart extends Part
 		rootMeanSquareCurrentField.setText(format.format(file.getRootMeanSquareCurrent()));
 		rootMeanSquarePowerField.setText(format.format(file.getRootMeanSquarePower()));
 		
+		/*
 		((SpinnerNumberModel) minTimestampSpinner.getModel()).setMaximum(file.getMaxTimestampDisplayed());
 		((SpinnerNumberModel) maxTimestampSpinner.getModel()).setMinimum(file.getMinTimestampDisplayed());
 		((SpinnerNumberModel) minVoltageSpinner.getModel()).setMaximum(file.getMaxVoltageDisplayed());
 		((SpinnerNumberModel) maxVoltageSpinner.getModel()).setMinimum(file.getMinVoltageDisplayed());
 		((SpinnerNumberModel) minCurrentSpinner.getModel()).setMaximum(file.getMaxCurrentDisplayed());
 		((SpinnerNumberModel) maxCurrentSpinner.getModel()).setMinimum(file.getMinCurrentDisplayed());
+		*/
 		
 		/*
 		((SpinnerNumberModel) minTimestampSpinner.getModel()).setStepSize((file.getMaxTimestampDisplayed() - file.getMinTimestampDisplayed()) / 100);
