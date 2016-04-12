@@ -29,7 +29,33 @@ public class PropertyPart extends Part
 {
 	
 	private JPanel panel;
+	
+	private JButton colorButton;
+	
+	private JTextField minTimestampField;
+	private JTextField maxTimestampField;
+	private JTextField minVoltageField;
+	private JTextField maxVoltageField;
+	private JTextField minCurrentField;
+	private JTextField maxCurrentField;
+	
+	private JTextField meanVoltageField;
+	private JTextField meanCurrentField;
+	private JTextField meanPowerField;
+	private JTextField rootMeanSquareVoltageField;
+	private JTextField rootMeanSquareCurrentField;
+	private JTextField rootMeanSquarePowerField;
+
+	private JSpinner minTimestampSpinner;
+	private JSpinner maxTimestampSpinner;
+	private JSpinner minVoltageSpinner;
+	private JSpinner maxVoltageSpinner;
+	private JSpinner minCurrentSpinner;
+	private JSpinner maxCurrentSpinner;
+	
 	private ASDFile file;
+	
+	private NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
 
 	public PropertyPart()
 	{
@@ -52,56 +78,14 @@ public class PropertyPart extends Part
 		{
 			file = event.getASDFile();
 			
-			NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
-			
 			PropertyPart self = this;
 			
 			ASDFile file = event.getASDFile();
 			
-			JButton colorButton = new JButton(file.getIcon());
+			// Buttons
 			
-			double minTimestampMeasured = file.getMinTimestampMeasured();
-			double maxTimestampMeasured = file.getMaxTimestampMeasured();
-			double minVoltageMeasured = file.getMinVoltageMeasured();
-			double maxVoltageMeasured = file.getMaxVoltageMeasured();
-			double minCurrentMeasured = file.getMinCurrentMeasured();
-			double maxCurrentMeasured = file.getMaxCurrentMeasured();
-			
-			double minTimestampDisplayed = file.getMinTimestampDisplayed();
-			double maxTimestampDisplayed = file.getMaxTimestampDisplayed();
-			double minVoltageDisplayed = file.getMinVoltageDisplayed();
-			double maxVoltageDisplayed = file.getMaxVoltageDisplayed();
-			double minCurrentDisplayed = file.getMinCurrentDisplayed();
-			double maxCurrentDisplayed = file.getMaxCurrentDisplayed();
-			
-			JTextField minTimestampField = new JTextField(format.format(minTimestampMeasured));
-			JTextField maxTimestampField = new JTextField(format.format(maxTimestampMeasured));
-			JTextField minVoltageField = new JTextField(format.format(minVoltageMeasured));
-			JTextField maxVoltageField = new JTextField(format.format(maxVoltageMeasured));
-			JTextField minCurrentField = new JTextField(format.format(minCurrentMeasured));
-			JTextField maxCurrentField = new JTextField(format.format(maxCurrentMeasured));
-			
-			minTimestampField.setEnabled(false);
-			maxTimestampField.setEnabled(false);
-			minVoltageField.setEnabled(false);
-			maxVoltageField.setEnabled(false);
-			minCurrentField.setEnabled(false);
-			maxCurrentField.setEnabled(false);
-			
-			minTimestampField.setHorizontalAlignment(JTextField.RIGHT);			
-			maxTimestampField.setHorizontalAlignment(JTextField.RIGHT);
-			minVoltageField.setHorizontalAlignment(JTextField.RIGHT);
-			maxVoltageField.setHorizontalAlignment(JTextField.RIGHT);
-			minCurrentField.setHorizontalAlignment(JTextField.RIGHT);
-			maxCurrentField.setHorizontalAlignment(JTextField.RIGHT);
-			
-			JSpinner minTimestampSpinner = new JSpinner(new SpinnerNumberModel(minTimestampDisplayed, minTimestampMeasured, maxTimestampMeasured, (maxTimestampMeasured - minTimestampMeasured) / 100));
-			JSpinner maxTimestampSpinner = new JSpinner(new SpinnerNumberModel(maxTimestampDisplayed, minTimestampMeasured, maxTimestampMeasured, (maxTimestampMeasured - minTimestampMeasured) / 100));
-			JSpinner minVoltageSpinner = new JSpinner(new SpinnerNumberModel(minVoltageDisplayed, minVoltageMeasured, maxVoltageMeasured, (maxVoltageMeasured - minVoltageMeasured) / 100));
-			JSpinner maxVoltageSpinner = new JSpinner(new SpinnerNumberModel(maxVoltageDisplayed, minVoltageMeasured, maxVoltageMeasured, (maxVoltageMeasured - minVoltageMeasured) / 100));
-			JSpinner minCurrentSpinner = new JSpinner(new SpinnerNumberModel(minCurrentDisplayed, minCurrentMeasured, maxCurrentMeasured, (maxCurrentMeasured - minCurrentMeasured) / 100));
-			JSpinner maxCurrentSpinner = new JSpinner(new SpinnerNumberModel(maxCurrentDisplayed, minCurrentMeasured, maxCurrentMeasured, (maxCurrentMeasured - minCurrentMeasured) / 100));
-			
+			colorButton = new JButton(file.getIcon());
+
 			colorButton.addActionListener(new ActionListener()
 				{
 					@Override
@@ -120,6 +104,34 @@ public class PropertyPart extends Part
 					}
 				}
 			);
+			
+			// Text fields (1)
+			
+			minTimestampField = createTextField(file.getMinTimestampMeasured());
+			maxTimestampField = createTextField(file.getMaxTimestampMeasured());
+			minVoltageField = createTextField(file.getMinVoltageMeasured());
+			maxVoltageField = createTextField(file.getMaxVoltageMeasured());
+			minCurrentField = createTextField(file.getMinCurrentMeasured());
+			maxCurrentField = createTextField(file.getMaxCurrentMeasured());
+			
+			// Text fields (2)
+			
+			meanVoltageField = createTextField(file.getMeanVoltage());
+			meanCurrentField = createTextField(file.getMeanCurrent());
+			meanPowerField = createTextField(file.getMeanPower());
+			rootMeanSquareVoltageField = createTextField(file.getRootMeanSquareVoltage());
+			rootMeanSquareCurrentField = createTextField(file.getRootMeanSquareCurrent());
+			rootMeanSquarePowerField = createTextField(file.getRootMeanSquarePower());
+			
+			// Spinners
+			
+			minTimestampSpinner = createMinSpinner(file.getMinTimestampDisplayed(), file.getMaxTimestampDisplayed());
+			maxTimestampSpinner = createMaxSpinner(file.getMinTimestampDisplayed(), file.getMaxTimestampDisplayed());
+			minVoltageSpinner = createMinSpinner(file.getMinVoltageDisplayed(), file.getMaxVoltageDisplayed());
+			maxVoltageSpinner = createMaxSpinner(file.getMinVoltageDisplayed(), file.getMaxVoltageDisplayed());
+			minCurrentSpinner = createMinSpinner(file.getMinCurrentDisplayed(), file.getMaxCurrentDisplayed());
+			maxCurrentSpinner = createMaxSpinner(file.getMinCurrentDisplayed(), file.getMaxCurrentDisplayed());
+			
 			minTimestampSpinner.addChangeListener(
 				new ChangeListener()
 				{
@@ -193,9 +205,13 @@ public class PropertyPart extends Part
 				}
 			);
 			
-			panel.setLayout(new GridLayout(9, 3, 10, 10));
+			// Layout
 			
-			panel.add(new JLabel("Property"));
+			panel.setLayout(new GridLayout(14, 3, 10, 10));
+			
+			// Single parameters
+			
+			panel.add(new JLabel("Parameters"));
 			panel.add(new JLabel("Value"));
 			panel.add(new JLabel());
 			
@@ -203,29 +219,53 @@ public class PropertyPart extends Part
 			panel.add(colorButton);
 			panel.add(new JLabel());
 			
-			panel.add(new JLabel("Property"));
+			// Min/max parameters
+			
+			panel.add(new JLabel("Parameters"));
 			panel.add(new JLabel("Minimum"));
 			panel.add(new JLabel("Maximum"));
 
-			panel.add(new JLabel("Timestamp measured"));
-			panel.add(minTimestampField);
-			panel.add(maxTimestampField);
-			panel.add(new JLabel("Voltage measured"));
-			panel.add(minVoltageField);
-			panel.add(maxVoltageField);
-			panel.add(new JLabel("Current measured"));
-			panel.add(minCurrentField);
-			panel.add(maxCurrentField); 
-
-			panel.add(new JLabel("Timestamp displayed"));
+			panel.add(new JLabel("Timestamp"));
 			panel.add(minTimestampSpinner);
 			panel.add(maxTimestampSpinner);
-			panel.add(new JLabel("Voltage displayed"));
+			panel.add(new JLabel("Voltage"));
 			panel.add(minVoltageSpinner);
 			panel.add(maxVoltageSpinner);
-			panel.add(new JLabel("Current displayed"));
+			panel.add(new JLabel("Current"));
 			panel.add(minCurrentSpinner);
 			panel.add(maxCurrentSpinner);
+			
+			// Min/max measurements
+			
+			panel.add(new JLabel("Measurements"));
+			panel.add(new JLabel("Minimum"));
+			panel.add(new JLabel("Maximum"));
+
+			panel.add(new JLabel("Timestamp"));
+			panel.add(minTimestampField);
+			panel.add(maxTimestampField);
+			panel.add(new JLabel("Voltage"));
+			panel.add(minVoltageField);
+			panel.add(maxVoltageField);
+			panel.add(new JLabel("Current"));
+			panel.add(minCurrentField);
+			panel.add(maxCurrentField); 
+			
+			// Mean/root mean square measurements
+			
+			panel.add(new JLabel("Measurements"));
+			panel.add(new JLabel("Mean"));
+			panel.add(new JLabel("Root mean square"));
+			
+			panel.add(new JLabel("Voltage"));
+			panel.add(meanVoltageField);
+			panel.add(rootMeanSquareVoltageField);
+			panel.add(new JLabel("Current"));
+			panel.add(meanCurrentField);
+			panel.add(rootMeanSquareCurrentField);
+			panel.add(new JLabel("Power"));
+			panel.add(meanPowerField);
+			panel.add(rootMeanSquarePowerField);
 		}
 		
 		panel.revalidate();
@@ -244,6 +284,58 @@ public class PropertyPart extends Part
 		}
 		
 		return true;
+	}
+	
+	public boolean handleEvent(PropertyPartChangeEvent event) {
+		meanVoltageField.setText(format.format(file.getMeanVoltage()));
+		meanCurrentField.setText(format.format(file.getMeanCurrent()));
+		meanPowerField.setText(format.format(file.getMeanPower()));
+		rootMeanSquareVoltageField.setText(format.format(file.getRootMeanSquareVoltage()));
+		rootMeanSquareCurrentField.setText(format.format(file.getRootMeanSquareCurrent()));
+		rootMeanSquarePowerField.setText(format.format(file.getRootMeanSquarePower()));
+		
+		((SpinnerNumberModel) minTimestampSpinner.getModel()).setMaximum(file.getMaxTimestampDisplayed());
+		((SpinnerNumberModel) maxTimestampSpinner.getModel()).setMinimum(file.getMinTimestampDisplayed());
+		((SpinnerNumberModel) minVoltageSpinner.getModel()).setMaximum(file.getMaxVoltageDisplayed());
+		((SpinnerNumberModel) maxVoltageSpinner.getModel()).setMinimum(file.getMinVoltageDisplayed());
+		((SpinnerNumberModel) minCurrentSpinner.getModel()).setMaximum(file.getMaxCurrentDisplayed());
+		((SpinnerNumberModel) maxCurrentSpinner.getModel()).setMinimum(file.getMinCurrentDisplayed());
+		
+		/*
+		((SpinnerNumberModel) minTimestampSpinner.getModel()).setStepSize((file.getMaxTimestampDisplayed() - file.getMinTimestampDisplayed()) / 100);
+		((SpinnerNumberModel) maxTimestampSpinner.getModel()).setStepSize((file.getMaxTimestampDisplayed() - file.getMinTimestampDisplayed()) / 100);
+		((SpinnerNumberModel) minVoltageSpinner.getModel()).setStepSize((file.getMaxVoltageDisplayed() - file.getMinVoltageDisplayed()) / 100);
+		((SpinnerNumberModel) maxVoltageSpinner.getModel()).setStepSize((file.getMaxVoltageDisplayed() - file.getMinVoltageDisplayed()) / 100);
+		((SpinnerNumberModel) minCurrentSpinner.getModel()).setStepSize((file.getMaxCurrentDisplayed() - file.getMinCurrentDisplayed()) / 100);
+		((SpinnerNumberModel) maxCurrentSpinner.getModel()).setStepSize((file.getMaxCurrentDisplayed() - file.getMinCurrentDisplayed()) / 100);
+		*/
+		
+		return true;
+	}
+	
+	private JTextField createTextField(double value)
+	{
+		JTextField field = new JTextField(format.format(value));
+		
+		field.setEnabled(false);
+		field.setHorizontalAlignment(JTextField.RIGHT);
+		
+		return field;
+	}
+	
+	private JSpinner createMinSpinner(double minimumValue, double maximumValue)
+	{
+		return createSpinner(minimumValue, maximumValue, minimumValue);
+	}
+	
+	private JSpinner createMaxSpinner(double minimumValue, double maximumValue)
+	{
+		return createSpinner(minimumValue, maximumValue, maximumValue);
+	}
+	
+	private JSpinner createSpinner(double minimumValue, double maximumValue, double value)
+	{
+		return new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, (maximumValue - minimumValue) / 100));
 	}
 
 }
