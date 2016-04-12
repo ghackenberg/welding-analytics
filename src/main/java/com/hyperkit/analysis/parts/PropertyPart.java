@@ -2,6 +2,7 @@ package com.hyperkit.analysis.parts;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,11 +11,13 @@ import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,6 +34,13 @@ public class PropertyPart extends Part
 	private JPanel panel;
 	
 	private JButton colorButton;
+
+	private JSpinner minTimestampSpinner;
+	private JSpinner maxTimestampSpinner;
+	private JSpinner minVoltageSpinner;
+	private JSpinner maxVoltageSpinner;
+	private JSpinner minCurrentSpinner;
+	private JSpinner maxCurrentSpinner;
 	
 	private JTextField minTimestampField;
 	private JTextField maxTimestampField;
@@ -45,13 +55,13 @@ public class PropertyPart extends Part
 	private JTextField rootMeanSquareVoltageField;
 	private JTextField rootMeanSquareCurrentField;
 	private JTextField rootMeanSquarePowerField;
-
-	private JSpinner minTimestampSpinner;
-	private JSpinner maxTimestampSpinner;
-	private JSpinner minVoltageSpinner;
-	private JSpinner maxVoltageSpinner;
-	private JSpinner minCurrentSpinner;
-	private JSpinner maxCurrentSpinner;
+	
+	private JSpinner minVoltagePercentageSpinner;
+	private JSpinner maxVoltagePercentageSpinner;
+	private JSpinner minCurrentPercentageSpinner;
+	private JSpinner maxCurrentPercentageSpinner;
+	private JTextField voltagePercentageField;
+	private JTextField currentPercentageField;
 	
 	private ASDFile file;
 	
@@ -123,7 +133,7 @@ public class PropertyPart extends Part
 			rootMeanSquareCurrentField = createTextField(file.getRootMeanSquareCurrent());
 			rootMeanSquarePowerField = createTextField(file.getRootMeanSquarePower());
 			
-			// Spinners
+			// Spinners (1)
 			
 			minTimestampSpinner = createMinSpinner(file.getMinTimestampDisplayed(), file.getMaxTimestampDisplayed());
 			maxTimestampSpinner = createMaxSpinner(file.getMinTimestampDisplayed(), file.getMaxTimestampDisplayed());
@@ -205,67 +215,91 @@ public class PropertyPart extends Part
 				}
 			);
 			
-			// Layout
+			// Spinners (2)
 			
-			panel.setLayout(new GridLayout(14, 3, 10, 10));
+			minVoltagePercentageSpinner = createMinSpinner(file.getMinVoltageDisplayed(), file.getMaxVoltageDisplayed());
+			maxVoltagePercentageSpinner = createMaxSpinner(file.getMinVoltageDisplayed(), file.getMaxVoltageDisplayed());
+			minCurrentPercentageSpinner = createMinSpinner(file.getMinCurrentDisplayed(), file.getMaxCurrentDisplayed());
+			maxCurrentPercentageSpinner = createMaxSpinner(file.getMinCurrentDisplayed(), file.getMaxCurrentDisplayed());
+			voltagePercentageField = createTextField(100);
+			currentPercentageField = createTextField(100);
+			
+			minVoltagePercentageSpinner.addChangeListener(
+				new ChangeListener()
+				{
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						file.setMinVoltagePercentage((double) minVoltagePercentageSpinner.getValue());
+						
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					}
+				}
+			);
+			maxVoltagePercentageSpinner.addChangeListener(
+				new ChangeListener()
+				{
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						file.setMaxVoltagePercentage((double) maxVoltagePercentageSpinner.getValue());
+						
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					}
+				}
+			);
+			minCurrentPercentageSpinner.addChangeListener(
+				new ChangeListener()
+				{
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						file.setMinCurrentPercentage((double) minCurrentPercentageSpinner.getValue());
+						
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					}
+				}
+			);
+			maxCurrentPercentageSpinner.addChangeListener(
+				new ChangeListener()
+				{
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						file.setMaxCurrentPercentage((double) maxCurrentPercentageSpinner.getValue());
+						
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					}
+				}
+			);
 			
 			// Single parameters
 			
-			panel.add(new JLabel("Parameters"));
-			panel.add(new JLabel("Value"));
-			panel.add(new JLabel());
-			
-			panel.add(new JLabel("Color"));
-			panel.add(colorButton);
-			panel.add(new JLabel());
+			addRow("Parameter", "Value");
+			addRow("Color", colorButton);
 			
 			// Min/max parameters
 			
-			panel.add(new JLabel("Parameters"));
-			panel.add(new JLabel("Minimum"));
-			panel.add(new JLabel("Maximum"));
-
-			panel.add(new JLabel("Timestamp"));
-			panel.add(minTimestampSpinner);
-			panel.add(maxTimestampSpinner);
-			panel.add(new JLabel("Voltage"));
-			panel.add(minVoltageSpinner);
-			panel.add(maxVoltageSpinner);
-			panel.add(new JLabel("Current"));
-			panel.add(minCurrentSpinner);
-			panel.add(maxCurrentSpinner);
+			addRow("Parameter", "Minimum", "Maximum");
+			addRow("Timestamp", minTimestampSpinner, maxTimestampSpinner);
+			addRow("Voltage", minVoltageSpinner, maxVoltageSpinner);
+			addRow("Current", minCurrentSpinner, maxCurrentSpinner);
 			
 			// Min/max measurements
 			
-			panel.add(new JLabel("Measurements"));
-			panel.add(new JLabel("Minimum"));
-			panel.add(new JLabel("Maximum"));
-
-			panel.add(new JLabel("Timestamp"));
-			panel.add(minTimestampField);
-			panel.add(maxTimestampField);
-			panel.add(new JLabel("Voltage"));
-			panel.add(minVoltageField);
-			panel.add(maxVoltageField);
-			panel.add(new JLabel("Current"));
-			panel.add(minCurrentField);
-			panel.add(maxCurrentField); 
+			addRow("Measurement", "Minimum", "Maximum");
+			addRow("Timestamp", minTimestampField, maxTimestampField);
+			addRow("Voltage", minVoltageField, maxVoltageField);
+			addRow("Current", minCurrentField, maxCurrentField);
 			
 			// Mean/root mean square measurements
 			
-			panel.add(new JLabel("Measurements"));
-			panel.add(new JLabel("Mean"));
-			panel.add(new JLabel("Root mean square"));
+			addRow("Measurement", "Mean", "Root variance");
+			addRow("Voltage", meanVoltageField, rootMeanSquareVoltageField);
+			addRow("Current", meanCurrentField, rootMeanSquareCurrentField);
+			addRow("Power", meanPowerField, rootMeanSquarePowerField);
 			
-			panel.add(new JLabel("Voltage"));
-			panel.add(meanVoltageField);
-			panel.add(rootMeanSquareVoltageField);
-			panel.add(new JLabel("Current"));
-			panel.add(meanCurrentField);
-			panel.add(rootMeanSquareCurrentField);
-			panel.add(new JLabel("Power"));
-			panel.add(meanPowerField);
-			panel.add(rootMeanSquarePowerField);
+			// Percentage measurements
+			
+			addRow("Measurement", "Minimum", "Maximum", "Percentage");
+			addRow("Voltage", minVoltagePercentageSpinner, maxVoltagePercentageSpinner, voltagePercentageField);
+			addRow("Current", minCurrentPercentageSpinner, maxCurrentPercentageSpinner, currentPercentageField);
 		}
 		
 		panel.revalidate();
@@ -286,33 +320,97 @@ public class PropertyPart extends Part
 		return true;
 	}
 	
-	public boolean handleEvent(PropertyPartChangeEvent event) {
-		meanVoltageField.setText(format.format(file.getMeanVoltage()));
-		meanCurrentField.setText(format.format(file.getMeanCurrent()));
-		meanPowerField.setText(format.format(file.getMeanPower()));
-		rootMeanSquareVoltageField.setText(format.format(file.getRootMeanSquareVoltage()));
-		rootMeanSquareCurrentField.setText(format.format(file.getRootMeanSquareCurrent()));
-		rootMeanSquarePowerField.setText(format.format(file.getRootMeanSquarePower()));
+	public boolean handleEvent(PropertyPartChangeEvent event)
+	{
+		updateSpinner(minTimestampSpinner, file.getMinTimestampMeasured(), file.getMaxTimestampDisplayed());
+		updateSpinner(maxTimestampSpinner, file.getMinTimestampDisplayed(), file.getMaxTimestampMeasured());
+		updateSpinner(minVoltageSpinner, file.getMinVoltageMeasured(), file.getMaxVoltageDisplayed());
+		updateSpinner(maxVoltageSpinner, file.getMinVoltageDisplayed(), file.getMaxVoltageMeasured());
+		updateSpinner(minCurrentSpinner, file.getMinCurrentMeasured(), file.getMaxCurrentDisplayed());
+		updateSpinner(maxCurrentSpinner, file.getMinCurrentDisplayed(), file.getMaxCurrentMeasured());
 		
-		/*
-		((SpinnerNumberModel) minTimestampSpinner.getModel()).setMaximum(file.getMaxTimestampDisplayed());
-		((SpinnerNumberModel) maxTimestampSpinner.getModel()).setMinimum(file.getMinTimestampDisplayed());
-		((SpinnerNumberModel) minVoltageSpinner.getModel()).setMaximum(file.getMaxVoltageDisplayed());
-		((SpinnerNumberModel) maxVoltageSpinner.getModel()).setMinimum(file.getMinVoltageDisplayed());
-		((SpinnerNumberModel) minCurrentSpinner.getModel()).setMaximum(file.getMaxCurrentDisplayed());
-		((SpinnerNumberModel) maxCurrentSpinner.getModel()).setMinimum(file.getMinCurrentDisplayed());
-		*/
+		updateTextField(meanVoltageField, file.getMeanVoltage());
+		updateTextField(meanCurrentField, file.getMeanCurrent());
+		updateTextField(meanPowerField, file.getMeanPower());
+		updateTextField(rootMeanSquareVoltageField, file.getRootMeanSquareVoltage());
+		updateTextField(rootMeanSquareCurrentField, file.getRootMeanSquareCurrent());
+		updateTextField(rootMeanSquarePowerField, file.getRootMeanSquarePower());
 		
-		/*
-		((SpinnerNumberModel) minTimestampSpinner.getModel()).setStepSize((file.getMaxTimestampDisplayed() - file.getMinTimestampDisplayed()) / 100);
-		((SpinnerNumberModel) maxTimestampSpinner.getModel()).setStepSize((file.getMaxTimestampDisplayed() - file.getMinTimestampDisplayed()) / 100);
-		((SpinnerNumberModel) minVoltageSpinner.getModel()).setStepSize((file.getMaxVoltageDisplayed() - file.getMinVoltageDisplayed()) / 100);
-		((SpinnerNumberModel) maxVoltageSpinner.getModel()).setStepSize((file.getMaxVoltageDisplayed() - file.getMinVoltageDisplayed()) / 100);
-		((SpinnerNumberModel) minCurrentSpinner.getModel()).setStepSize((file.getMaxCurrentDisplayed() - file.getMinCurrentDisplayed()) / 100);
-		((SpinnerNumberModel) maxCurrentSpinner.getModel()).setStepSize((file.getMaxCurrentDisplayed() - file.getMinCurrentDisplayed()) / 100);
-		*/
+		updateSpinner(minVoltagePercentageSpinner, file.getMinVoltageDisplayed(), file.getMaxVoltagePercentage());
+		updateSpinner(maxVoltagePercentageSpinner, file.getMinVoltagePercentage(), file.getMaxVoltageDisplayed());
+		updateSpinner(minCurrentPercentageSpinner, file.getMinCurrentDisplayed(), file.getMaxCurrentPercentage());
+		updateSpinner(maxCurrentPercentageSpinner, file.getMinCurrentPercentage(), file.getMaxCurrentDisplayed());
+		updateTextField(voltagePercentageField, file.getVoltagePercentage());
+		updateTextField(currentPercentageField, file.getCurrentPercentage());
 		
 		return true;
+	}
+	
+	private void addRow(String first, String second)
+	{	
+		addRow(createBoldLabel(first), createBoldLabel(second));
+	}
+	
+	private void addRow(String first, JComponent second)
+	{
+		addRow(new JLabel(first), second);
+	}
+	
+	private void addRow(JComponent first, JComponent second)
+	{
+		addRow(first, second, new JPanel());
+	}
+	
+	private void addRow(String first, String second, String third)
+	{
+		addRow(createBoldLabel(first), createBoldLabel(second), createBoldLabel(third));
+	}
+	
+	private void addRow(String first, JComponent second, JComponent third)
+	{
+		addRow(new JLabel(first), second, third);
+	}
+	
+	private void addRow(JComponent first, JComponent second, JComponent third)
+	{
+		addRow(first, second, third, new JPanel());
+	}
+	
+	private void addRow(String first, String second, String third, String fourth)
+	{
+		addRow(createBoldLabel(first), createBoldLabel(second), createBoldLabel(third), createBoldLabel(fourth));
+	}
+	
+	private void addRow(String first, JComponent second, JComponent third, JComponent fourth)
+	{
+		addRow(new JLabel(first), second, third, fourth);
+	}
+	
+	private void addRow(JComponent first, JComponent second, JComponent third, JComponent fourth)
+	{
+		style(first);
+		style(second);
+		style(third);
+		style(fourth);
+		
+		panel.add(first);
+		panel.add(second);
+		panel.add(third);
+		panel.add(fourth);
+		
+		panel.setLayout(new GridLayout(panel.getComponentCount() / 4, 4, 1, 1));
+	}
+	
+	private JLabel createBoldLabel(String value)
+	{
+		JLabel result = new JLabel(value);
+		
+		Font font = result.getFont();
+		
+		result.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+		result.setBackground(Color.WHITE);
+		
+		return result;
 	}
 	
 	private JTextField createTextField(double value)
@@ -337,7 +435,49 @@ public class PropertyPart extends Part
 	
 	private JSpinner createSpinner(double minimumValue, double maximumValue, double value)
 	{
-		return new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, (maximumValue - minimumValue) / 100));
+		JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, (maximumValue - minimumValue) / 100));
+		
+		return spinner;
+	}
+	
+	private void style(JComponent component)
+	{
+		component.setBorder(new EmptyBorder(5, 5, 5, 5));
+		component.setBackground(Color.WHITE);
+		component.setOpaque(true);
+	}
+	
+	private void updateTextField(JTextField field, double value)
+	{
+		String text = format.format(value);
+		
+		if (!field.getText().equals(text))
+		{
+			field.setText(text);
+		}
+	}
+	
+	private void updateSpinner(JSpinner spinner, double minimumValue, double maximumValue)
+	{
+		SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
+		
+		double value = model.getNumber().doubleValue();
+		double min = (double) model.getMinimum();
+		double max = (double) model.getMaximum();
+		
+		if (value < minimumValue)
+		{
+			value = minimumValue;
+		}
+		if (value > maximumValue)
+		{
+			value = maximumValue;
+		}
+		
+		if (value != model.getNumber().doubleValue() || minimumValue != min || maximumValue != max)
+		{
+			spinner.setModel(new SpinnerNumberModel(value, minimumValue, maximumValue, model.getStepSize()));
+		}
 	}
 
 }

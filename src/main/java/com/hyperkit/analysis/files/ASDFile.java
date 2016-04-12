@@ -54,6 +54,15 @@ public class ASDFile extends File
 	
 	private double minCurrentDisplayed = Double.MAX_VALUE;
 	private double maxCurrentDisplayed = -Double.MAX_VALUE;
+	
+	private double minTimestamp = Double.MAX_VALUE;
+	private double maxTimestamp = -Double.MAX_VALUE;
+	
+	private double minVoltagePercentage = Double.MAX_VALUE;
+	private double maxVoltagePercentage = -Double.MAX_VALUE;
+	
+	private double minCurrentPercentage = Double.MAX_VALUE;
+	private double maxCurrentPercentage = -Double.MAX_VALUE;
 
 	public ASDFile(java.io.File file) throws IOException
 	{
@@ -121,21 +130,31 @@ public class ASDFile extends File
 			}
 		}
 		
-		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(100));
-		
 		reader.close();
 		
-		updateActiveData();
+		// Update timestamps
 		
-		/*
-		double average = 0;
+		double minTimestamp = Double.MAX_VALUE;
 		
-		for (int step = 0; step < getLength(); step++) {
-			average += (getVoltageMeasured(step) * getCurrentMeasured(step)) / getLength();
+		for (double[] dataLine : data)
+		{
+			minTimestamp = Math.min(minTimestamp, dataLine[TIMESTAMP_INDEX]);
 		}
 		
-		System.out.println(file.getAbsolutePath() + " p_arith = " + average);
-		*/
+		// System.out.println(minTimestamp);
+		
+		for (double[] dataLine : data)
+		{
+			dataLine[TIMESTAMP_INDEX] -= minTimestamp;
+		}
+		
+		// Broadcast event
+		
+		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(100));
+		
+		// Update active data
+		
+		updateActiveData();
 	}
 	
 	public String getName()
@@ -342,6 +361,54 @@ public class ASDFile extends File
 		}
 	}
 	
+	public double getMinVoltagePercentage()
+	{
+		if (minVoltagePercentage == Double.MAX_VALUE)
+		{
+			return getMinVoltageDisplayed();
+		}
+		else
+		{
+			return minVoltagePercentage;
+		}
+	}
+	
+	public double getMaxVoltagePercentage()
+	{
+		if (maxVoltagePercentage == -Double.MAX_VALUE)
+		{
+			return getMaxVoltageDisplayed();
+		}
+		else
+		{
+			return maxVoltagePercentage;
+		}
+	}
+	
+	public double getMinCurrentPercentage()
+	{
+		if (minCurrentPercentage == Double.MAX_VALUE)
+		{
+			return getMinCurrentDisplayed();
+		}
+		else
+		{
+			return minCurrentPercentage;
+		}
+	}
+	
+	public double getMaxCurrentPercentage()
+	{
+		if (maxCurrentPercentage == -Double.MAX_VALUE)
+		{
+			return getMaxCurrentDisplayed();
+		}
+		else
+		{
+			return maxCurrentPercentage;
+		}
+	}
+	
 	public void setMinTimestampDisplayed(double value)
 	{
 		minTimestampDisplayed = value;
@@ -384,6 +451,26 @@ public class ASDFile extends File
 		updateActiveData();
 	}
 	
+	public void setMinVoltagePercentage(double value)
+	{
+		minVoltagePercentage = value;
+	}
+	
+	public void setMaxVoltagePercentage(double value)
+	{
+		maxVoltagePercentage = value;
+	}
+	
+	public void setMinCurrentPercentage(double value)
+	{
+		minCurrentPercentage = value;
+	}
+	
+	public void setMaxCurrentPercentage(double value)
+	{
+		maxCurrentPercentage = value;
+	}
+	
 	public double[][] getVoltageTimeseries()
 	{
 		int index = 0;
@@ -392,7 +479,7 @@ public class ASDFile extends File
 		
 		for (double[] line : activeData)
 		{
-			double timestamp = line[TIMESTAMP_INDEX];
+			double timestamp = line[TIMESTAMP_INDEX] - minTimestamp;
 			double voltage = line[VOLTAGE_INDEX];
 			
 			timeseries[0][index] = timestamp;
@@ -412,7 +499,7 @@ public class ASDFile extends File
 		
 		for (double[] line : activeData)
 		{
-			double timestamp = line[TIMESTAMP_INDEX];
+			double timestamp = line[TIMESTAMP_INDEX] - minTimestamp;
 			double current = line[CURRENT_INDEX];
 			
 			timeseries[0][index] = timestamp;
@@ -835,6 +922,46 @@ public class ASDFile extends File
 		return Math.sqrt(result);
 	}
 	
+	public double getVoltagePercentage()
+	{
+		double min = getMinVoltagePercentage();
+		double max = getMaxVoltagePercentage();
+		
+		int count = 0;
+		
+		for (double[] line : activeData)
+		{
+			double voltage = line[VOLTAGE_INDEX];
+			
+			if (voltage >= min && voltage <= max)
+			{
+				count++;
+			}
+		}
+		
+		return count * 100.0 / activeData.size();
+	}
+	
+	public double getCurrentPercentage()
+	{
+		double min = getMinCurrentPercentage();
+		double max = getMaxCurrentPercentage();
+		
+		int count = 0;
+		
+		for (double[] line : activeData)
+		{
+			double current = line[CURRENT_INDEX];
+			
+			if (current >= min && current <= max)
+			{
+				count++;
+			}
+		}
+		
+		return count * 100.0 / activeData.size();
+	}
+	
 	@Override
 	public String toString()
 	{
@@ -858,6 +985,9 @@ public class ASDFile extends File
 		
 		activeData.clear();
 		
+		this.minTimestamp = Double.MAX_VALUE;
+		this.maxTimestamp = -Double.MAX_VALUE;
+		
 		// Add active data
 		
 		for (double[] line : data)
@@ -869,6 +999,9 @@ public class ASDFile extends File
 			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
 			{	
 				activeData.add(line);
+				
+				this.minTimestamp = Math.min(this.minTimestamp, timestamp);
+				this.maxTimestamp = Math.max(this.maxTimestamp, timestamp);
 			}
 		}
 	}
