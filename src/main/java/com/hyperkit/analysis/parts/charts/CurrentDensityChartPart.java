@@ -1,6 +1,5 @@
 package com.hyperkit.analysis.parts.charts;
 
-import java.awt.BasicStroke;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,11 +7,8 @@ import java.util.Map.Entry;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.TextAnchor;
 
 import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
@@ -26,8 +22,10 @@ public class CurrentDensityChartPart extends ChartPart
 	
 	private int step;
 	private Map<String, ASDFile> files;
+	/*
 	private Map<ASDFile, ValueMarker> minMarkers;
 	private Map<ASDFile, ValueMarker> maxMarkers;
+	*/
 	private DefaultXYDataset dataset;
 
 	public CurrentDensityChartPart(int step)
@@ -36,8 +34,10 @@ public class CurrentDensityChartPart extends ChartPart
 		
 		this.step = step;
 		this.files = new HashMap<>();
+		/*
 		this.minMarkers = new HashMap<>();
 		this.maxMarkers = new HashMap<>();
+		*/
 	}
 
 	@Override
@@ -56,8 +56,10 @@ public class CurrentDensityChartPart extends ChartPart
 		
 		plot.getRenderer().setSeriesPaint(dataset.getSeriesCount(), file.getColor());
 		
+		/*
 		plot.addDomainMarker(getMinMarker(file));
 		plot.addDomainMarker(getMaxMarker(file));
+		*/
 		
 		dataset.addSeries(event.getASDFile().getName(), file.getCurrentDensity(step));
 		
@@ -111,11 +113,14 @@ public class CurrentDensityChartPart extends ChartPart
 			
 			plot.getRenderer().setSeriesPaint(series, file.getColor());
 			
+			/*
 			getMinMarker(file).setValue(file.getMinCurrentPercentage());
 			getMaxMarker(file).setValue(file.getMaxCurrentPercentage());
+			*/
 		}
 	}
 	
+	/*
 	private ValueMarker getMinMarker(ASDFile file)
 	{
 		if (!minMarkers.containsKey(file))
@@ -147,5 +152,6 @@ public class CurrentDensityChartPart extends ChartPart
 		}
 		return maxMarkers.get(file);
 	}
-
+	*/
+	
 }

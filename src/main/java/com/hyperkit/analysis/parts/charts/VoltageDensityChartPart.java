@@ -1,13 +1,11 @@
 package com.hyperkit.analysis.parts.charts;
 
-import java.awt.BasicStroke;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -27,8 +25,8 @@ public class VoltageDensityChartPart extends ChartPart
 	/*
 	private Map<ASDFile, ValueMarker> minMarkers;
 	private Map<ASDFile, ValueMarker> maxMarkers;
-	*/
 	private Map<ASDFile, IntervalMarker> markers;
+	*/
 	private DefaultXYDataset dataset;
 
 	public VoltageDensityChartPart(int step)
@@ -40,8 +38,8 @@ public class VoltageDensityChartPart extends ChartPart
 		/*
 		this.minMarkers = new HashMap<>();
 		this.maxMarkers = new HashMap<>();
-		*/
 		this.markers = new HashMap<>();
+		*/
 	}
 
 	@Override
@@ -63,8 +61,8 @@ public class VoltageDensityChartPart extends ChartPart
 		/*
 		plot.addDomainMarker(getMinMarker(file));
 		plot.addDomainMarker(getMaxMarker(file));
-		*/
 		plot.addDomainMarker(getMarker(file));
+		*/
 		
 		dataset.addSeries(event.getASDFile().getName(), event.getASDFile().getVoltageDensity(step));
 		
@@ -121,10 +119,10 @@ public class VoltageDensityChartPart extends ChartPart
 			/*
 			getMinMarker(file).setValue(file.getMinVoltagePercentage());
 			getMaxMarker(file).setValue(file.getMaxVoltagePercentage());
-			*/
 			
 			getMarker(file).setStartValue(file.getMinVoltagePercentage());
 			getMarker(file).setEndValue(file.getMaxVoltagePercentage());
+			*/
 		}
 	}
 	
@@ -160,7 +158,6 @@ public class VoltageDensityChartPart extends ChartPart
 		}
 		return maxMarkers.get(file);
 	}
-	*/
 	
 	private IntervalMarker getMarker(ASDFile file)
 	{
@@ -178,5 +175,6 @@ public class VoltageDensityChartPart extends ChartPart
 		}
 		return markers.get(file);
 	}
+	*/
 
 }
