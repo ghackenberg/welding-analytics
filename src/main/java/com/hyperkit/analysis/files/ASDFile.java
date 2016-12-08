@@ -867,29 +867,8 @@ public class ASDFile extends File
 		return result;
 	}
 	
-	public double getRootMeanSquarePower()
-	{
-		double mean = getMeanPower();
-		
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			double voltage = line[VOLTAGE_INDEX];
-			
-			result += (current * voltage - mean) * (current * voltage - mean) / activeData.size();
-		}
-		
-		return Math.sqrt(result);
-	}
-	
 	public double getRootMeanSquareCurrent()
-	{
-		double mean = getMeanCurrent();
-		
+	{	
 		// Calculate result
 		
 		double result = 0;
@@ -898,7 +877,7 @@ public class ASDFile extends File
 		{
 			double current = line[CURRENT_INDEX];
 			
-			result += (current - mean) * (current - mean) / activeData.size();
+			result += current * current / activeData.size();
 		}
 		
 		return Math.sqrt(result);
@@ -906,8 +885,6 @@ public class ASDFile extends File
 	
 	public double getRootMeanSquareVoltage()
 	{
-		double mean = getMeanVoltage();
-		
 		// Calculate result
 		
 		double result = 0;
@@ -916,7 +893,7 @@ public class ASDFile extends File
 		{
 			double voltage = line[VOLTAGE_INDEX];
 			
-			result += (voltage - mean) * (voltage - mean) / activeData.size();
+			result += voltage * voltage / activeData.size();
 		}
 		
 		return Math.sqrt(result);

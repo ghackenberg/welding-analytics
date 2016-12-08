@@ -54,7 +54,6 @@ public class PropertyPart extends Part
 	private JTextField meanPowerField;
 	private JTextField rootMeanSquareVoltageField;
 	private JTextField rootMeanSquareCurrentField;
-	private JTextField rootMeanSquarePowerField;
 	
 	private JSpinner minVoltagePercentageSpinner;
 	private JSpinner maxVoltagePercentageSpinner;
@@ -131,7 +130,6 @@ public class PropertyPart extends Part
 			meanPowerField = createTextField(file.getMeanPower());
 			rootMeanSquareVoltageField = createTextField(file.getRootMeanSquareVoltage());
 			rootMeanSquareCurrentField = createTextField(file.getRootMeanSquareCurrent());
-			rootMeanSquarePowerField = createTextField(file.getRootMeanSquarePower());
 			
 			// Spinners (1)
 			
@@ -290,10 +288,10 @@ public class PropertyPart extends Part
 			
 			// Mean/root mean square measurements
 			
-			addRow("Measurement", "Mean", "Root variance");
+			addRow("Measurement", "Mean", "Root mean square");
 			addRow("Voltage", meanVoltageField, rootMeanSquareVoltageField);
 			addRow("Current", meanCurrentField, rootMeanSquareCurrentField);
-			addRow("Power", meanPowerField, rootMeanSquarePowerField);
+			addRow("Power", meanPowerField);
 			
 			// Percentage measurements
 			
@@ -334,7 +332,6 @@ public class PropertyPart extends Part
 		updateTextField(meanPowerField, file.getMeanPower());
 		updateTextField(rootMeanSquareVoltageField, file.getRootMeanSquareVoltage());
 		updateTextField(rootMeanSquareCurrentField, file.getRootMeanSquareCurrent());
-		updateTextField(rootMeanSquarePowerField, file.getRootMeanSquarePower());
 		
 		updateSpinner(minVoltagePercentageSpinner, file.getMinVoltageDisplayed(), file.getMaxVoltagePercentage());
 		updateSpinner(maxVoltagePercentageSpinner, file.getMinVoltagePercentage(), file.getMaxVoltageDisplayed());
