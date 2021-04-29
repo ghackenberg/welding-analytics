@@ -597,11 +597,13 @@ public class ASDFile extends File
 		return density;
 	}
 	
-	public double[][] getCurrentVoltage(int point)
+	public double[][] getCurrentVoltage(int length, int start)
 	{
 		// Find count
 		
-		int count = Math.min(activeData.size(), point);
+		int last = Math.min(activeData.size(), start + length);
+		
+		int count = Math.max(0, last - start);
 		
 		// Create point cloud
 		
@@ -609,22 +611,13 @@ public class ASDFile extends File
 		
 		// Fill dataset
 		
-		int index = 0;
-		
-		for (double[] line : activeData)
+		for (int index = start; index < last; index++)
 		{
-			double current = line[CURRENT_INDEX];
-			double voltage = line[VOLTAGE_INDEX];
+			double current = activeData.get(index)[CURRENT_INDEX];
+			double voltage = activeData.get(index)[VOLTAGE_INDEX];
 			
-			result[0][index] = current;
-			result[1][index] = voltage;
-			
-			index++;
-			
-			if (index == count)
-			{
-				break;
-			}
+			result[0][index - start] = current;
+			result[1][index - start] = voltage;
 		}
 		
 		// Return result

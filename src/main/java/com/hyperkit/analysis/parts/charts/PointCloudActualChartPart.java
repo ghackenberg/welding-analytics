@@ -15,6 +15,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.hyperkit.analysis.adapters.FileXYSeriesLabelGenerator;
+import com.hyperkit.analysis.events.AnimationChangeEvent;
 import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -31,8 +32,9 @@ public class PointCloudActualChartPart extends ChartPart
 	private DefaultXYDataset dataset_points;
 	private DefaultXYDataset dataset_lines;
 	private int point;
+	private int progress;
 
-	public PointCloudActualChartPart(int point)
+	public PointCloudActualChartPart(int point, int progress)
 	{
 		super("Point cloud (actual)");
 		
@@ -40,6 +42,7 @@ public class PointCloudActualChartPart extends ChartPart
 		file_map = new HashMap<>();
 		
 		this.point = point;
+		this.progress = progress;
 	}
 
 	@Override
@@ -64,8 +67,11 @@ public class PointCloudActualChartPart extends ChartPart
 		plot.mapDatasetToRangeAxis(0, 0);
 		plot.mapDatasetToRangeAxis(1, 0);
 		
-		((NumberAxis) plot.getRangeAxis()).setAutoRangeIncludesZero(false);
-		((NumberAxis) plot.getDomainAxis()).setAutoRangeIncludesZero(false);
+		((NumberAxis) plot.getRangeAxis()).setAutoRange(false);
+		((NumberAxis) plot.getDomainAxis()).setAutoRange(false);
+		
+		//((NumberAxis) plot.getRangeAxis()).setAutoRangeIncludesZero(true);
+		//((NumberAxis) plot.getDomainAxis()).setAutoRangeIncludesZero(false);
 		
 		return chart;
 	}
@@ -86,7 +92,7 @@ public class PointCloudActualChartPart extends ChartPart
 		file_map.put(event.getASDFile().getName() + " (Points)", event.getASDFile());
 		file_map.put(event.getASDFile().getName() + " (Regression)", event.getASDFile());
 		
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point));
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point, progress));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();
@@ -115,7 +121,26 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		for (ASDFile file : file_list)
 		{
-			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point));
+			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point, progress));
+		}
+		
+		// Update colors
+		
+		update();
+		
+		// Return true
+		
+		return true;
+	}
+	public boolean handleEvent(AnimationChangeEvent event)
+	{
+		// Update diagram series
+		
+		progress = event.getProgress();
+		
+		for (ASDFile file : file_list)
+		{
+			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point, progress));
 		}
 		
 		// Update colors
@@ -128,7 +153,7 @@ public class PointCloudActualChartPart extends ChartPart
 	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point));
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point, progress));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();
@@ -164,6 +189,31 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		getChart().getXYPlot().getRenderer(0).setLegendItemLabelGenerator(new FileXYSeriesLabelGenerator(file_map));
 		getChart().getXYPlot().getRenderer(1).setLegendItemLabelGenerator(new FileXYSeriesLabelGenerator(file_map));
+		
+		// Update axes ranges
+		
+		double range_lower = +Double.MAX_VALUE;
+		double range_upper = -Double.MAX_VALUE;
+		
+		double domain_lower = +Double.MAX_VALUE;
+		double domain_upper = -Double.MAX_VALUE;
+		
+		for (ASDFile file : file_list) {
+			range_lower = Math.min(range_lower, file.getMinVoltageDisplayed());
+			range_upper = Math.max(range_upper, file.getMaxVoltageDisplayed());
+			
+			domain_lower = Math.min(domain_lower, file.getMinCurrentDisplayed());
+			domain_upper = Math.max(domain_upper, file.getMaxCurrentDisplayed());
+		}
+		
+		double range_delta = range_upper - range_lower;
+		double domain_delta = domain_upper - domain_lower;
+		
+		getChart().getXYPlot().getRangeAxis().setLowerBound(range_lower - range_delta * 0.1);
+		getChart().getXYPlot().getRangeAxis().setUpperBound(range_upper + range_delta * 0.1);
+		
+		getChart().getXYPlot().getDomainAxis().setLowerBound(domain_lower - domain_delta * 0.1);
+		getChart().getXYPlot().getDomainAxis().setUpperBound(domain_upper + domain_delta * 0.1);
 	}
 	
 }

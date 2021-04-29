@@ -13,21 +13,20 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import bibliothek.extension.gui.dock.theme.EclipseTheme;
-import bibliothek.gui.DockController;
-import bibliothek.gui.dock.SplitDockStation;
-import bibliothek.gui.dock.station.split.SplitDockGrid;
-
+import com.hyperkit.analysis.events.AnimationChangeEvent;
 import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
 import com.hyperkit.analysis.events.StepChangeEvent;
+import com.hyperkit.analysis.parts.CanvasPart;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
@@ -37,6 +36,11 @@ import com.hyperkit.analysis.parts.charts.PointCloudStatisticalChartPart;
 import com.hyperkit.analysis.parts.charts.VoltageDensityChartPart;
 import com.hyperkit.analysis.parts.charts.VoltageTimeseriesChartPart;
 
+import bibliothek.extension.gui.dock.theme.EclipseTheme;
+import bibliothek.gui.DockController;
+import bibliothek.gui.dock.SplitDockStation;
+import bibliothek.gui.dock.station.split.SplitDockGrid;
+
 public class Main
 {
 	
@@ -45,10 +49,10 @@ public class Main
 	private static final int STEP_MAX = 10000;
 	private static final int STEP_SIZE = 100;
 	
-	private static final int POINT_INIT = 10000;
-	private static final int POINT_MIN = 10000;
+	private static final int POINT_INIT = 200;
+	private static final int POINT_MIN = 1;
 	private static final int POINT_MAX = 100000;
-	private static final int POINT_SIZE = 10000;
+	private static final int POINT_SIZE = 1;
 	
 	public static void main(String[] arguments)
 	{
@@ -72,10 +76,11 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
 		Part part_current_timeseries = new CurrentTimeseriesChartPart();
-		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT);
+		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT, 0);
 		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
 		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
 		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
+		Part part_canvas = new CanvasPart(POINT_INIT, 0);
 		Part part_property = new PropertyPart();
 		
 		// Progress
@@ -123,12 +128,80 @@ public class Main
 			}
 		);
 		
+		// Time point
+		
+		JSpinner slider = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+		slider.addChangeListener(
+			new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					Bus.getInstance().broadcastEvent(new AnimationChangeEvent((int) slider.getValue()));
+				}
+			}
+		);
+		
+		// Time step
+		
+		JSpinner delta = new JSpinner(new SpinnerNumberModel(100, 1, Integer.MAX_VALUE, 1));
+		
+		// Timer
+		
+		Timer timer = new Timer(1000 / 2,
+			new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					slider.setValue((int) slider.getValue() + (int) delta.getValue());
+				}
+			}
+		);
+		
+		// Time point
+		
+		JSpinner delay = new JSpinner(new SpinnerNumberModel(1000 / 30, 1, Integer.MAX_VALUE, 1));
+		delay.addChangeListener(
+			new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					timer.setDelay((int) delay.getValue());
+				}
+			}
+		);
+		
+		// Play
+		
+		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
+		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		
+		JToggleButton button_play = new JToggleButton(play_resized);
+		button_play.addActionListener(
+			new ActionListener()
+			{	
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					if (button_play.isSelected())
+					{
+						timer.start();
+					}
+					else
+					{
+						timer.stop();
+					}
+				}
+			}
+		);
+		
 		// Help
 		
-		ImageIcon icon_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/help.png"));
-		ImageIcon icon_resized = new ImageIcon(icon_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		ImageIcon help_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/help.png"));
+		ImageIcon help_resized = new ImageIcon(help_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
 		
-		JButton button_help = new JButton(icon_resized);
+		JButton button_help = new JButton(help_resized);
 		button_help.addActionListener(
 			new ActionListener()
 			{	
@@ -156,8 +229,15 @@ public class Main
 		headbar.add(progress);
 		headbar.add(new JLabel("Step number:"));
 		headbar.add(step);
-		headbar.add(new JLabel("Point count:"));
+		headbar.add(new JLabel("Time frame:"));
 		headbar.add(point);
+		headbar.add(new JLabel("Time step:"));
+		headbar.add(delta);
+		headbar.add(new JLabel("Frame number:"));
+		headbar.add(slider);
+		headbar.add(new JLabel("Frame delay:"));
+		headbar.add(delay);
+		headbar.add(button_play);
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
@@ -182,6 +262,8 @@ public class Main
 		grid.addDockable(2, 1, 1, 1, part_current_density.getDockable());
 		grid.addDockable(3, 1, 1, 1, part_point_cloud_actual.getDockable());
 		grid.addDockable(4, 1, 1, 1, part_point_cloud_statistical.getDockable());
+		
+		grid.addDockable(5, 0, 1, 2, part_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

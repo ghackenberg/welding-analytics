@@ -46,8 +46,11 @@ public class PointCloudStatisticalChartPart extends ChartPart
 		
 		JFreeChart chart = ChartFactory.createXYLineChart("Point cloud (statistical)", "Current (in A)", "Voltage (in V)", dataset, PlotOrientation.VERTICAL, true, true, true);
 		
-		((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRangeIncludesZero(false);
-		((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRangeIncludesZero(false);
+		((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRange(false);
+		((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRange(false);
+		
+		//((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRangeIncludesZero(false);
+		//((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRangeIncludesZero(false);
 		
 		return chart;
 	}
@@ -189,6 +192,31 @@ public class PointCloudStatisticalChartPart extends ChartPart
 		// Update label generator
 		
 		getChart().getXYPlot().getRenderer().setLegendItemLabelGenerator(new FileXYSeriesLabelGenerator(file_map));
+		
+		// Update axes ranges
+		
+		double range_lower = +Double.MAX_VALUE;
+		double range_upper = -Double.MAX_VALUE;
+		
+		double domain_lower = +Double.MAX_VALUE;
+		double domain_upper = -Double.MAX_VALUE;
+		
+		for (ASDFile file : file_list) {
+			range_lower = Math.min(range_lower, file.getMinVoltageDisplayed());
+			range_upper = Math.max(range_upper, file.getMaxVoltageDisplayed());
+			
+			domain_lower = Math.min(domain_lower, file.getMinCurrentDisplayed());
+			domain_upper = Math.max(domain_upper, file.getMaxCurrentDisplayed());
+		}
+		
+		double range_delta = range_upper - range_lower;
+		double domain_delta = domain_upper - domain_lower;
+		
+		getChart().getXYPlot().getRangeAxis().setLowerBound(range_lower - range_delta * 0.1);
+		getChart().getXYPlot().getRangeAxis().setUpperBound(range_upper + range_delta * 0.1);
+		
+		getChart().getXYPlot().getDomainAxis().setLowerBound(domain_lower - domain_delta * 0.1);
+		getChart().getXYPlot().getDomainAxis().setUpperBound(domain_upper + domain_delta * 0.1);
 	}
 
 }

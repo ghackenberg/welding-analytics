@@ -76,7 +76,7 @@ public class VoltageDensityChartPart extends ChartPart
 	{
 		dataset.removeSeries(event.getASDFile().getName());
 		
-		files.remove(event.getASDFile());
+		files.remove(event.getASDFile().getName());
 		
 		update();
 		
