@@ -1,10 +1,14 @@
-package com.hyperkit.analysis.parts.charts;
+package com.hyperkit.analysis.parts.charts.pointclouds;
 
 import java.awt.BasicStroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -21,22 +25,32 @@ import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.StatisticsHelper;
 import com.hyperkit.analysis.parts.ChartPart;
 
-public class PointCloudStatisticalChartPart extends ChartPart
+public class StatisticalPointCloudChartPart extends ChartPart
 {
 	
-	private List<ASDFile> file_list;
-	private Map<String, ASDFile> file_map;
-	private DefaultXYDataset dataset;
-	private int step;
+	private List<ASDFile> file_list = new ArrayList<>();
+	private Map<String, ASDFile> file_map = new HashMap<>();
 
-	public PointCloudStatisticalChartPart(int step)
+	private int step = 100;
+	
+	private DefaultXYDataset dataset;
+
+	public StatisticalPointCloudChartPart()
 	{
 		super("Point cloud (statistical)");
 		
-		file_list = new ArrayList<>();
-		file_map = new HashMap<>();
+		// Steps
 		
-		this.step = step;
+		JSpinner stepSpinner = new JSpinner(new SpinnerNumberModel(step, 100, 10000, 100));
+		stepSpinner.addChangeListener(
+			event ->
+			{
+				this.handleEvent(new StepChangeEvent((int) stepSpinner.getValue()));
+			}
+		);
+		
+		getToolBar().add(new JLabel("Histogram bins"));
+		getToolBar().add(stepSpinner);
 	}
 
 	@Override
@@ -48,9 +62,6 @@ public class PointCloudStatisticalChartPart extends ChartPart
 		
 		((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRange(false);
 		((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRange(false);
-		
-		//((NumberAxis) chart.getXYPlot().getRangeAxis()).setAutoRangeIncludesZero(false);
-		//((NumberAxis) chart.getXYPlot().getDomainAxis()).setAutoRangeIncludesZero(false);
 		
 		return chart;
 	}

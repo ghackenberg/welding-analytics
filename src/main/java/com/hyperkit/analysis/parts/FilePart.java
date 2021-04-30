@@ -3,6 +3,7 @@ package com.hyperkit.analysis.parts;
 import java.awt.Component;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -50,6 +51,8 @@ public class FilePart extends Part
 				}
 			}
 		);
+		
+		getToolBar().add(new JLabel("No settings"));
 	}
 
 	@Override

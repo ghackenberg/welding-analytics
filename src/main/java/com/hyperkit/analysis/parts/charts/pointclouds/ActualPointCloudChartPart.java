@@ -1,10 +1,14 @@
-package com.hyperkit.analysis.parts.charts;
+package com.hyperkit.analysis.parts.charts.pointclouds;
 
 import java.awt.BasicStroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -24,25 +28,42 @@ import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.StatisticsHelper;
 import com.hyperkit.analysis.parts.ChartPart;
 
-public class PointCloudActualChartPart extends ChartPart
+public class ActualPointCloudChartPart extends ChartPart
 {
 
-	private List<ASDFile> file_list;
-	private Map<String, ASDFile> file_map;
+	private List<ASDFile> file_list = new ArrayList<>();
+	private Map<String, ASDFile> file_map = new HashMap<>();
+	
+	private int point = 1000;
+	private int progress = 0;
+	
 	private DefaultXYDataset dataset_points;
 	private DefaultXYDataset dataset_lines;
-	private int point;
-	private int progress;
 
-	public PointCloudActualChartPart(int point, int progress)
+	public ActualPointCloudChartPart()
 	{
 		super("Point cloud (actual)");
 		
-		file_list = new ArrayList<>();
-		file_map = new HashMap<>();
+		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(point, 100, 100000, 100));
+		pointSpinner.addChangeListener(
+			event ->
+			{
+				this.handleEvent(new PointChangeEvent((int) pointSpinner.getValue()));
+			}
+		);
 		
-		this.point = point;
-		this.progress = progress;
+		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(progress, 0, Integer.MAX_VALUE, 1));
+		progressSpinner.addChangeListener(
+			event ->
+			{
+				this.handleEvent(new AnimationChangeEvent((int) progressSpinner.getValue()));
+			}
+		);
+		
+		getToolBar().add(new JLabel("Point count"));
+		getToolBar().add(pointSpinner);
+		getToolBar().add(new JLabel("Frame number"));
+		getToolBar().add(progressSpinner);
 	}
 
 	@Override
@@ -69,9 +90,6 @@ public class PointCloudActualChartPart extends ChartPart
 		
 		((NumberAxis) plot.getRangeAxis()).setAutoRange(false);
 		((NumberAxis) plot.getDomainAxis()).setAutoRange(false);
-		
-		//((NumberAxis) plot.getRangeAxis()).setAutoRangeIncludesZero(true);
-		//((NumberAxis) plot.getDomainAxis()).setAutoRangeIncludesZero(false);
 		
 		return chart;
 	}
@@ -134,8 +152,6 @@ public class PointCloudActualChartPart extends ChartPart
 	}
 	public boolean handleEvent(AnimationChangeEvent event)
 	{
-		// TODO remove?
-		/*
 		// Update diagram series
 
 		progress = event.getProgress();
@@ -148,7 +164,6 @@ public class PointCloudActualChartPart extends ChartPart
 		// Update colors
 		
 		update();
-		*/
 		
 		// Return true
 		

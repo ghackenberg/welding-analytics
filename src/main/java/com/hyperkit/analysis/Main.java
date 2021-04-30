@@ -4,35 +4,27 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
 import javax.swing.JToolBar;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
-import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvases.PointCloudAnimationCanvasPart;
 import com.hyperkit.analysis.parts.canvases.PointCloudVisualizationCanvasPart;
-import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
-import com.hyperkit.analysis.parts.charts.CurrentTimeseriesChartPart;
-import com.hyperkit.analysis.parts.charts.PointCloudActualChartPart;
-import com.hyperkit.analysis.parts.charts.PointCloudStatisticalChartPart;
-import com.hyperkit.analysis.parts.charts.VoltageDensityChartPart;
-import com.hyperkit.analysis.parts.charts.VoltageTimeseriesChartPart;
+import com.hyperkit.analysis.parts.charts.densities.CurrentDensityChartPart;
+import com.hyperkit.analysis.parts.charts.densities.VoltageDensityChartPart;
+import com.hyperkit.analysis.parts.charts.pointclouds.ActualPointCloudChartPart;
+import com.hyperkit.analysis.parts.charts.pointclouds.StatisticalPointCloudChartPart;
+import com.hyperkit.analysis.parts.charts.timeseries.CurrentTimeseriesChartPart;
+import com.hyperkit.analysis.parts.charts.timeseries.VoltageTimeseriesChartPart;
 
 import bibliothek.extension.gui.dock.theme.EclipseTheme;
 import bibliothek.gui.DockController;
@@ -41,16 +33,6 @@ import bibliothek.gui.dock.station.split.SplitDockGrid;
 
 public class Main
 {
-	
-	private static final int STEP_INIT = 100;
-	private static final int STEP_MIN = 100;
-	private static final int STEP_MAX = 10000;
-	private static final int STEP_SIZE = 100;
-	
-	private static final int POINT_INIT = 1000;
-	private static final int POINT_MIN = 1;
-	private static final int POINT_MAX = 100000;
-	private static final int POINT_SIZE = 1;
 	
 	public static void main(String[] arguments)
 	{
@@ -86,37 +68,6 @@ public class Main
 			}
 		);
 		
-		// Steps
-		
-		JSpinner step = new JSpinner(new SpinnerNumberModel(STEP_INIT, STEP_MIN, STEP_MAX, STEP_SIZE));
-		step.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new StepChangeEvent((int) step.getValue()));
-				}
-			}
-		);
-		step.setSize(100, 100);
-		
-		// Points
-		
-		JSpinner point = new JSpinner(new SpinnerNumberModel(POINT_INIT, POINT_MIN, POINT_MAX, POINT_SIZE));
-		point.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new PointChangeEvent((int) point.getValue()));
-				}
-			}
-		);
-		
-		
-		
 		// Help
 		
 		ImageIcon help_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/help.png"));
@@ -124,19 +75,15 @@ public class Main
 		
 		JButton button_help = new JButton(help_resized);
 		button_help.addActionListener(
-			new ActionListener()
-			{	
-				@Override
-				public void actionPerformed(ActionEvent e)
+			event ->
+			{
+				try
 				{
-					try
-					{
-						Desktop.getDesktop().open(new java.io.File("User Documentation.pdf"));
-					}
-					catch (Exception ex)
-					{
-						ex.printStackTrace();
-					}
+					Desktop.getDesktop().open(new java.io.File("User Documentation.pdf"));
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
 				}
 			}
 		);
@@ -148,10 +95,6 @@ public class Main
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		headbar.add(new JLabel("Load progress:"));
 		headbar.add(progress);
-		headbar.add(new JLabel("Bin count:"));
-		headbar.add(step);
-		headbar.add(new JLabel("Point count:"));
-		headbar.add(point);
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
@@ -168,12 +111,12 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
 		Part part_current_timeseries = new CurrentTimeseriesChartPart();
-		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
-		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
-		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT, 0);
-		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
-		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart(POINT_INIT, 0);
-		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart(10, 3, 0);
+		Part part_voltage_density = new VoltageDensityChartPart();
+		Part part_current_density = new CurrentDensityChartPart();
+		Part part_point_cloud_actual = new ActualPointCloudChartPart();
+		Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
+		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart();
+		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart();
 		Part part_property = new PropertyPart();
 		
 		// Grid

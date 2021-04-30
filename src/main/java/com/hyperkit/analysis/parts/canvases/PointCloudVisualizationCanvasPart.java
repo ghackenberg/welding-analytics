@@ -6,10 +6,7 @@ import java.awt.Graphics;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.events.ExponentChangeEvent;
 import com.hyperkit.analysis.events.OffsetChangeEvent;
 import com.hyperkit.analysis.events.SpreadChangeEvent;
@@ -19,57 +16,41 @@ import com.hyperkit.analysis.parts.CanvasPart;
 public class PointCloudVisualizationCanvasPart extends CanvasPart
 {
 	
-	private int offset;
-	private int exponent;
-	private int spread;
+	private int offset = 10;
+	private int exponent = 3;
+	private int spread = 0;
 	
-	public PointCloudVisualizationCanvasPart(int offset, int exponent, int spread)
+	public PointCloudVisualizationCanvasPart()
 	{
 		super("Point cloud visualization");
 		
-		this.offset = offset;
-		this.exponent = exponent;
-		this.spread = spread;
-		
 		// Offset
 		
-		JSpinner offsetSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 100, 1));
+		JSpinner offsetSpinner = new JSpinner(new SpinnerNumberModel(offset, 0, 100, 1));
 		offsetSpinner.addChangeListener(
-			new ChangeListener()
+			event ->
 			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new OffsetChangeEvent((int) offsetSpinner.getValue()));
-				}
+				this.handleEvent(new OffsetChangeEvent((int) offsetSpinner.getValue()));
 			}
 		);
 		
 		// Exponent
 		
-		JSpinner exponentSpinner = new JSpinner(new SpinnerNumberModel(3, 1, 100, 1));
+		JSpinner exponentSpinner = new JSpinner(new SpinnerNumberModel(exponent, 1, 100, 1));
 		exponentSpinner.addChangeListener(
-			new ChangeListener()
+			event ->
 			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new ExponentChangeEvent((int) exponentSpinner.getValue()));
-				}
+				this.handleEvent(new ExponentChangeEvent((int) exponentSpinner.getValue()));
 			}
 		);
 		
 		// Spread
 		
-		JSpinner spreadSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
+		JSpinner spreadSpinner = new JSpinner(new SpinnerNumberModel(spread, 0, 100, 1));
 		spreadSpinner.addChangeListener(
-			new ChangeListener()
+			event ->
 			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new SpreadChangeEvent((int) spreadSpinner.getValue()));
-				}
+				this.handleEvent(new SpreadChangeEvent((int) spreadSpinner.getValue()));
 			}
 		);
 		

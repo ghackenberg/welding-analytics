@@ -2,9 +2,8 @@ package com.hyperkit.analysis.parts.canvases;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -12,10 +11,7 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Main;
 import com.hyperkit.analysis.events.AnimationChangeEvent;
 import com.hyperkit.analysis.events.PointChangeEvent;
@@ -24,56 +20,52 @@ import com.hyperkit.analysis.parts.CanvasPart;
 
 public class PointCloudAnimationCanvasPart extends CanvasPart {
 	
-	private int point;
-	private int progress;
+	private int point = 1000;
+	private int progress = 0;
 	
-	public PointCloudAnimationCanvasPart(int _point, int _progress) {
+	public PointCloudAnimationCanvasPart() {
 		super("Point cloud animation");
 		
-		this.point = _point;
-		this.progress = _progress;
+		// Point
 		
-		// Time point
-		
-		JSpinner slider = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
-		slider.addChangeListener(
-			new ChangeListener()
+		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(point, 100, 100000, 100));
+		pointSpinner.addChangeListener(
+			event ->
 			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new AnimationChangeEvent((int) slider.getValue()));
-				}
+				this.handleEvent(new PointChangeEvent((int) pointSpinner.getValue()));
 			}
 		);
 		
-		// Time step
+		// Progress
+		
+		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(progress, 0, Integer.MAX_VALUE, 1));
+		progressSpinner.addChangeListener(
+			event ->
+			{
+				this.handleEvent(new AnimationChangeEvent((int) progressSpinner.getValue()));
+			}
+		);
+		
+		// Delta
 		
 		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
 		
 		// Timer
 		
 		Timer timer = new Timer(10,
-			new ActionListener()
+			event ->
 			{
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					slider.setValue((int) slider.getValue() + (int) delta.getValue());
-				}
+				progressSpinner.setValue((int) progressSpinner.getValue() + (int) delta.getValue());
 			}
 		);
 		
-		// Time point
+		// Delay
 		
 		JSpinner delay = new JSpinner(new SpinnerNumberModel(10, 1, 1000, 1));
 		delay.addChangeListener(
-			new ChangeListener()
+			event ->
 			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					timer.setDelay((int) delay.getValue());
-				}
+				timer.setDelay((int) delay.getValue());
 			}
 		);
 		
@@ -84,27 +76,25 @@ public class PointCloudAnimationCanvasPart extends CanvasPart {
 		
 		JToggleButton button_play = new JToggleButton(play_resized);
 		button_play.addActionListener(
-			new ActionListener()
-			{	
-				@Override
-				public void actionPerformed(ActionEvent e)
+			event ->
+			{
+				if (button_play.isSelected())
 				{
-					if (button_play.isSelected())
-					{
-						timer.start();
-					}
-					else
-					{
-						timer.stop();
-					}
+					timer.start();
+				}
+				else
+				{
+					timer.stop();
 				}
 			}
 		);
 
+		getToolBar().add(new JLabel("Point count"));
+		getToolBar().add(pointSpinner);
+		getToolBar().add(new JLabel("Frame number:"));
+		getToolBar().add(progressSpinner);
 		getToolBar().add(new JLabel("Time step:"));
 		getToolBar().add(delta);
-		getToolBar().add(new JLabel("Frame number:"));
-		getToolBar().add(slider);
 		getToolBar().add(new JLabel("Frame delay:"));
 		getToolBar().add(delay);
 		getToolBar().add(button_play);
