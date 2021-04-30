@@ -142,9 +142,9 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		{	
 			for (int y = 0; y < height; y++)
 			{
-				double r = 0;
-				double g = 0;
-				double b = 0;
+				double r = 255;
+				double g = 255;
+				double b = 255;
 				
 				for (int number = 0; number < getFiles().size(); number++)
 				{
@@ -160,14 +160,14 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 					
 					progress = progress > 0 ? (offset / 100. + (1 - offset / 100.) * progress) : 0;
 					
-					r += red * progress;
-					g += green * progress;
-					b += blue * progress;
+					r -= (255 - red) * progress;
+					g -= (255 - green) * progress;
+					b -= (255 - blue) * progress;
 				}
 				
-				r = Math.min(r, 255);
-				g = Math.min(g, 255);
-				b = Math.min(b, 255);
+				r = Math.max(r, 0);
+				g = Math.max(g, 0);
+				b = Math.max(b, 0);
 				
 				graphics.setColor(new Color((int) r, (int) g, (int) b));
 				graphics.fillRect(x, y, 1, 1);

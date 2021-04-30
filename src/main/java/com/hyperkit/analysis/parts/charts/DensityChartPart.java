@@ -51,7 +51,7 @@ public abstract class DensityChartPart extends ChartPart
 			}
 		);
 		
-		getToolBar().add(new JLabel("Histogram bins"));
+		getToolBar().add(new JLabel("Histogram bins:"));
 		getToolBar().add(stepSpinner);
 	}
 

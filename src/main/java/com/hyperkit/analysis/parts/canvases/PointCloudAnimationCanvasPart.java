@@ -89,7 +89,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart {
 			}
 		);
 
-		getToolBar().add(new JLabel("Point count"));
+		getToolBar().add(new JLabel("Point count:"));
 		getToolBar().add(pointSpinner);
 		getToolBar().add(new JLabel("Frame number:"));
 		getToolBar().add(progressSpinner);

@@ -2,7 +2,6 @@ package com.hyperkit.analysis;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Image;
 import java.net.URL;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
