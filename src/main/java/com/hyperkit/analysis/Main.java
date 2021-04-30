@@ -103,7 +103,7 @@ public class Main
 		JToolBar footbar = new JToolBar("Footbar");
 		footbar.setFloatable(false);
 		footbar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		footbar.add(new JLabel("Copyright 2014 Hyperkit Software, Georg Hackenberg, Auweg 20, 85748 Garching"));
+		footbar.add(new JLabel("(c) 2021 Dr. Georg Hackenberg, Raimundstraße 9, 4701 Bad Schallerbach, Österreich"));
 		
 		// Dock
 		
@@ -147,7 +147,7 @@ public class Main
 		
 		// Frame
 		
-		JFrame frame = new JFrame("Hyperkit Analysis Solution");
+		JFrame frame = new JFrame("Software für die Analyse von Messdaten");
 		frame.setLayout(new BorderLayout());
 		frame.add(headbar, BorderLayout.PAGE_START);
 		frame.add(station.getComponent(), BorderLayout.CENTER);

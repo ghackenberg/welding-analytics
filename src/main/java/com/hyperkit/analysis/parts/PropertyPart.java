@@ -461,9 +461,10 @@ public class PropertyPart extends Part
 		SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
 		
 		double value = model.getNumber().doubleValue();
+		/*
 		double min = (double) model.getMinimum();
 		double max = (double) model.getMaximum();
-		
+		*/
 		if (value < minimumValue)
 		{
 			value = minimumValue;
@@ -473,7 +474,7 @@ public class PropertyPart extends Part
 			value = maximumValue;
 		}
 		
-		if (value != model.getNumber().doubleValue() || minimumValue != min || maximumValue != max)
+		//if (value != model.getNumber().doubleValue() || minimumValue != min || maximumValue != max)
 		{
 			spinner.setModel(new SpinnerNumberModel(value, minimumValue, maximumValue, model.getStepSize()));
 		}
