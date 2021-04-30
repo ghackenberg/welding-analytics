@@ -5,14 +5,14 @@ import com.hyperkit.analysis.Event;
 public class OffsetChangeEvent extends Event
 {
 	
-	private double offset;
+	private int offset;
 	
-	public OffsetChangeEvent(double offset)
+	public OffsetChangeEvent(int offset)
 	{
 		this.offset = offset;
 	}
 	
-	public double getOffset()
+	public int getOffset()
 	{
 		return offset;
 	}

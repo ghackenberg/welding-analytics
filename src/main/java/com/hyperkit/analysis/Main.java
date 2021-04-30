@@ -13,18 +13,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.hyperkit.analysis.events.AnimationChangeEvent;
-import com.hyperkit.analysis.events.ExponentChangeEvent;
-import com.hyperkit.analysis.events.OffsetChangeEvent;
 import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
 import com.hyperkit.analysis.events.StepChangeEvent;
@@ -106,35 +101,6 @@ public class Main
 		);
 		step.setSize(100, 100);
 		
-		// Offset
-		
-		JSpinner offset = new JSpinner(new SpinnerNumberModel(0.1, 0, 1, 0.1));
-		offset.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new OffsetChangeEvent((double) offset.getValue()));
-				}
-			}
-		);
-		offset.setSize(100, 100);
-		
-		// Exponent
-		
-		JSpinner exponent = new JSpinner(new SpinnerNumberModel(3, 1, Integer.MAX_VALUE, 1));
-		exponent.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new ExponentChangeEvent((int) exponent.getValue()));
-				}
-			}
-		);
-		
 		// Points
 		
 		JSpinner point = new JSpinner(new SpinnerNumberModel(POINT_INIT, POINT_MIN, POINT_MAX, POINT_SIZE));
@@ -149,73 +115,7 @@ public class Main
 			}
 		);
 		
-		// Time point
 		
-		JSpinner slider = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
-		slider.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					Bus.getInstance().broadcastEvent(new AnimationChangeEvent((int) slider.getValue()));
-				}
-			}
-		);
-		
-		// Time step
-		
-		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, Integer.MAX_VALUE, 1));
-		
-		// Timer
-		
-		Timer timer = new Timer(1000 / 2,
-			new ActionListener()
-			{
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					slider.setValue((int) slider.getValue() + (int) delta.getValue());
-				}
-			}
-		);
-		
-		// Time point
-		
-		JSpinner delay = new JSpinner(new SpinnerNumberModel(1000 / 30, 1, Integer.MAX_VALUE, 1));
-		delay.addChangeListener(
-			new ChangeListener()
-			{
-				@Override
-				public void stateChanged(ChangeEvent e)
-				{
-					timer.setDelay((int) delay.getValue());
-				}
-			}
-		);
-		
-		// Play
-		
-		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
-		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-		
-		JToggleButton button_play = new JToggleButton(play_resized);
-		button_play.addActionListener(
-			new ActionListener()
-			{	
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					if (button_play.isSelected())
-					{
-						timer.start();
-					}
-					else
-					{
-						timer.stop();
-					}
-				}
-			}
-		);
 		
 		// Help
 		
@@ -248,21 +148,10 @@ public class Main
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		headbar.add(new JLabel("Load progress:"));
 		headbar.add(progress);
-		headbar.add(new JLabel("Step number:"));
+		headbar.add(new JLabel("Bin count:"));
 		headbar.add(step);
-		headbar.add(new JLabel("Offset:"));
-		headbar.add(offset);
-		headbar.add(new JLabel("Exponent:"));
-		headbar.add(exponent);
-		headbar.add(new JLabel("Time frame:"));
+		headbar.add(new JLabel("Point count:"));
 		headbar.add(point);
-		headbar.add(new JLabel("Time step:"));
-		headbar.add(delta);
-		headbar.add(new JLabel("Frame number:"));
-		headbar.add(slider);
-		headbar.add(new JLabel("Frame delay:"));
-		headbar.add(delay);
-		headbar.add(button_play);
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
@@ -284,7 +173,7 @@ public class Main
 		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT, 0);
 		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
 		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart(POINT_INIT, 0);
-		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart(0.1, 3);
+		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart(10, 3, 0);
 		Part part_property = new PropertyPart();
 		
 		// Grid
@@ -292,17 +181,17 @@ public class Main
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
 		
-		grid.addDockable(1, 0, 1, 1, part_voltage_timeseries.getDockable());
-		grid.addDockable(2, 0, 1, 1, part_current_timeseries.getDockable());
-		grid.addDockable(3, 0, 1, 1, part_voltage_density.getDockable());
-		grid.addDockable(4, 0, 1, 1, part_current_density.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_voltage_timeseries.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_current_timeseries.getDockable());
+		grid.addDockable(3, 0, 2, 1, part_voltage_density.getDockable());
+		grid.addDockable(3, 0, 2, 1, part_current_density.getDockable());
 		
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
 		
-		grid.addDockable(1, 1, 1, 1, part_point_cloud_actual.getDockable());
-		grid.addDockable(2, 1, 1, 1, part_point_cloud_statistical.getDockable());
-		grid.addDockable(3, 1, 1, 1, part_point_cloud_animation.getDockable());
-		grid.addDockable(4, 1, 1, 1, part_point_cloud_visualization.getDockable());
+		grid.addDockable(1, 1, 2, 1, part_point_cloud_actual.getDockable());
+		grid.addDockable(1, 1, 2, 1, part_point_cloud_statistical.getDockable());
+		grid.addDockable(3, 1, 2, 1, part_point_cloud_animation.getDockable());
+		grid.addDockable(3, 1, 2, 1, part_point_cloud_visualization.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

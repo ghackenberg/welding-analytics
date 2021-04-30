@@ -134,8 +134,10 @@ public class PointCloudActualChartPart extends ChartPart
 	}
 	public boolean handleEvent(AnimationChangeEvent event)
 	{
+		// TODO remove?
+		/*
 		// Update diagram series
-		
+
 		progress = event.getProgress();
 		
 		for (ASDFile file : file_list)
@@ -146,6 +148,7 @@ public class PointCloudActualChartPart extends ChartPart
 		// Update colors
 		
 		update();
+		*/
 		
 		// Return true
 		
