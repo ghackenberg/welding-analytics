@@ -191,9 +191,14 @@ public class ASDFile extends File
 	}
 	*/
 	
-	public int getLength()
+	public int getLengthMeasured()
 	{
 		return data.size();
+	}
+	
+	public int getLengthDisplayed()
+	{
+		return activeData.size();
 	}
 	
 	public double getTimestampMeasured(int index)
@@ -209,6 +214,21 @@ public class ASDFile extends File
 	public double getCurrentMeasured(int index)
 	{
 		return data.get(index)[CURRENT_INDEX];
+	}
+	
+	public double getTimestampDisplayed(int index)
+	{
+		return activeData.get(index)[TIMESTAMP_INDEX];
+	}
+	
+	public double getVoltageDisplayed(int index)
+	{
+		return activeData.get(index)[VOLTAGE_INDEX];
+	}
+	
+	public double getCurrentDisplayed(int index)
+	{
+		return activeData.get(index)[CURRENT_INDEX];
 	}
 	
 	public double getMinTimestampMeasured()

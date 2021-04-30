@@ -23,12 +23,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.hyperkit.analysis.events.AnimationChangeEvent;
+import com.hyperkit.analysis.events.ExponentChangeEvent;
+import com.hyperkit.analysis.events.OffsetChangeEvent;
 import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.ProgressChangeEvent;
 import com.hyperkit.analysis.events.StepChangeEvent;
-import com.hyperkit.analysis.parts.CanvasPart;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
+import com.hyperkit.analysis.parts.canvases.PointCloudAnimationCanvasPart;
+import com.hyperkit.analysis.parts.canvases.PointCloudVisualizationCanvasPart;
 import com.hyperkit.analysis.parts.charts.CurrentDensityChartPart;
 import com.hyperkit.analysis.parts.charts.CurrentTimeseriesChartPart;
 import com.hyperkit.analysis.parts.charts.PointCloudActualChartPart;
@@ -49,7 +52,7 @@ public class Main
 	private static final int STEP_MAX = 10000;
 	private static final int STEP_SIZE = 100;
 	
-	private static final int POINT_INIT = 200;
+	private static final int POINT_INIT = 1000;
 	private static final int POINT_MIN = 1;
 	private static final int POINT_MAX = 100000;
 	private static final int POINT_SIZE = 1;
@@ -70,18 +73,6 @@ public class Main
 		// Icon
 		
 		ImageIcon icon_analysis = new ImageIcon(Main.class.getClassLoader().getResource("icons/main.png"));
-		
-		// Part
-		
-		Part part_file = new FilePart();
-		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
-		Part part_current_timeseries = new CurrentTimeseriesChartPart();
-		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT, 0);
-		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
-		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
-		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
-		Part part_canvas = new CanvasPart(POINT_INIT, 0);
-		Part part_property = new PropertyPart();
 		
 		// Progress
 		
@@ -110,6 +101,36 @@ public class Main
 				public void stateChanged(ChangeEvent e)
 				{
 					Bus.getInstance().broadcastEvent(new StepChangeEvent((int) step.getValue()));
+				}
+			}
+		);
+		step.setSize(100, 100);
+		
+		// Offset
+		
+		JSpinner offset = new JSpinner(new SpinnerNumberModel(0.1, 0, 1, 0.1));
+		offset.addChangeListener(
+			new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					Bus.getInstance().broadcastEvent(new OffsetChangeEvent((double) offset.getValue()));
+				}
+			}
+		);
+		offset.setSize(100, 100);
+		
+		// Exponent
+		
+		JSpinner exponent = new JSpinner(new SpinnerNumberModel(3, 1, Integer.MAX_VALUE, 1));
+		exponent.addChangeListener(
+			new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					Bus.getInstance().broadcastEvent(new ExponentChangeEvent((int) exponent.getValue()));
 				}
 			}
 		);
@@ -144,7 +165,7 @@ public class Main
 		
 		// Time step
 		
-		JSpinner delta = new JSpinner(new SpinnerNumberModel(100, 1, Integer.MAX_VALUE, 1));
+		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, Integer.MAX_VALUE, 1));
 		
 		// Timer
 		
@@ -229,6 +250,10 @@ public class Main
 		headbar.add(progress);
 		headbar.add(new JLabel("Step number:"));
 		headbar.add(step);
+		headbar.add(new JLabel("Offset:"));
+		headbar.add(offset);
+		headbar.add(new JLabel("Exponent:"));
+		headbar.add(exponent);
 		headbar.add(new JLabel("Time frame:"));
 		headbar.add(point);
 		headbar.add(new JLabel("Time step:"));
@@ -250,20 +275,34 @@ public class Main
 		
 		// Dock
 		
+		// Part
+		Part part_file = new FilePart();
+		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
+		Part part_current_timeseries = new CurrentTimeseriesChartPart();
+		Part part_voltage_density = new VoltageDensityChartPart(STEP_INIT);
+		Part part_current_density = new CurrentDensityChartPart(STEP_INIT);
+		Part part_point_cloud_actual = new PointCloudActualChartPart(POINT_INIT, 0);
+		Part part_point_cloud_statistical = new PointCloudStatisticalChartPart(STEP_INIT);
+		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart(POINT_INIT, 0);
+		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart(0.1, 3);
+		Part part_property = new PropertyPart();
+		
 		// Grid
 		SplitDockGrid grid = new SplitDockGrid();
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
-		grid.addDockable(1, 0, 2, 1, part_voltage_timeseries.getDockable());
-		grid.addDockable(3, 0, 2, 1, part_current_timeseries.getDockable());
+		
+		grid.addDockable(1, 0, 1, 1, part_voltage_timeseries.getDockable());
+		grid.addDockable(2, 0, 1, 1, part_current_timeseries.getDockable());
+		grid.addDockable(3, 0, 1, 1, part_voltage_density.getDockable());
+		grid.addDockable(4, 0, 1, 1, part_current_density.getDockable());
 		
 		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
-		grid.addDockable(1, 1, 1, 1, part_voltage_density.getDockable());
-		grid.addDockable(2, 1, 1, 1, part_current_density.getDockable());
-		grid.addDockable(3, 1, 1, 1, part_point_cloud_actual.getDockable());
-		grid.addDockable(4, 1, 1, 1, part_point_cloud_statistical.getDockable());
 		
-		grid.addDockable(5, 0, 1, 2, part_canvas.getDockable());
+		grid.addDockable(1, 1, 1, 1, part_point_cloud_actual.getDockable());
+		grid.addDockable(2, 1, 1, 1, part_point_cloud_statistical.getDockable());
+		grid.addDockable(3, 1, 1, 1, part_point_cloud_animation.getDockable());
+		grid.addDockable(4, 1, 1, 1, part_point_cloud_visualization.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

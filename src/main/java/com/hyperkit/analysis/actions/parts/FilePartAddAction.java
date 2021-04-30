@@ -58,7 +58,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 						{
 							ASDFile asdFile = new ASDFile(file);
 							
-							if (asdFile.getLength() > 0)
+							if (asdFile.getLengthMeasured() > 0)
 							{
 								Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), asdFile));
 							}
