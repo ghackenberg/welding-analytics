@@ -7,9 +7,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.hyperkit.analysis.events.ExponentChangeEvent;
-import com.hyperkit.analysis.events.OffsetChangeEvent;
-import com.hyperkit.analysis.events.SpreadChangeEvent;
+import com.hyperkit.analysis.events.values.ExponentChangeEvent;
+import com.hyperkit.analysis.events.values.OffsetChangeEvent;
+import com.hyperkit.analysis.events.values.SpreadChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
@@ -64,7 +64,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	
 	public boolean handleEvent(OffsetChangeEvent event)
 	{
-		offset = event.getOffset();
+		offset = event.getValue();
 		
 		getPanel().repaint();
 		
@@ -73,7 +73,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	
 	public boolean handleEvent(ExponentChangeEvent event)
 	{
-		exponent = event.getExponent();
+		exponent = event.getValue();
 		
 		getPanel().repaint();
 		
@@ -82,7 +82,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	
 	public boolean handleEvent(SpreadChangeEvent event)
 	{
-		spread = event.getSpread();
+		spread = event.getValue();
 		
 		getPanel().repaint();
 		

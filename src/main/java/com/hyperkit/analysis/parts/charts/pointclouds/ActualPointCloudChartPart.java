@@ -19,11 +19,11 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.hyperkit.analysis.adapters.FileXYSeriesLabelGenerator;
-import com.hyperkit.analysis.events.AnimationChangeEvent;
-import com.hyperkit.analysis.events.PointChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.values.WindowChangeEvent;
+import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.StatisticsHelper;
 import com.hyperkit.analysis.parts.ChartPart;
@@ -33,9 +33,9 @@ public class ActualPointCloudChartPart extends ChartPart
 
 	private List<ASDFile> file_list = new ArrayList<>();
 	private Map<String, ASDFile> file_map = new HashMap<>();
-	
-	private int point = 1000;
-	private int progress = 0;
+
+	private int frame = 0;
+	private int window_backward = 1000;
 	
 	private DefaultXYDataset dataset_points;
 	private DefaultXYDataset dataset_lines;
@@ -44,26 +44,16 @@ public class ActualPointCloudChartPart extends ChartPart
 	{
 		super("Point cloud (actual)");
 		
-		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(point, 100, 100000, 100));
+		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(window_backward, 100, 100000, 100));
 		pointSpinner.addChangeListener(
 			event ->
 			{
-				this.handleEvent(new PointChangeEvent((int) pointSpinner.getValue()));
-			}
-		);
-		
-		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(progress, 0, Integer.MAX_VALUE, 1));
-		progressSpinner.addChangeListener(
-			event ->
-			{
-				this.handleEvent(new AnimationChangeEvent((int) progressSpinner.getValue()));
+				this.handleEvent(new WindowChangeEvent((int) pointSpinner.getValue()));
 			}
 		);
 		
 		getToolBar().add(new JLabel("Point count:"));
 		getToolBar().add(pointSpinner);
-		getToolBar().add(new JLabel("Frame number:"));
-		getToolBar().add(progressSpinner);
 	}
 
 	@Override
@@ -110,7 +100,7 @@ public class ActualPointCloudChartPart extends ChartPart
 		file_map.put(event.getASDFile().getName() + " (Points)", event.getASDFile());
 		file_map.put(event.getASDFile().getName() + " (Regression)", event.getASDFile());
 		
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point, progress));
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(window_backward, frame));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();
@@ -131,15 +121,15 @@ public class ActualPointCloudChartPart extends ChartPart
 		
 		return true;
 	}
-	public boolean handleEvent(PointChangeEvent event)
+	public boolean handleEvent(WindowChangeEvent event)
 	{
 		// Update diagram series
 		
-		point = event.getPoint();
+		window_backward = event.getValue();
 		
 		for (ASDFile file : file_list)
 		{
-			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point, progress));
+			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(window_backward, frame));
 		}
 		
 		// Update colors
@@ -150,15 +140,15 @@ public class ActualPointCloudChartPart extends ChartPart
 		
 		return true;
 	}
-	public boolean handleEvent(AnimationChangeEvent event)
+	public boolean handleEvent(FrameChangeEvent event)
 	{
 		// Update diagram series
 
-		progress = event.getProgress();
+		frame = event.getValue();
 		
 		for (ASDFile file : file_list)
 		{
-			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(point, progress));
+			dataset_points.addSeries(file.getName() + " (Points)", file.getCurrentVoltage(frame, window_backward));
 		}
 		
 		// Update colors
@@ -171,7 +161,7 @@ public class ActualPointCloudChartPart extends ChartPart
 	}
 	public boolean handleEvent(PropertyPartChangeEvent event)
 	{
-		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(point, progress));
+		dataset_points.addSeries(event.getASDFile().getName() + " (Points)", event.getASDFile().getCurrentVoltage(window_backward, frame));
 		dataset_lines.addSeries(event.getASDFile().getName() + " (Regression)", StatisticsHelper.getRegressionData(event.getASDFile()));
 		
 		update();

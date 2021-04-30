@@ -10,17 +10,22 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.hyperkit.analysis.events.ProgressChangeEvent;
+import com.hyperkit.analysis.events.values.FrameChangeEvent;
+import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvases.PointCloudAnimationCanvasPart;
 import com.hyperkit.analysis.parts.canvases.PointCloudVisualizationCanvasPart;
-import com.hyperkit.analysis.parts.charts.densities.CurrentDensityChartPart;
-import com.hyperkit.analysis.parts.charts.densities.VoltageDensityChartPart;
+import com.hyperkit.analysis.parts.charts.histograms.CurrentHistogramChartPart;
+import com.hyperkit.analysis.parts.charts.histograms.VoltageHistogramChartPart;
 import com.hyperkit.analysis.parts.charts.pointclouds.ActualPointCloudChartPart;
 import com.hyperkit.analysis.parts.charts.pointclouds.StatisticalPointCloudChartPart;
 import com.hyperkit.analysis.parts.charts.timeseries.CurrentTimeseriesChartPart;
@@ -61,9 +66,62 @@ public class Main
 				@SuppressWarnings("unused")
 				public boolean handleEvent(ProgressChangeEvent event)
 				{
-					progress.setValue(event.getProgress());
+					progress.setValue(event.getValue());
 					
 					return true;
+				}
+			}
+		);
+		
+		// Progress
+		
+		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+		progressSpinner.addChangeListener(
+			event ->
+			{
+				Bus.getInstance().broadcastEvent(new FrameChangeEvent((int) progressSpinner.getValue()));
+			}
+		);
+		
+		// Delta
+		
+		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+		
+		// Timer
+		
+		Timer timer = new Timer(10,
+			event ->
+			{
+				progressSpinner.setValue((int) progressSpinner.getValue() + (int) delta.getValue());
+			}
+		);
+		
+		// Delay
+		
+		JSpinner delay = new JSpinner(new SpinnerNumberModel(30, 1, 60, 1));
+		delay.addChangeListener(
+			event ->
+			{
+				timer.setDelay(1000 / (int) delay.getValue());
+			}
+		);
+		
+		// Play
+		
+		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
+		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		
+		JToggleButton button_play = new JToggleButton(play_resized);
+		button_play.addActionListener(
+			event ->
+			{
+				if (button_play.isSelected())
+				{
+					timer.start();
+				}
+				else
+				{
+					timer.stop();
 				}
 			}
 		);
@@ -95,6 +153,13 @@ public class Main
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		headbar.add(new JLabel("Load progress:"));
 		headbar.add(progress);
+		headbar.add(new JLabel("Frame:"));
+		headbar.add(progressSpinner);
+		headbar.add(new JLabel("Step:"));
+		headbar.add(delta);
+		headbar.add(new JLabel("FPS:"));
+		headbar.add(delay);
+		headbar.add(button_play);
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
@@ -111,8 +176,8 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
 		Part part_current_timeseries = new CurrentTimeseriesChartPart();
-		Part part_voltage_density = new VoltageDensityChartPart();
-		Part part_current_density = new CurrentDensityChartPart();
+		Part part_voltage_density = new VoltageHistogramChartPart();
+		Part part_current_density = new CurrentHistogramChartPart();
 		Part part_point_cloud_actual = new ActualPointCloudChartPart();
 		Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
 		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart();
@@ -124,17 +189,18 @@ public class Main
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
 		
-		grid.addDockable(1, 0, 2, 1, part_voltage_timeseries.getDockable());
-		grid.addDockable(1, 0, 2, 1, part_current_timeseries.getDockable());
-		grid.addDockable(3, 0, 2, 1, part_voltage_density.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_voltage_density.getDockable());
 		grid.addDockable(3, 0, 2, 1, part_current_density.getDockable());
 		
-		grid.addDockable(0, 1, 1, 1, part_property.getDockable());
+		grid.addDockable(1, 1, 2, 1, part_voltage_timeseries.getDockable());
+		grid.addDockable(3, 1, 2, 1, part_current_timeseries.getDockable());
 		
-		grid.addDockable(1, 1, 2, 1, part_point_cloud_actual.getDockable());
-		grid.addDockable(1, 1, 2, 1, part_point_cloud_statistical.getDockable());
-		grid.addDockable(3, 1, 2, 1, part_point_cloud_animation.getDockable());
-		grid.addDockable(3, 1, 2, 1, part_point_cloud_visualization.getDockable());
+		grid.addDockable(0, 1, 1, 2, part_property.getDockable());
+		
+		grid.addDockable(1, 2, 2, 1, part_point_cloud_actual.getDockable());
+		grid.addDockable(3, 2, 2, 1, part_point_cloud_statistical.getDockable());
+		grid.addDockable(1, 2, 2, 1, part_point_cloud_animation.getDockable());
+		grid.addDockable(3, 2, 2, 1, part_point_cloud_visualization.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

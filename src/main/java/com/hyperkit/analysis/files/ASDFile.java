@@ -21,7 +21,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.File;
-import com.hyperkit.analysis.events.ProgressChangeEvent;
+import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 
 public class ASDFile extends File
 {
@@ -165,6 +165,11 @@ public class ASDFile extends File
 	public Color getColor()
 	{
 		return color;
+	}
+	
+	public Color getMarkerColor()
+	{
+		return new Color((int) (color.getRed() * 0.8), (int) (color.getGreen() * 0.8), (int) (color.getBlue() * 0.8));
 	}
 	
 	public void setColor(Color color)
@@ -491,41 +496,45 @@ public class ASDFile extends File
 		maxCurrentPercentage = value;
 	}
 	
-	public double[][] getVoltageTimeseries()
+	public double[][] getVoltageTimeseries(int frame, int window)
 	{
-		int index = 0;
+		int end = Math.min(frame + 1, activeData.size());
 		
-		double[][] timeseries = new double[2][activeData.size()];
+		int start = Math.max(frame + 1 - window, 0);
 		
-		for (double[] line : activeData)
+		int count = Math.max(0, end - start);
+		
+		double[][] timeseries = new double[2][count];
+		
+		for (int index = start; index < end; index++)
 		{
-			double timestamp = line[TIMESTAMP_INDEX] - minTimestamp;
-			double voltage = line[VOLTAGE_INDEX];
+			double timestamp = activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
+			double voltage = activeData.get(index)[VOLTAGE_INDEX];
 			
-			timeseries[0][index] = timestamp;
-			timeseries[1][index] = voltage;
-			
-			index++;
+			timeseries[0][index - start] = timestamp;
+			timeseries[1][index - start] = voltage;
 		}
 		
 		return timeseries;
 	}
 	
-	public double[][] getCurrentTimeseries()
+	public double[][] getCurrentTimeseries(int frame, int window)
 	{
-		int index = 0;
+		int end = Math.min(frame + 1, activeData.size());
 		
-		double[][] timeseries = new double[2][activeData.size()];
+		int start = Math.max(frame + 1 - window, 0);
 		
-		for (double[] line : activeData)
+		int count = Math.max(0, end - start);
+		
+		double[][] timeseries = new double[2][count];
+
+		for (int index = start; index < end; index++)
 		{
-			double timestamp = line[TIMESTAMP_INDEX] - minTimestamp;
-			double current = line[CURRENT_INDEX];
+			double timestamp = activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
+			double current = activeData.get(index)[CURRENT_INDEX];
 			
-			timeseries[0][index] = timestamp;
-			timeseries[1][index] = current;
-			
-			index++;
+			timeseries[0][index - start] = timestamp;
+			timeseries[1][index - start] = current;
 		}
 		
 		return timeseries;
@@ -617,13 +626,43 @@ public class ASDFile extends File
 		return density;
 	}
 	
-	public double[][] getCurrentVoltage(int length, int start)
+	public double getCurrentProbability(int steps, int frame)
+	{
+		double[][] density = getCurrentDensity(steps);
+		
+		double min = getMinCurrentDisplayed();
+		double max = getMaxCurrentDisplayed();
+		
+		double value = activeData.get(frame)[CURRENT_INDEX];
+		
+		int bin = (int) Math.floor((value - min) / (max - min) * (steps - 1));
+		
+		return density[1][bin];
+	}
+	
+	public double getVoltageProbability(int steps, int frame)
+	{
+		double[][] density = getVoltageDensity(steps);
+		
+		double min = getMinVoltageDisplayed();
+		double max = getMaxVoltageDisplayed();
+		
+		double value = activeData.get(frame)[VOLTAGE_INDEX];
+		
+		int bin = (int) Math.floor((value - min) / (max - min) * (steps - 1));
+		
+		return density[1][bin];
+	}
+	
+	public double[][] getCurrentVoltage(int frame, int window_backward)
 	{
 		// Find count
 		
-		int last = Math.min(activeData.size(), start + length);
+		int start = Math.max(frame + 1 - window_backward, 0);
 		
-		int count = Math.max(0, last - start);
+		int end = Math.min(frame + 1, activeData.size());
+		
+		int count = Math.max(0, end - start);
 		
 		// Create point cloud
 		
@@ -631,7 +670,7 @@ public class ASDFile extends File
 		
 		// Fill dataset
 		
-		for (int index = start; index < last; index++)
+		for (int index = start; index < end; index++)
 		{
 			double current = activeData.get(index)[CURRENT_INDEX];
 			double voltage = activeData.get(index)[VOLTAGE_INDEX];

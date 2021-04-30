@@ -2,115 +2,50 @@ package com.hyperkit.analysis.parts.canvases;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
-import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.Timer;
 
-import com.hyperkit.analysis.Main;
-import com.hyperkit.analysis.events.AnimationChangeEvent;
-import com.hyperkit.analysis.events.PointChangeEvent;
+import com.hyperkit.analysis.events.values.WindowChangeEvent;
+import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public class PointCloudAnimationCanvasPart extends CanvasPart {
-	
-	private int point = 1000;
-	private int progress = 0;
+
+	private int frame = 0;
+	private int window_backward = 1000;
 	
 	public PointCloudAnimationCanvasPart() {
 		super("Point cloud animation");
 		
 		// Point
 		
-		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(point, 100, 100000, 100));
+		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(window_backward, 100, 100000, 100));
 		pointSpinner.addChangeListener(
 			event ->
 			{
-				this.handleEvent(new PointChangeEvent((int) pointSpinner.getValue()));
-			}
-		);
-		
-		// Progress
-		
-		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(progress, 0, Integer.MAX_VALUE, 1));
-		progressSpinner.addChangeListener(
-			event ->
-			{
-				this.handleEvent(new AnimationChangeEvent((int) progressSpinner.getValue()));
-			}
-		);
-		
-		// Delta
-		
-		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
-		
-		// Timer
-		
-		Timer timer = new Timer(10,
-			event ->
-			{
-				progressSpinner.setValue((int) progressSpinner.getValue() + (int) delta.getValue());
-			}
-		);
-		
-		// Delay
-		
-		JSpinner delay = new JSpinner(new SpinnerNumberModel(10, 1, 1000, 1));
-		delay.addChangeListener(
-			event ->
-			{
-				timer.setDelay((int) delay.getValue());
-			}
-		);
-		
-		// Play
-		
-		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
-		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-		
-		JToggleButton button_play = new JToggleButton(play_resized);
-		button_play.addActionListener(
-			event ->
-			{
-				if (button_play.isSelected())
-				{
-					timer.start();
-				}
-				else
-				{
-					timer.stop();
-				}
+				this.handleEvent(new WindowChangeEvent((int) pointSpinner.getValue()));
 			}
 		);
 
 		getToolBar().add(new JLabel("Point count:"));
 		getToolBar().add(pointSpinner);
-		getToolBar().add(new JLabel("Frame number:"));
-		getToolBar().add(progressSpinner);
-		getToolBar().add(new JLabel("Time step:"));
-		getToolBar().add(delta);
-		getToolBar().add(new JLabel("Frame delay:"));
-		getToolBar().add(delay);
-		getToolBar().add(button_play);
 	}
 	
-	public boolean handleEvent(PointChangeEvent event)
+	public boolean handleEvent(WindowChangeEvent event)
 	{
-		point = event.getPoint();
+		window_backward = event.getValue();
 		
 		getPanel().repaint();
 		
 		return true;
 	}
 	
-	public boolean handleEvent(AnimationChangeEvent event)
+	public boolean handleEvent(FrameChangeEvent event)
 	{
-		progress = event.getProgress();
+		frame = event.getValue();
 		
 		getPanel().repaint();
 		
@@ -158,7 +93,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart {
 			int green = color.getGreen();
 			int blue = color.getBlue();
 			
-			double[][] data = file.getCurrentVoltage(point, progress);
+			double[][] data = file.getCurrentVoltage(frame, window_backward);
 			
 			assert data.length == 2;
 			assert data[0].length == data[1].length;

@@ -17,10 +17,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.hyperkit.analysis.adapters.FileXYSeriesLabelGenerator;
-import com.hyperkit.analysis.events.StepChangeEvent;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.StatisticsHelper;
 import com.hyperkit.analysis.parts.ChartPart;
@@ -45,7 +45,7 @@ public class StatisticalPointCloudChartPart extends ChartPart
 		stepSpinner.addChangeListener(
 			event ->
 			{
-				this.handleEvent(new StepChangeEvent((int) stepSpinner.getValue()));
+				this.handleEvent(new HistogramChangeEvent((int) stepSpinner.getValue()));
 			}
 		);
 		
@@ -136,11 +136,11 @@ public class StatisticalPointCloudChartPart extends ChartPart
 		
 		return true;
 	}
-	public boolean handleEvent(StepChangeEvent event)
+	public boolean handleEvent(HistogramChangeEvent event)
 	{
 		// Update diagram series
 		
-		step = event.getStep();
+		step = event.getValue();
 		
 		for (ASDFile file : file_list)
 		{
