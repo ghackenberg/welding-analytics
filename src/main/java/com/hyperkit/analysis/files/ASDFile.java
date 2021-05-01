@@ -566,7 +566,7 @@ public class ASDFile extends File
 		{
 			double voltage = line[VOLTAGE_INDEX];
 			
-			int bin = (int) Math.floor((voltage - minVoltage) / (maxVoltage - minVoltage) * (steps - 1));
+			int bin = Math.min((int) Math.floor((voltage - minVoltage) / (maxVoltage - minVoltage) * steps), steps - 1);
 			
 			density[1][bin]++;
 			
@@ -609,7 +609,7 @@ public class ASDFile extends File
 		{
 			double current = line[CURRENT_INDEX];
 			
-			int bin = (int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * (steps - 1));
+			int bin = Math.min((int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * steps), steps - 1);
 			
 			density[1][bin]++;
 			
@@ -635,7 +635,7 @@ public class ASDFile extends File
 		
 		double value = activeData.get(frame)[CURRENT_INDEX];
 		
-		int bin = (int) Math.floor((value - min) / (max - min) * (steps - 1));
+		int bin = Math.min((int) Math.floor((value - min) / (max - min) * steps), steps - 1);
 		
 		return density[1][bin];
 	}
@@ -649,7 +649,7 @@ public class ASDFile extends File
 		
 		double value = activeData.get(frame)[VOLTAGE_INDEX];
 		
-		int bin = (int) Math.floor((value - min) / (max - min) * (steps - 1));
+		int bin = Math.min((int) Math.floor((value - min) / (max - min) * steps), steps - 1);
 		
 		return density[1][bin];
 	}
