@@ -22,8 +22,10 @@ import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
-import com.hyperkit.analysis.parts.canvases.PointCloudAnimationCanvasPart;
-import com.hyperkit.analysis.parts.canvases.PointCloudVisualizationCanvasPart;
+import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudAnimationCanvasPart;
+import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudVisualizationCanvasPart;
+import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
+import com.hyperkit.analysis.parts.canvas.timeseries.VoltageTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.charts.histograms.CurrentHistogramChartPart;
 import com.hyperkit.analysis.parts.charts.histograms.VoltageHistogramChartPart;
 import com.hyperkit.analysis.parts.charts.pointclouds.ActualPointCloudChartPart;
@@ -174,14 +176,21 @@ public class Main
 		
 		// Part
 		Part part_file = new FilePart();
-		Part part_voltage_timeseries = new VoltageTimeseriesChartPart();
-		Part part_current_timeseries = new CurrentTimeseriesChartPart();
+		
+		Part part_voltage_timeseries_chart = new VoltageTimeseriesChartPart();
+		Part part_current_timeseries_chart = new CurrentTimeseriesChartPart();
+		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart();
+		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart();
+		
 		Part part_voltage_density = new VoltageHistogramChartPart();
 		Part part_current_density = new CurrentHistogramChartPart();
+		
 		Part part_point_cloud_actual = new ActualPointCloudChartPart();
 		Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
+		
 		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart();
 		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart();
+		
 		Part part_property = new PropertyPart();
 		
 		// Grid
@@ -192,8 +201,10 @@ public class Main
 		grid.addDockable(1, 0, 2, 1, part_voltage_density.getDockable());
 		grid.addDockable(3, 0, 2, 1, part_current_density.getDockable());
 		
-		grid.addDockable(1, 1, 2, 1, part_voltage_timeseries.getDockable());
-		grid.addDockable(3, 1, 2, 1, part_current_timeseries.getDockable());
+		grid.addDockable(1, 1, 2, 1, part_voltage_timeseries_chart.getDockable());
+		grid.addDockable(3, 1, 2, 1, part_current_timeseries_chart.getDockable());
+		grid.addDockable(1, 1, 2, 1, part_voltage_timeseries_canvas.getDockable());
+		grid.addDockable(3, 1, 2, 1, part_current_timeseries_canvas.getDockable());
 		
 		grid.addDockable(0, 1, 1, 2, part_property.getDockable());
 		

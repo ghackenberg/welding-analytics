@@ -1,4 +1,4 @@
-package com.hyperkit.analysis.parts.canvases;
+package com.hyperkit.analysis.parts.canvas.pointclouds;
 
 import java.awt.Color;
 import java.awt.Graphics;
