@@ -12,12 +12,14 @@ import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
-public class PointCloudAnimationCanvasPart extends CanvasPart {
+public class PointCloudAnimationCanvasPart extends CanvasPart
+{
 
 	private int frame = 0;
 	private int window_backward = 1000;
 	
-	public PointCloudAnimationCanvasPart() {
+	public PointCloudAnimationCanvasPart()
+	{
 		super("Point cloud animation");
 		
 		// Point
@@ -98,21 +100,6 @@ public class PointCloudAnimationCanvasPart extends CanvasPart {
 			assert data.length == 2;
 			assert data[0].length == data[1].length;
 			
-			for (int index = 0; index < data[0].length; index++)
-			{	
-				double x = width * (data[0][index] - domain_lower) / domain_delta;
-				double y = height - height * (data[1][index] - range_lower) / range_delta;
-
-				double progress = 1 - (1.0) / data[0].length;
-				
-				double r = red + (255 - red) * progress;
-				double g = green + (255 - green) * progress;
-				double b = blue + (255 - blue) * progress;
-				
-				graphics.setColor(new Color((int) r, (int) g, (int) b));
-				graphics.fillOval((int) x - 2, (int) y - 2, 4, 4);
-			}
-			
 			for (int index = 1; index < data[0].length; index++)
 			{	
 				double x1 = width * (data[0][index - 1] - domain_lower) / domain_delta;
@@ -123,24 +110,24 @@ public class PointCloudAnimationCanvasPart extends CanvasPart {
 
 				double progress = 1 - (index + 1.0) / data[0].length;
 				
-				double r = red * 0.5 + (255 - red * 0.5) * progress;
-				double g = green * 0.5 + (255 - green * 0.5) * progress;
-				double b = blue * 0.5 + (255 - blue * 0.5) * progress;
+				double r = red + (255 - red) * progress;
+				double g = green + (255 - green) * progress;
+				double b = blue + (255 - blue) * progress;
 				
 				graphics.setColor(new Color((int) r, (int) g, (int) b));
 				graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 			}
 			
-			for (int index = 0; index < data[0].length; index++)
+			for (int index = data[0].length - 1; index < data[0].length; index++)
 			{	
 				double x = width * (data[0][index] - domain_lower) / domain_delta;
 				double y = height - height * (data[1][index] - range_lower) / range_delta;
 
 				double progress = 1 - (index + 1.0) / data[0].length;
 				
-				double r = red + (255 - red) * progress;
-				double g = green + (255 - green) * progress;
-				double b = blue + (255 - blue) * progress;
+				double r = red * 0.5 + (255 - red * 0.5) * progress;
+				double g = green * 0.5 + (255 - green * 0.5) * progress;
+				double b = blue * 0.5 + (255 - blue * 0.5) * progress;
 				
 				graphics.setColor(new Color((int) r, (int) g, (int) b));
 				graphics.fillOval((int) x - 2, (int) y - 2, 4, 4);

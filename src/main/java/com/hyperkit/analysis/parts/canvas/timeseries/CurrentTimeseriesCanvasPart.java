@@ -3,11 +3,12 @@ package com.hyperkit.analysis.parts.canvas.timeseries;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.canvas.TimeseriesCanvasPart;
 
-public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart {
+public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart
+{
 	
 	public CurrentTimeseriesCanvasPart()
 	{
-		super("Point cloud animation");
+		super("Current timeseries");
 	}
 
 	@Override

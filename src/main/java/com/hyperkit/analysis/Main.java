@@ -22,6 +22,8 @@ import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
+import com.hyperkit.analysis.parts.canvas.histograms.CurrentHistogramCanvasPart;
+import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudAnimationCanvasPart;
 import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudVisualizationCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
@@ -182,8 +184,10 @@ public class Main
 		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart();
 		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart();
 		
-		Part part_voltage_density = new VoltageHistogramChartPart();
-		Part part_current_density = new CurrentHistogramChartPart();
+		Part part_voltage_density_chart = new VoltageHistogramChartPart();
+		Part part_current_density_chart = new CurrentHistogramChartPart();
+		Part part_voltage_density_canvas = new VoltageHistogramCanvasPart();
+		Part part_current_density_canvas = new CurrentHistogramCanvasPart();
 		
 		Part part_point_cloud_actual = new ActualPointCloudChartPart();
 		Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
@@ -198,8 +202,10 @@ public class Main
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
 		
-		grid.addDockable(1, 0, 2, 1, part_voltage_density.getDockable());
-		grid.addDockable(3, 0, 2, 1, part_current_density.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_voltage_density_chart.getDockable());
+		grid.addDockable(3, 0, 2, 1, part_current_density_chart.getDockable());
+		grid.addDockable(1, 0, 2, 1, part_voltage_density_canvas.getDockable());
+		grid.addDockable(3, 0, 2, 1, part_current_density_canvas.getDockable());
 		
 		grid.addDockable(1, 1, 2, 1, part_voltage_timeseries_chart.getDockable());
 		grid.addDockable(3, 1, 2, 1, part_current_timeseries_chart.getDockable());

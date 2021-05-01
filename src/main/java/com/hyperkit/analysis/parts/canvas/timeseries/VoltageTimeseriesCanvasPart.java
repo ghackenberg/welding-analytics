@@ -8,7 +8,7 @@ public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public VoltageTimeseriesCanvasPart()
 	{
-		super("Point cloud animation");
+		super("Voltage timeseries");
 	}
 
 	@Override
