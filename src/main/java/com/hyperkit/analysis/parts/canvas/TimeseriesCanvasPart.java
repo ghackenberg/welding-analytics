@@ -76,6 +76,7 @@ public abstract class TimeseriesCanvasPart extends CanvasPart
 			
 			series.put(file.getName(), data);
 			
+			/*
 			for (int index = 0; index < data[0].length; index++)
 			{
 				domain_lower = Math.min(domain_lower, data[0][index]);
@@ -84,6 +85,7 @@ public abstract class TimeseriesCanvasPart extends CanvasPart
 				range_lower = Math.min(range_lower, data[1][index]);
 				range_upper = Math.max(range_upper, data[1][index]);	
 			}
+			*/
 			
 			domain_lower = Math.min(domain_lower, getDomainMinimum(file, frame, window_backward));
 			domain_upper = Math.max(domain_upper, getDomainMaximum(file, frame, window_backward));

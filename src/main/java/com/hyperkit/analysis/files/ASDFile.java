@@ -223,7 +223,7 @@ public class ASDFile extends File
 	
 	public double getTimestampDisplayed(int index)
 	{
-		return activeData.get(index)[TIMESTAMP_INDEX];
+		return activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
 	}
 	
 	public double getVoltageDisplayed(int index)
