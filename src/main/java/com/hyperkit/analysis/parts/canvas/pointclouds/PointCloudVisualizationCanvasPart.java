@@ -91,33 +91,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	
 	@Override
 	protected void paintComponent(Graphics graphics)
-	{	
-		double range_lower = +Double.MAX_VALUE;
-		double range_upper = -Double.MAX_VALUE;
-		
-		double domain_lower = +Double.MAX_VALUE;
-		double domain_upper = -Double.MAX_VALUE;
-		
-		for (ASDFile file : getFiles())
-		{
-			range_lower = Math.min(range_lower, file.getMinVoltageDisplayed());
-			range_upper = Math.max(range_upper, file.getMaxVoltageDisplayed());
-			
-			domain_lower = Math.min(domain_lower, file.getMinCurrentDisplayed());
-			domain_upper = Math.max(domain_upper, file.getMaxCurrentDisplayed());
-		}
-		
-		double range_delta = range_upper - range_lower;
-		double domain_delta = domain_upper - domain_lower;
-		
-		range_lower -= range_delta * 0.1;
-		range_upper += range_delta * 0.1;
-		
-		domain_lower -= domain_delta * 0.1;
-		domain_upper += domain_delta * 0.1;
-		
-		range_delta *= 1.2;
-		domain_delta *= 1.2;
+	{
 		
 		int width = getPanel().getWidth();
 		int height = getPanel().getHeight();
@@ -129,10 +103,10 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		{
 			ASDFile file = getFiles().get(number);
 			
-			for (int index = 0; index < file.getLengthDisplayed(); index++)
+			for (int index = 0; index < getDataLength(file); index++)
 			{	
-				double x = width * (file.getCurrentDisplayed(index) - domain_lower) / domain_delta;
-				double y = height - height * (file.getVoltageDisplayed(index) - range_lower) / range_delta;
+				double x = projectX(getDomainValue(file, index));
+				double y = projectY(getRangeValue(file, index));
 
 				max[number] = Math.max(max[number], ++count[number][(int) x][(int) y]);
 			}
@@ -175,6 +149,54 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 				// TODO graphics.fillRect(x - spread, y - spread, spread * 2 + 1, spread * 2 + 1);
 			}
 		}
+	}
+
+	@Override
+	protected void prepareData()
+	{
+		// empty
+	}
+
+	@Override
+	protected double getDomainMinimum(ASDFile file)
+	{
+		return file.getMinCurrentDisplayed();
+	}
+
+	@Override
+	protected double getRangeMinimum(ASDFile file)
+	{
+		return file.getMinVoltageDisplayed();
+	}
+
+	@Override
+	protected double getDomainMaximum(ASDFile file)
+	{
+		return file.getMaxCurrentDisplayed();
+	}
+
+	@Override
+	protected double getRangeMaximum(ASDFile file)
+	{
+		return file.getMaxVoltageDisplayed();
+	}
+
+	@Override
+	protected int getDataLength(ASDFile file)
+	{
+		return file.getLengthDisplayed();
+	}
+
+	@Override
+	protected double getDomainValue(ASDFile file, int index)
+	{
+		return file.getCurrentDisplayed(index);
+	}
+
+	@Override
+	protected double getRangeValue(ASDFile file, int index)
+	{
+		return file.getVoltageDisplayed(index);
 	}
 
 }

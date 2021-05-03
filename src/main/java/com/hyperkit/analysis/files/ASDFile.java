@@ -45,6 +45,9 @@ public class ASDFile extends File
 	
 	private double minCurrentMeasured = Double.MAX_VALUE;
 	private double maxCurrentMeasured = -Double.MAX_VALUE;
+	
+	private double minResistanceMeasured = Double.MAX_VALUE;
+	private double maxResistanceMeasured = -Double.MAX_VALUE;
 
 	private double minTimestampDisplayed = Double.MAX_VALUE;
 	private double maxTimestampDisplayed = -Double.MAX_VALUE;
@@ -54,6 +57,9 @@ public class ASDFile extends File
 	
 	private double minCurrentDisplayed = Double.MAX_VALUE;
 	private double maxCurrentDisplayed = -Double.MAX_VALUE;
+	
+	private double minResistanceDisplayed = Double.MAX_VALUE;
+	private double maxResistanceDisplayed = -Double.MAX_VALUE;
 	
 	private double minTimestamp = Double.MAX_VALUE;
 	private double maxTimestamp = -Double.MAX_VALUE;
@@ -184,18 +190,6 @@ public class ASDFile extends File
 		return icon;
 	}
 	
-	/*
-	public List<double[]> getData()
-	{
-		return data;
-	}
-	
-	public List<double[]> getActiveData()
-	{
-		return activeData;
-	}
-	*/
-	
 	public int getLengthMeasured()
 	{
 		return data.size();
@@ -221,6 +215,11 @@ public class ASDFile extends File
 		return data.get(index)[CURRENT_INDEX];
 	}
 	
+	public double getResistanceMeasured(int index)
+	{
+		return getVoltageMeasured(index) / getCurrentMeasured(index);
+	}
+	
 	public double getTimestampDisplayed(int index)
 	{
 		return activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
@@ -234,6 +233,11 @@ public class ASDFile extends File
 	public double getCurrentDisplayed(int index)
 	{
 		return activeData.get(index)[CURRENT_INDEX];
+	}
+	
+	public double getResistanceDisplayed(int index)
+	{
+		return getVoltageDisplayed(index) / getCurrentDisplayed(index);
 	}
 	
 	public double getMinTimestampMeasured()
@@ -314,6 +318,32 @@ public class ASDFile extends File
 		return maxCurrentMeasured;
 	}
 	
+	public double getMinResistanceMeasured()
+	{
+		if (minResistanceMeasured == Double.MAX_VALUE)
+		{
+			for (int index = 0; index < data.size(); index++)
+			{
+				minResistanceMeasured = Math.min(minResistanceMeasured, getResistanceMeasured(index));
+			}
+		}
+		
+		return minResistanceMeasured;
+	}
+	
+	public double getMaxResistanceMeasured()
+	{
+		if (maxResistanceMeasured == -Double.MAX_VALUE)
+		{
+			for (int index = 0; index < data.size(); index++)
+			{
+				maxResistanceMeasured = Math.max(maxResistanceMeasured, getResistanceMeasured(index));
+			}
+		}
+		
+		return maxResistanceMeasured;
+	}
+	
 	public double getMinTimestampDisplayed()
 	{
 		if (minTimestampDisplayed == Double.MAX_VALUE)
@@ -383,6 +413,30 @@ public class ASDFile extends File
 		else
 		{
 			return maxCurrentDisplayed;
+		}
+	}
+	
+	public double getMinResistanceDisplayed()
+	{
+		if (minResistanceDisplayed == Double.MAX_VALUE)
+		{
+			return getMinResistanceMeasured();
+		}
+		else
+		{
+			return minResistanceDisplayed;
+		}
+	}
+	
+	public double getMaxResistanceDisplayed()
+	{
+		if (maxResistanceDisplayed == -Double.MAX_VALUE)
+		{
+			return getMaxResistanceMeasured();
+		}
+		else
+		{
+			return maxResistanceDisplayed;
 		}
 	}
 	

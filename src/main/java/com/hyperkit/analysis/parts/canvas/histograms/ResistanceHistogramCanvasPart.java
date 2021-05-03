@@ -3,30 +3,30 @@ package com.hyperkit.analysis.parts.canvas.histograms;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.canvas.HistogramCanvasPart;
 
-public class CurrentHistogramCanvasPart extends HistogramCanvasPart
+public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 {
 	
-	public CurrentHistogramCanvasPart()
+	public ResistanceHistogramCanvasPart()
 	{
-		super("Current histogram");
+		super("Resistance histogram");
 	}
 
 	@Override
 	protected double getRawMinimum(ASDFile file)
 	{
-		return file.getMinCurrentDisplayed();
+		return file.getMinResistanceDisplayed();
 	}
 
 	@Override
 	protected double getRawMaximum(ASDFile file)
 	{
-		return file.getMaxCurrentDisplayed();
+		return file.getMaxResistanceDisplayed();
 	}
 
 	@Override
 	protected double getRawValue(ASDFile file, int index)
 	{
-		return file.getCurrentDisplayed(index);
+		return file.getResistanceDisplayed(index);
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.hyperkit.analysis.parts.canvas;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +18,10 @@ public abstract class HistogramCanvasPart extends CanvasPart
 
 	private int frame = 0;
 	private int histogram = 100;
+	private Map<ASDFile, Double> mins = new HashMap<>();
+	private Map<ASDFile, Double> maxs = new HashMap<>();
+	private Map<ASDFile, Double> deltas = new HashMap<>();
+	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
 	public HistogramCanvasPart(String title)
 	{
@@ -56,124 +59,217 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return true;
 	}
 	
+	protected int getFrame()
+	{
+		return frame;
+	}
+	
+	protected int getHistogram()
+	{
+		return histogram;
+	}
+	
+	@Override
+	protected void prepareData()
+	{
+		mins.clear();
+		maxs.clear();
+		deltas.clear();
+		series.clear();
+		
+		for (ASDFile file : getFiles())
+		{
+			// Find limits
+			
+			double min = getRawMinimum(file);
+			double max = getRawMaximum(file);
+			
+			// Create density
+			
+			double[][] density = new double[2][histogram];
+			
+			// Calculate x
+			
+			for (int i = 0; i < histogram; i++)
+			{
+				density[0][i] = min + (max - min) / histogram * (i + 0.5);
+			}
+			
+			// Calculate y
+			
+			int count = 0;
+			
+			for (int i = 0; i < getRawDataLength(file); i++)
+			{
+				double voltage = getRawValue(file, i);
+				
+				int bin = Math.min((int) Math.floor((voltage - min) / (max - min) * histogram), histogram - 1);
+				
+				density[1][bin]++;
+				
+				count++;
+			}
+			
+			// Normalize y
+			
+			for (int i = 0; i < histogram; i++)
+			{
+				density[1][i] /= count;
+			}
+			
+			// Remember
+			
+			mins.put(file, min);
+			maxs.put(file, max);
+			deltas.put(file, (density[0][1] - density[0][0]) / 2);
+			series.put(file, density);
+		}
+	}
+	
+	@Override
+	protected double getDomainMinimum(ASDFile file)
+	{
+		double result = Double.MAX_VALUE;
+		
+		double delta = deltas.get(file);
+		
+		for (int index = 0; index < getDataLength(file); index++)
+		{
+			result = Math.min(result, getDomainValue(file, index) - delta);
+		}
+		
+		return result;
+	}
+	
+	@Override
+	protected double getDomainMaximum(ASDFile file)
+	{
+		double result = -Double.MAX_VALUE;
+		
+		double delta = deltas.get(file);
+		
+		for (int index = 0; index < getDataLength(file); index++)
+		{
+			result = Math.max(result, getDomainValue(file, index) + delta);
+		}
+		
+		return result;
+	}
+	
+	@Override
+	protected double getRangeMinimum(ASDFile file)
+	{
+		double result = Double.MAX_VALUE;
+		
+		for (int index = 0; index < getDataLength(file); index++)
+		{
+			result = Math.min(result, getRangeValue(file, index));
+		}
+		
+		return result;
+	}
+	
+	@Override
+	protected double getRangeMaximum(ASDFile file)
+	{
+		double result = -Double.MAX_VALUE;
+		
+		for (int index = 0; index < getDataLength(file); index++)
+		{
+			result = Math.max(result, getRangeValue(file, index));
+		}
+		
+		return result;
+	}
+
+	@Override
+	protected int getDataLength(ASDFile file)
+	{
+		return series.get(file)[0].length;
+	}
+
+	@Override
+	protected double getDomainValue(ASDFile file, int index)
+	{
+		return series.get(file)[0][index];
+	}
+
+	@Override
+	protected double getRangeValue(ASDFile file, int index)
+	{
+		return series.get(file)[1][index];
+	}
+	
 	@Override
 	protected void paintComponent(Graphics graphics)
-	{	
-		double domain_lower = +Double.MAX_VALUE;
-		double domain_upper = -Double.MAX_VALUE;
-		
-		double range_lower = +Double.MAX_VALUE;
-		double range_upper = -Double.MAX_VALUE;
-		
-		Map<String, double[][]> series = new HashMap<>();
-		
+	{		
 		for (ASDFile file : getFiles())
 		{
-			double[][] data = getData(file, histogram);
+			double delta = deltas.get(file);
 			
-			assert data.length == 2;
-			assert data[0].length == data[1].length;
-			
-			double delta = (data[0][1] - data[0][0]) / 2;
-			
-			series.put(file.getName(), data);
-			
-			for (int index = 0; index < data[0].length; index++)
-			{
-				domain_lower = Math.min(domain_lower, data[0][index] - delta);
-				domain_upper = Math.max(domain_upper, data[0][index] + delta);
-				
-				range_lower = Math.min(range_lower, data[1][index]);
-				range_upper = Math.max(range_upper, data[1][index]);	
-			}	
-		}
-
-		double domain_delta = domain_upper - domain_lower;
-		double range_delta = range_upper - range_lower;
-		
-		domain_lower -= domain_delta * 0.1;
-		domain_upper += domain_delta * 0.1;
-		
-		range_lower -= range_delta * 0.1;
-		range_upper += range_delta * 0.1;
-
-		domain_delta *= 1.2;
-		range_delta *= 1.2;
-		
-		double width = getPanel().getWidth();
-		double height = getPanel().getHeight();
-		
-		for (ASDFile file : getFiles())
-		{
-			Color color = file.getColor();
-			
-			int red = color.getRed();
-			int green = color.getGreen();
-			int blue = color.getBlue();
-			
-			double[][] data = series.get(file.getName());
-			
-			double delta = (data[0][1] - data[0][0]) / 2;
-			
-			for (int index = 0; index < data[0].length; index++)
+			for (int index = 0; index < getDataLength(file); index++)
 			{	
-				double x1 = width * (data[0][index] - delta - domain_lower) / domain_delta;
-				double y1 = height - height * (data[1][index] - range_lower) / range_delta;
+				double x1 = getDomainValue(file, index) - delta;
+				double y1 = getRangeValue(file, index);
 
-				double x2 = width * (data[0][index] + delta - domain_lower) / domain_delta;
-				double y2 = height - height * (data[1][index] - range_lower) / range_delta;
-
+				double x2 = getDomainValue(file, index) + delta;
+				double y2 = getRangeValue(file, index);
+				
 				double progress = 0;
 				
-				double r = red + (255 - red) * progress;
-				double g = green + (255 - green) * progress;
-				double b = blue + (255 - blue) * progress;
-				
-				graphics.setColor(new Color((int) r, (int) g, (int) b));
-				graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
 			}
 			
-			for (int index = 1; index < data[0].length; index++)
+			for (int index = 1; index < getDataLength(file); index++)
 			{	
-				double x1 = width * (data[0][index] - delta - domain_lower) / domain_delta;
-				double y1 = height - height * (data[1][index - 1] - range_lower) / range_delta;
+				double x1 = getDomainValue(file, index) - delta;
+				double y1 = getRangeValue(file, index - 1);
 
-				double x2 = width * (data[0][index] - delta - domain_lower) / domain_delta;
-				double y2 = height - height * (data[1][index] - range_lower) / range_delta;
-
+				double x2 = getDomainValue(file, index) - delta;
+				double y2 = getRangeValue(file, index);
+				
 				double progress = 0;
 				
-				double r = red + (255 - red) * progress;
-				double g = green + (255 - green) * progress;
-				double b = blue + (255 - blue) * progress;
-				
-				graphics.setColor(new Color((int) r, (int) g, (int) b));
-				graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
 			}
 			
-			if (hasDomainMarkerValue(file, frame) && hasRangeMarkerValue(file, frame))
+			if (frame < getRawDataLength(file))
 			{
-				double x = width * (getDomainMarkerValue(file, frame) - domain_lower) / domain_delta;
-				double y = height - height * (getRangeMarkerValue(file, histogram, frame) - range_lower) / range_delta;
-
+				double x = getDomainMarkerValue(file);
+				double y = getRangeMarkerValue(file);
+				
 				double progress = 0;
 				
-				double r = red * 0.5 + (255 - red * 0.5) * progress;
-				double g = green * 0.5 + (255 - green * 0.5) * progress;
-				double b = blue * 0.5 + (255 - blue * 0.5) * progress;
-				
-				graphics.setColor(new Color((int) r, (int) g, (int) b));
-				graphics.fillOval((int) x - 2, (int) y - 2, 4, 4);
+				drawPoint(graphics, calculateColor(file, 0.5, progress), x, y);
 			}
 		}
 	}
 	
-	protected abstract double[][] getData(ASDFile file, int step);
+	protected double getDomainMarkerValue(ASDFile file)
+	{
+		return getRawValue(file, frame);
+	}
 	
-	protected abstract boolean hasDomainMarkerValue(ASDFile file, int frame);
-	protected abstract boolean hasRangeMarkerValue(ASDFile file, int frame);
+	protected double getRangeMarkerValue(ASDFile file)
+	{
+		double value = getDomainMarkerValue(file);
+		
+		double min = mins.get(file);
+		double max = maxs.get(file);
+		
+		int bin = Math.min((int) Math.floor((value - min) / (max - min) * histogram), histogram - 1);
+		
+		return series.get(file)[1][bin];
+	}
 	
-	protected abstract double getDomainMarkerValue(ASDFile file, int frame);
-	protected abstract double getRangeMarkerValue(ASDFile file, int step, int frame);
+	protected double getRawDataLength(ASDFile file)
+	{
+		return file.getLengthDisplayed();
+	}
+	
+	protected abstract double getRawMinimum(ASDFile file);
+	protected abstract double getRawMaximum(ASDFile file);
+	
+	protected abstract double getRawValue(ASDFile file, int index);
 
 }

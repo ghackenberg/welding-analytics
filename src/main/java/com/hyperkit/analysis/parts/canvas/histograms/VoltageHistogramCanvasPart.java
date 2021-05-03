@@ -12,33 +12,21 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
-	protected double[][] getData(ASDFile file, int step)
+	protected double getRawMinimum(ASDFile file)
 	{
-		return file.getVoltageDensity(step);
+		return file.getMinVoltageDisplayed();
 	}
 
 	@Override
-	protected boolean hasDomainMarkerValue(ASDFile file, int frame)
+	protected double getRawMaximum(ASDFile file)
 	{
-		return frame < file.getLengthDisplayed();
+		return file.getMaxVoltageDisplayed();
 	}
 
 	@Override
-	protected boolean hasRangeMarkerValue(ASDFile file, int frame)
+	protected double getRawValue(ASDFile file, int index)
 	{
-		return frame < file.getLengthDisplayed();
-	}
-
-	@Override
-	protected double getDomainMarkerValue(ASDFile file, int frame)
-	{
-		return file.getVoltageDisplayed(frame);
-	}
-
-	@Override
-	protected double getRangeMarkerValue(ASDFile file, int step, int frame)
-	{
-		return file.getVoltageProbability(step, frame);
+		return file.getVoltageDisplayed(index);
 	}
 
 }

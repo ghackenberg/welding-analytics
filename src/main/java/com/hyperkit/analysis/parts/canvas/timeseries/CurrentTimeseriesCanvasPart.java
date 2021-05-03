@@ -12,33 +12,21 @@ public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart
 	}
 
 	@Override
-	protected double[][] getData(ASDFile file, int frame, int window)
-	{
-		return file.getCurrentTimeseries(frame, window);
-	}
-
-	@Override
-	protected double getDomainMinimum(ASDFile file, int frame, int window)
-	{
-		return file.getTimestampDisplayed(Math.max(frame + 1 - window, 0));
-	}
-
-	@Override
-	protected double getRangeMinimum(ASDFile file, int frame, int window)
+	protected double getRangeMinimum(ASDFile file)
 	{
 		return file.getMinCurrentDisplayed();
 	}
 
 	@Override
-	protected double getDomainMaximum(ASDFile file, int frame, int window)
+	protected double getRangeMaximum(ASDFile file)
 	{
-		return file.getTimestampDisplayed(Math.min(frame, file.getLengthDisplayed() - 1));
+		return file.getMaxCurrentDisplayed();
 	}
 
 	@Override
-	protected double getRangeMaximum(ASDFile file, int frame, int window)
+	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getMaxCurrentDisplayed();
+		return file.getCurrentDisplayed(index);
 	}
 
 }

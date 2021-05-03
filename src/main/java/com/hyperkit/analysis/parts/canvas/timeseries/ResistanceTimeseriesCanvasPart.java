@@ -3,30 +3,30 @@ package com.hyperkit.analysis.parts.canvas.timeseries;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.canvas.TimeseriesCanvasPart;
 
-public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
+public class ResistanceTimeseriesCanvasPart extends TimeseriesCanvasPart
 {
 	
-	public VoltageTimeseriesCanvasPart()
+	public ResistanceTimeseriesCanvasPart()
 	{
-		super("Voltage timeseries");
+		super("Resistance timeseries");
 	}
 
 	@Override
 	protected double getRangeMinimum(ASDFile file)
 	{
-		return file.getMinVoltageDisplayed();
+		return file.getMinResistanceDisplayed();
 	}
 
 	@Override
 	protected double getRangeMaximum(ASDFile file)
 	{
-		return file.getMaxVoltageDisplayed();
+		return file.getMaxResistanceDisplayed();
 	}
 
 	@Override
 	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getVoltageDisplayed(index);
+		return file.getResistanceDisplayed(index);
 	}
 
 }
