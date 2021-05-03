@@ -8,17 +8,18 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.hyperkit.analysis.events.values.ExponentChangeEvent;
+import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.OffsetChangeEvent;
-import com.hyperkit.analysis.events.values.SpreadChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public class PointCloudVisualizationCanvasPart extends CanvasPart
 {
 	
+	private int frame = 0;
+	private int window = 10000;
 	private int offset = 10;
 	private int exponent = 3;
-	private int spread = 0;
 	
 	public PointCloudVisualizationCanvasPart()
 	{
@@ -46,11 +47,13 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		
 		// Spread
 		
-		JSpinner spreadSpinner = new JSpinner(new SpinnerNumberModel(spread, 0, 100, 1));
-		spreadSpinner.addChangeListener(
+		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 1000, Integer.MAX_VALUE, 1000));
+		windowSpinner.addChangeListener(
 			event ->
 			{
-				this.handleEvent(new SpreadChangeEvent((int) spreadSpinner.getValue()));
+				window = (int) windowSpinner.getValue();
+				
+				getPanel().repaint();
 			}
 		);
 		
@@ -58,8 +61,8 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		getToolBar().add(offsetSpinner);
 		getToolBar().add(new JLabel("Exponent:"));
 		getToolBar().add(exponentSpinner);
-		getToolBar().add(new JLabel("Spread:"));
-		getToolBar().add(spreadSpinner);
+		getToolBar().add(new JLabel("Point count:"));
+		getToolBar().add(windowSpinner);
 	}
 	
 	public boolean handleEvent(OffsetChangeEvent event)
@@ -80,9 +83,9 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		return true;
 	}
 	
-	public boolean handleEvent(SpreadChangeEvent event)
+	public boolean handleEvent(FrameChangeEvent event)
 	{
-		spread = event.getValue();
+		frame = event.getValue();
 		
 		getPanel().repaint();
 		
@@ -103,7 +106,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 		{
 			ASDFile file = getFiles().get(number);
 			
-			for (int index = 0; index < getDataLength(file); index++)
+			for (int index = Math.max(frame - window, 0); index < Math.min(frame, getDataLength(file) - 1); index++)
 			{	
 				double x = projectX(getDomainValue(file, index));
 				double y = projectY(getRangeValue(file, index));

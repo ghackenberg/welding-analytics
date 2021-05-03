@@ -25,6 +25,11 @@ public abstract class CanvasPart extends Part {
 	private int width;
 	private int height;
 	
+	private int padding_top = 10;
+	private int padding_left = 50;
+	private int padding_right = 10;
+	private int padding_bottom = 20;
+	
 	private double domain_lower;
 	private double domain_upper;
 	private double domain_delta;
@@ -70,14 +75,29 @@ public abstract class CanvasPart extends Part {
 						range_upper = Math.max(range_upper, getRangeMaximum(file));
 					}
 					
+					if (domain_lower == Double.MAX_VALUE)
+					{
+						domain_lower = 0;
+						domain_upper = 1;
+						
+						range_lower = 0;
+						range_upper = 1;
+					}
+					
+					if (domain_lower == domain_upper)
+					{
+						domain_lower -= 0.5;
+						domain_upper += 0.5;
+					}
+					
+					if (range_lower == range_upper)
+					{
+						range_lower -= 0.5;
+						range_upper += 0.5;
+					}
+					
 					domain_delta = domain_upper - domain_lower;
 					range_delta = range_upper - range_lower;
-					
-					double dl = domain_lower - domain_delta * 0.05;
-					double du = domain_upper + domain_delta * 0.05;
-					
-					double rl = range_lower - range_delta * 0.05;
-					double ru = range_upper + range_delta * 0.05;
 					
 					domain_lower -= domain_delta * 0.1;
 					domain_upper += domain_delta * 0.1;
@@ -90,33 +110,33 @@ public abstract class CanvasPart extends Part {
 					
 					self.paintComponent(graphics);
 					
-					drawLine(graphics, new Color(128,128,128), dl, rl, du, rl);
-					drawLine(graphics, new Color(128,128,128), dl, ru, dl, rl);
+					drawLine(graphics, new Color(128,128,128), domain_lower, range_lower, domain_upper, range_lower);
+					drawLine(graphics, new Color(128,128,128), domain_lower, range_upper, domain_lower, range_lower);
 					
-					double dx = crop((du - dl) / 10);
-					double dy = crop((ru - rl) / 10);
+					double dx = crop((domain_upper - domain_lower) / 10);
+					double dy = crop((range_upper - range_lower) / 10);
 					
 					FontMetrics metrics = graphics.getFontMetrics();
 					
-					for (double x = Math.ceil(dl / dx); x <= Math.floor(du / dx); x++)
+					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{
 						String string = String.format("%." + digits(dx) + "f", x * dx);
 						
 						Rectangle2D bounds = metrics.getStringBounds(string, graphics);
 						
 						graphics.setColor(new Color(128,128,128));
-						graphics.drawLine((int) projectX(x * dx), (int) projectY(rl) - 2, (int) projectX(x * dx), (int) projectY(rl) + 2);
-						graphics.drawString(string, (int) (projectX(x * dx) - bounds.getWidth() / 2), (int) (projectY(rl) + bounds.getHeight() / 2));
+						graphics.drawLine((int) projectX(x * dx), (int) projectY(range_lower) - 2, (int) projectX(x * dx), (int) projectY(range_lower) + 2);
+						graphics.drawString(string, (int) (projectX(x * dx) - bounds.getWidth() / 2), (int) (projectY(range_lower) + padding_bottom / 2 + bounds.getHeight() / 2));
 					}
-					for (double y = Math.ceil(rl / dy); y <= Math.floor(ru / dy); y++)
+					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 					{
 						String string = String.format("%." + digits(dy) + "f", y * dy);
 						
 						Rectangle2D bounds = metrics.getStringBounds(string, graphics);
 						
 						graphics.setColor(new Color(128,128,128));
-						graphics.drawLine((int) projectX(dl) - 2, (int) projectY(y * dy), (int) projectX(dl) + 2, (int) projectY(y * dy));
-						graphics.drawString(string, (int) (projectX(dl) - bounds.getWidth() / 2), (int) (projectY(y * dy) + bounds.getHeight() / 2));
+						graphics.drawLine((int) projectX(domain_lower) - 2, (int) projectY(y * dy), (int) projectX(domain_lower) + 2, (int) projectY(y * dy));
+						graphics.drawString(string, (int) (projectX(domain_lower) - padding_left / 2 - bounds.getWidth() / 2), (int) (projectY(y * dy) + bounds.getHeight() / 2));
 					}
 				}
 			}
@@ -222,12 +242,12 @@ public abstract class CanvasPart extends Part {
 	
 	protected double projectX(double x)
 	{
-		return width * (x - domain_lower) / domain_delta;
+		return padding_left + (width - padding_left - padding_right) * (x - domain_lower) / domain_delta;
 	}
 	
 	protected double projectY(double y)
 	{
-		return height - height * (y - range_lower) / range_delta;
+		return padding_top + (height - padding_top - padding_bottom) - (height - padding_top - padding_bottom) * (y - range_lower) / range_delta;
 	}
 	
 	protected double calculateColor(int value, double shade, double progress)

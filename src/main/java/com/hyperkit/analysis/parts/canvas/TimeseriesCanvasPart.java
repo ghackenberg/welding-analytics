@@ -135,7 +135,7 @@ public abstract class TimeseriesCanvasPart extends CanvasPart
 				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
 			}
 			
-			for (int index = getDataLength(file) - 1; index < getDataLength(file); index++)
+			for (int index = Math.max(getDataLength(file) - 1, 0); index < getDataLength(file); index++)
 			{	
 				double x = getDomainValue(file, index);
 				double y = getRangeValue(file, index);

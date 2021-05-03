@@ -85,7 +85,7 @@ public class Main
 		
 		// Delta
 		
-		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
 		
 		// Timer
 		
