@@ -8,7 +8,7 @@ public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 	
 	public ResistanceHistogramCanvasPart()
 	{
-		super("Resistance histogram", "Resistance (in Ohm)");
+		super("Resistance histogram", "Resistance (in V/A)");
 	}
 
 	@Override

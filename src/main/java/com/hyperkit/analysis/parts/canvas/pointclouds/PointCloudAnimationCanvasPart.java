@@ -124,7 +124,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, Math.sqrt(progress)), x1, y1, x2, y2);
 			}
 			
 			for (int index = Math.max(getDataLength(file) - 1, 0); index < getDataLength(file); index++)
@@ -134,7 +134,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawPoint(graphics, calculateColor(file, 0.5, progress), x, y);
+				drawPoint(graphics, calculateColor(file, 0.5, Math.sqrt(progress)), x, y);
 			}
 		}
 	}

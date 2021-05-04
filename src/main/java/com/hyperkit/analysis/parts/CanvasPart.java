@@ -158,6 +158,12 @@ public abstract class CanvasPart extends Part {
 					drawLine(graphics, new Color(128,128,128), domain_lower, range_lower, domain_upper, range_lower);
 					drawLine(graphics, new Color(128,128,128), domain_lower, range_upper, domain_lower, range_lower);
 					
+					graphics.setColor(new Color(128,128,128));
+					graphics.fillPolygon(new int[] {(int) projectX(domain_upper), (int) projectX(domain_upper), (int) projectX(domain_upper) + padding_right / 2}, new int[] {(int) projectY(range_lower) - padding_right / 3, (int) projectY(range_lower) + padding_right / 3, (int) projectY(range_lower)}, 3);
+					
+					graphics.setColor(new Color(128,128,128));
+					graphics.fillPolygon(new int[] {(int) projectX(domain_lower) - padding_top / 3, (int) projectX(domain_lower) + padding_top / 3, (int) projectX(domain_lower)}, new int[] {(int) projectY(range_upper), (int) projectY(range_upper), (int) projectY(range_upper) - padding_top / 2}, 3);
+					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{
 						string = String.format("%." + digits(dx) + "f", x * dx);
