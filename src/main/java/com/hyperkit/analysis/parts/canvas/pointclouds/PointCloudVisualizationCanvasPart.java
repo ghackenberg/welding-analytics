@@ -23,7 +23,7 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	
 	public PointCloudVisualizationCanvasPart()
 	{
-		super("Point cloud visualization");
+		super("Point cloud visualization", "Current (in A)", "Voltage (in V)");
 		
 		// Offset
 		
@@ -146,8 +146,11 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 				g = Math.max(g, 0);
 				b = Math.max(b, 0);
 				
-				graphics.setColor(new Color((int) r, (int) g, (int) b));
-				graphics.fillRect(x, y, 1, 1);
+				if (r < 255 || b < 255 || g < 255)
+				{
+					graphics.setColor(new Color((int) r, (int) g, (int) b));
+					graphics.fillRect(x, y, 1, 1);
+				}
 				
 				// TODO graphics.fillRect(x - spread, y - spread, spread * 2 + 1, spread * 2 + 1);
 			}

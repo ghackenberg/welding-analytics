@@ -22,7 +22,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 	
 	public PointCloudAnimationCanvasPart()
 	{
-		super("Point cloud animation");
+		super("Point cloud animation", "Current (in A)", "Voltage (in V)");
 		
 		// Point
 		

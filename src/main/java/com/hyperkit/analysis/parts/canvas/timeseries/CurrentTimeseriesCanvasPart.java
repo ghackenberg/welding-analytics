@@ -8,7 +8,7 @@ public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public CurrentTimeseriesCanvasPart()
 	{
-		super("Current timeseries");
+		super("Current timeseries", "Current (in A)");
 	}
 
 	@Override

@@ -8,7 +8,7 @@ public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 	
 	public CurrentHistogramCanvasPart()
 	{
-		super("Current histogram");
+		super("Current histogram", "Current (in A)");
 	}
 
 	@Override

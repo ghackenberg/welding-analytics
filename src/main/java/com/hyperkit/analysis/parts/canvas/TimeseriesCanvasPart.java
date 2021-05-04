@@ -22,9 +22,9 @@ public abstract class TimeseriesCanvasPart extends CanvasPart
 	private Map<ASDFile, Integer> ends = new HashMap<>();
 	private Map<ASDFile, Integer> counts = new HashMap<>();
 	
-	public TimeseriesCanvasPart(String title)
+	public TimeseriesCanvasPart(String title, String range)
 	{
-		super(title);
+		super(title, "Time (in s)", range);
 		
 		// Point
 		

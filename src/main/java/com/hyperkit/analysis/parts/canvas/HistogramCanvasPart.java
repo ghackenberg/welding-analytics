@@ -23,9 +23,9 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private Map<ASDFile, Double> deltas = new HashMap<>();
 	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
-	public HistogramCanvasPart(String title)
+	public HistogramCanvasPart(String title, String domain)
 	{
-		super(title);
+		super(title, domain, "Probability (in %)");
 		
 		// Point
 		
@@ -115,6 +115,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			for (int i = 0; i < histogram; i++)
 			{
 				density[1][i] /= count;
+				density[1][i] *= 100;
 			}
 			
 			// Remember

@@ -8,7 +8,7 @@ public class ResistanceTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public ResistanceTimeseriesCanvasPart()
 	{
-		super("Resistance timeseries");
+		super("Resistance timeseries", "Resistance (in Ohm)");
 	}
 
 	@Override

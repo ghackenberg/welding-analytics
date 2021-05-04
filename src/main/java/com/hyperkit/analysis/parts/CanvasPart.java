@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,7 @@ public abstract class CanvasPart extends Part {
 	private int padding_top = 10;
 	private int padding_left = 50;
 	private int padding_right = 10;
-	private int padding_bottom = 20;
+	private int padding_bottom = 50;
 	
 	private double domain_lower;
 	private double domain_upper;
@@ -38,7 +40,7 @@ public abstract class CanvasPart extends Part {
 	private double range_upper;
 	private double range_delta;
 	
-	public CanvasPart(String title)
+	public CanvasPart(String title, String domain, String range)
 	{
 		super(title, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"));
 		
@@ -54,6 +56,8 @@ public abstract class CanvasPart extends Part {
 				synchronized (files)
 				{
 					super.paintComponent(graphics);
+					
+					Graphics2D graphics2D = (Graphics2D) graphics;
 					
 					width = panel.getWidth();
 					height = panel.getHeight();
@@ -108,36 +112,107 @@ public abstract class CanvasPart extends Part {
 					domain_delta *= 1.2;
 					range_delta *= 1.2;
 					
+					FontMetrics metrics = graphics.getFontMetrics();
+					String string;
+					Rectangle2D bounds;
+					AffineTransform transform;
+					
+					int xticks = 1;
+					int yticks = 1;
+					
+					double dx;
+					double dy;
+					
+					do
+					{
+						dx = crop((domain_upper - domain_lower) / xticks);
+						
+						string = String.format("%." + digits(dx) + "f", domain_upper);
+						bounds = metrics.getStringBounds(string, graphics);
+					}
+					while (xticks++ < (width - padding_left - padding_right) / bounds.getWidth() / 2);
+					
+					do
+					{
+						dy = crop((range_upper - range_lower) / yticks);
+						
+						string = String.format("%." + digits(dy) + "f", range_upper);
+						bounds = metrics.getStringBounds(string, graphics);
+					}
+					while (yticks++ < (height - padding_top - padding_bottom) / bounds.getWidth() / 2);
+					
+					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
+					{	
+						graphics.setColor(new Color(224,224,224));
+						graphics.drawLine((int) projectX(x * dx), (int) projectY(range_lower), (int) projectX(x * dx), (int) projectY(range_upper));
+					}
+					
+					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
+					{
+						graphics.setColor(new Color(224,224,224));
+						graphics.drawLine((int) projectX(domain_lower), (int) projectY(y * dy), (int) projectX(domain_upper), (int) projectY(y * dy));
+					}
+					
 					self.paintComponent(graphics);
 					
 					drawLine(graphics, new Color(128,128,128), domain_lower, range_lower, domain_upper, range_lower);
 					drawLine(graphics, new Color(128,128,128), domain_lower, range_upper, domain_lower, range_lower);
 					
-					double dx = crop((domain_upper - domain_lower) / 10);
-					double dy = crop((range_upper - range_lower) / 10);
-					
-					FontMetrics metrics = graphics.getFontMetrics();
-					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{
-						String string = String.format("%." + digits(dx) + "f", x * dx);
+						string = String.format("%." + digits(dx) + "f", x * dx);
 						
-						Rectangle2D bounds = metrics.getStringBounds(string, graphics);
+						if (string.startsWith("-"))
+						{
+							string = string.substring(1);
+						}
+						
+						bounds = metrics.getStringBounds(string, graphics);
 						
 						graphics.setColor(new Color(128,128,128));
 						graphics.drawLine((int) projectX(x * dx), (int) projectY(range_lower) - 2, (int) projectX(x * dx), (int) projectY(range_lower) + 2);
-						graphics.drawString(string, (int) (projectX(x * dx) - bounds.getWidth() / 2), (int) (projectY(range_lower) + padding_bottom / 2 + bounds.getHeight() / 2));
+						graphics.drawString(string, (int) (projectX(x * dx) - bounds.getWidth() / 2), (int) (projectY(range_lower) + 2 + bounds.getHeight()));
 					}
+					
 					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 					{
-						String string = String.format("%." + digits(dy) + "f", y * dy);
+						string = String.format("%." + digits(dy) + "f", y * dy);
 						
-						Rectangle2D bounds = metrics.getStringBounds(string, graphics);
+						if (string.startsWith("-"))
+						{
+							string = string.substring(1);
+						}
+						
+						bounds = metrics.getStringBounds(string, graphics);
 						
 						graphics.setColor(new Color(128,128,128));
 						graphics.drawLine((int) projectX(domain_lower) - 2, (int) projectY(y * dy), (int) projectX(domain_lower) + 2, (int) projectY(y * dy));
-						graphics.drawString(string, (int) (projectX(domain_lower) - padding_left / 2 - bounds.getWidth() / 2), (int) (projectY(y * dy) + bounds.getHeight() / 2));
+						
+						transform = graphics2D.getTransform();
+						
+						graphics2D.translate(projectX(domain_lower) - bounds.getHeight() / 2, projectY(y * dy) + bounds.getWidth() / 2);
+						graphics2D.rotate(- Math.PI / 2);
+						graphics.setColor(new Color(128,128,128));
+						graphics.drawString(string, 0, 0);
+						
+						graphics2D.setTransform(transform);
 					}
+					
+					bounds = metrics.getStringBounds(domain, graphics);
+					
+					graphics.setColor(new Color(128,128,128));
+					graphics.drawString(domain, (int) (projectX(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectY(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
+					
+					bounds = metrics.getStringBounds(range, graphics);
+					
+					transform = graphics2D.getTransform();
+					
+					graphics2D.translate(projectX(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectY(range_lower + range_delta / 2) + bounds.getWidth() / 2);
+					graphics2D.rotate(- Math.PI / 2);
+					graphics.setColor(new Color(128,128,128));
+					graphics.drawString(range, 0, 0);
+					
+					graphics2D.setTransform(transform);
 				}
 			}
 		};

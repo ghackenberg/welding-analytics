@@ -8,7 +8,7 @@ public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public VoltageTimeseriesCanvasPart()
 	{
-		super("Voltage timeseries");
+		super("Voltage timeseries", "Voltage (in V)");
 	}
 
 	@Override
