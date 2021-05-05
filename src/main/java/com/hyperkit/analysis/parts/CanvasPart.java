@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,12 @@ import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 
-public abstract class CanvasPart extends Part {
+public abstract class CanvasPart extends Part
+{
+	
+	private static final Color LOW = new Color(0,0,0);
+	private static final Color MEDIUM = new Color(160,160,160);
+	private static final Color HIGH = new Color(224,224,224);
 	
 	private List<ASDFile> files = new ArrayList<>();
 	
@@ -42,7 +48,12 @@ public abstract class CanvasPart extends Part {
 	
 	public CanvasPart(String title, String domain, String range)
 	{
-		super(title, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"));
+		this(title, domain, range, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"));
+	}
+	
+	public CanvasPart(String title, String domain, String range, URL icon)
+	{
+		super(title, icon);
 		
 		CanvasPart self = this;
 		
@@ -159,25 +170,25 @@ public abstract class CanvasPart extends Part {
 					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{	
-						graphics.setColor(new Color(224,224,224));
+						graphics.setColor(x == 0 ? MEDIUM : HIGH);
 						graphics.drawLine((int) projectX(x * dx), (int) projectY(range_lower), (int) projectX(x * dx), (int) projectY(range_upper));
 					}
 					
 					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 					{
-						graphics.setColor(new Color(224,224,224));
+						graphics.setColor(y == 0 ? MEDIUM : HIGH);
 						graphics.drawLine((int) projectX(domain_lower), (int) projectY(y * dy), (int) projectX(domain_upper), (int) projectY(y * dy));
 					}
 					
 					self.paintComponent(graphics);
 					
-					drawLine(graphics, new Color(128,128,128), domain_lower, range_lower, domain_upper, range_lower);
-					drawLine(graphics, new Color(128,128,128), domain_lower, range_upper, domain_lower, range_lower);
+					drawLine(graphics, LOW, domain_lower, range_lower, domain_upper, range_lower);
+					drawLine(graphics, LOW, domain_lower, range_upper, domain_lower, range_lower);
 					
-					graphics.setColor(new Color(128,128,128));
+					graphics.setColor(LOW);
 					graphics.fillPolygon(new int[] {(int) projectX(domain_upper), (int) projectX(domain_upper), (int) projectX(domain_upper) + padding_right / 2}, new int[] {(int) projectY(range_lower) - padding_right / 3, (int) projectY(range_lower) + padding_right / 3, (int) projectY(range_lower)}, 3);
 					
-					graphics.setColor(new Color(128,128,128));
+					graphics.setColor(LOW);
 					graphics.fillPolygon(new int[] {(int) projectX(domain_lower) - padding_top / 3, (int) projectX(domain_lower) + padding_top / 3, (int) projectX(domain_lower)}, new int[] {(int) projectY(range_upper), (int) projectY(range_upper), (int) projectY(range_upper) - padding_top / 2}, 3);
 					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
@@ -191,7 +202,7 @@ public abstract class CanvasPart extends Part {
 						
 						bounds = metrics.getStringBounds(string, graphics);
 						
-						graphics.setColor(new Color(128,128,128));
+						graphics.setColor(LOW);
 						graphics.drawLine((int) projectX(x * dx), (int) projectY(range_lower) - 2, (int) projectX(x * dx), (int) projectY(range_lower) + 2);
 						graphics.drawString(string, (int) (projectX(x * dx) - bounds.getWidth() / 2), (int) (projectY(range_lower) + 2 + bounds.getHeight()));
 					}
@@ -207,14 +218,14 @@ public abstract class CanvasPart extends Part {
 						
 						bounds = metrics.getStringBounds(string, graphics);
 						
-						graphics.setColor(new Color(128,128,128));
+						graphics.setColor(LOW);
 						graphics.drawLine((int) projectX(domain_lower) - 2, (int) projectY(y * dy), (int) projectX(domain_lower) + 2, (int) projectY(y * dy));
 						
 						transform = graphics2D.getTransform();
 						
 						graphics2D.translate(projectX(domain_lower) - bounds.getHeight() / 2, projectY(y * dy) + bounds.getWidth() / 2);
 						graphics2D.rotate(- Math.PI / 2);
-						graphics.setColor(new Color(128,128,128));
+						graphics.setColor(LOW);
 						graphics.drawString(string, 0, 0);
 						
 						graphics2D.setTransform(transform);
@@ -222,7 +233,7 @@ public abstract class CanvasPart extends Part {
 					
 					bounds = metrics.getStringBounds(domain, graphics);
 					
-					graphics.setColor(new Color(128,128,128));
+					graphics.setColor(LOW);
 					graphics.drawString(domain, (int) (projectX(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectY(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
 					
 					bounds = metrics.getStringBounds(range, graphics);
@@ -231,7 +242,7 @@ public abstract class CanvasPart extends Part {
 					
 					graphics2D.translate(projectX(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectY(range_lower + range_delta / 2) + bounds.getWidth() / 2);
 					graphics2D.rotate(- Math.PI / 2);
-					graphics.setColor(new Color(128,128,128));
+					graphics.setColor(LOW);
 					graphics.drawString(range, 0, 0);
 					
 					graphics2D.setTransform(transform);

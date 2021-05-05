@@ -30,7 +30,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public HistogramCanvasPart(String title, String domain)
 	{
-		super(title, domain, "Probability (in %)");
+		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"));
 		
 		// Point
 		
@@ -246,7 +246,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
 			}
 			
-			if (frame < getRawDataLength(file))
+			if (frame >= 0 && frame < getRawDataLength(file))
 			{
 				double x = getDomainMarkerValue(file);
 				double y = getRangeMarkerValue(file);

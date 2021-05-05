@@ -25,7 +25,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 	
 	public CloudCanvasPart(String title, String domain, String range)
 	{
-		super(title, domain, range);
+		super(title, domain, range, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"));
 		
 		// Offset
 		

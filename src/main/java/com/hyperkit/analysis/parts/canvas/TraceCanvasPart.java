@@ -1,6 +1,7 @@
 package com.hyperkit.analysis.parts.canvas;
 
 import java.awt.Graphics;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,9 +26,9 @@ public abstract class TraceCanvasPart extends CanvasPart
 	private int window;
 	private int padding;
 	
-	public TraceCanvasPart(String title, String domain, String range, int window, int padding)
+	public TraceCanvasPart(String title, String domain, String range, URL icon, int window, int padding)
 	{
-		super(title, domain, range);
+		super(title, domain, range, icon);
 		
 		this.window = window;
 		this.padding = padding;

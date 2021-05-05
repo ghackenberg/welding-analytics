@@ -16,7 +16,7 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	
 	public DerivativeCanvasPart(String title, String range)
 	{
-		super(title, "Time (in s)", range, 5000, 1);
+		super(title, "Time (in s)", range, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), 5000, 1);
 	}
 	
 	@Override

@@ -8,7 +8,7 @@ public class CurrentVoltageTraceCanvasPart extends TraceCanvasPart
 
 	public CurrentVoltageTraceCanvasPart()
 	{
-		super("Current-voltage trace", "Current (in A)", "Voltage (in V)", 1000, 0);
+		super("Current-voltage trace", "Current (in A)", "Voltage (in V)", CurrentVoltageTraceCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), 1000, 0);
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -88,14 +89,34 @@ public class Main
 		
 		// Delta
 		
-		JSpinner delta = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
+		JSlider deltaSlider = new JSlider(-1000, 1000, 10);
+		
+		JSpinner deltaSpinner = new JSpinner(new SpinnerNumberModel(10, -1000, 1000, 1));
+		
+		deltaSlider.setMajorTickSpacing(500);
+		deltaSlider.setMinorTickSpacing(100);
+		deltaSlider.setPaintTicks(true);
+		deltaSlider.setPaintTrack(true);
+		deltaSlider.addChangeListener(
+			event ->
+			{
+				deltaSpinner.setValue(deltaSlider.getValue());
+			}
+		);
+		
+		deltaSpinner.addChangeListener(
+			event ->
+			{
+				deltaSlider.setValue((int) deltaSpinner.getValue());
+			}
+		);
 		
 		// Timer
 		
 		Timer timer = new Timer(10,
 			event ->
 			{
-				progressSpinner.setValue((int) progressSpinner.getValue() + (int) delta.getValue());
+				progressSpinner.setValue((int) progressSpinner.getValue() + (int) deltaSlider.getValue());
 			}
 		);
 		
@@ -114,16 +135,21 @@ public class Main
 		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
 		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
 		
+		ImageIcon pause_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/pause.png"));
+		ImageIcon pause_resized = new ImageIcon(pause_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		
 		JToggleButton button_play = new JToggleButton(play_resized);
 		button_play.addActionListener(
 			event ->
 			{
 				if (button_play.isSelected())
 				{
+					button_play.setIcon(pause_resized);
 					timer.start();
 				}
 				else
 				{
+					button_play.setIcon(play_resized);
 					timer.stop();
 				}
 			}
@@ -159,7 +185,8 @@ public class Main
 		headbar.add(new JLabel("Frame:"));
 		headbar.add(progressSpinner);
 		headbar.add(new JLabel("Step:"));
-		headbar.add(delta);
+		headbar.add(deltaSlider);
+		headbar.add(deltaSpinner);
 		headbar.add(new JLabel("FPS:"));
 		headbar.add(delay);
 		headbar.add(button_play);
