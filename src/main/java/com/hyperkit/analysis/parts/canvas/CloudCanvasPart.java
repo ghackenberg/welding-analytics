@@ -3,6 +3,7 @@ package com.hyperkit.analysis.parts.canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -17,9 +18,10 @@ public abstract class CloudCanvasPart extends CanvasPart
 {
 	
 	private int frame = 0;
-	private int window = 10000;
 	private int offset = 10;
 	private int exponent = 3;
+	private int window = 10000;
+	private boolean animate = false;
 	
 	public CloudCanvasPart(String title, String domain, String range)
 	{
@@ -45,13 +47,25 @@ public abstract class CloudCanvasPart extends CanvasPart
 			}
 		);
 		
-		// Spread
+		// Window
 		
-		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 1000, Integer.MAX_VALUE, 1000));
+		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 1000, 100000, 1000));
 		windowSpinner.addChangeListener(
 			event ->
 			{
 				window = (int) windowSpinner.getValue();
+				
+				getPanel().repaint();
+			}
+		);
+		
+		// Animate
+		
+		JCheckBox animateCheck = new JCheckBox("", animate);
+		animateCheck.addChangeListener(
+			event ->
+			{
+				animate = animateCheck.isSelected();
 				
 				getPanel().repaint();
 			}
@@ -63,6 +77,8 @@ public abstract class CloudCanvasPart extends CanvasPart
 		getToolBar().add(exponentSpinner);
 		getToolBar().add(new JLabel("Point count:"));
 		getToolBar().add(windowSpinner);
+		getToolBar().add(new JLabel("Animation:"));
+		getToolBar().add(animateCheck);
 	}
 	
 	public boolean handleEvent(OffsetChangeEvent event)
@@ -87,7 +103,10 @@ public abstract class CloudCanvasPart extends CanvasPart
 	{
 		frame = event.getValue();
 		
-		getPanel().repaint();
+		if (animate)
+		{
+			getPanel().repaint();
+		}
 		
 		return true;
 	}
@@ -106,7 +125,10 @@ public abstract class CloudCanvasPart extends CanvasPart
 		{
 			ASDFile file = getFiles().get(number);
 			
-			for (int index = Math.max(frame - window, 0); index < Math.min(frame, getDataLength(file) - 1); index++)
+			int start = animate ? Math.max(frame - window, 0) : 0;
+			int end = animate ? Math.min(frame, getDataLength(file) - 1) : getDataLength(file) - 1;
+			
+			for (int index = start; index <= end; index++)
 			{	
 				double x = projectX(getDomainValue(file, index));
 				double y = projectY(getRangeValue(file, index));
