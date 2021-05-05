@@ -22,14 +22,14 @@ import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
+import com.hyperkit.analysis.parts.canvas.clouds.CurrentVoltageCloudCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.CurrentHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.ResistanceHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
-import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudAnimationCanvasPart;
-import com.hyperkit.analysis.parts.canvas.pointclouds.PointCloudVisualizationCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.ResistanceTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.VoltageTimeseriesCanvasPart;
+import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageTraceCanvasPart;
 
 import bibliothek.extension.gui.dock.theme.EclipseTheme;
 import bibliothek.gui.DockController;
@@ -189,8 +189,8 @@ public class Main
 		
 		//Part part_point_cloud_actual = new ActualPointCloudChartPart();
 		//Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
-		Part part_point_cloud_animation = new PointCloudAnimationCanvasPart();
-		Part part_point_cloud_visualization = new PointCloudVisualizationCanvasPart();
+		Part part_current_voltage_trace_canvas = new CurrentVoltageTraceCanvasPart();
+		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart();
 		
 		Part part_property = new PropertyPart();
 		
@@ -215,8 +215,8 @@ public class Main
 		
 		//grid.addDockable(2, 2, 3, 1, part_point_cloud_actual.getDockable());
 		//grid.addDockable(5, 2, 3, 1, part_point_cloud_statistical.getDockable());
-		grid.addDockable(2, 2, 3, 1, part_point_cloud_animation.getDockable());
-		grid.addDockable(5, 2, 3, 1, part_point_cloud_visualization.getDockable());
+		grid.addDockable(2, 2, 3, 1, part_current_voltage_trace_canvas.getDockable());
+		grid.addDockable(5, 2, 3, 1, part_current_voltage_cloud_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

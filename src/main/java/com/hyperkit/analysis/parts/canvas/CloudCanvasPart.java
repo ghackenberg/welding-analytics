@@ -1,4 +1,4 @@
-package com.hyperkit.analysis.parts.canvas.pointclouds;
+package com.hyperkit.analysis.parts.canvas;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -13,7 +13,7 @@ import com.hyperkit.analysis.events.values.OffsetChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
-public class PointCloudVisualizationCanvasPart extends CanvasPart
+public abstract class CloudCanvasPart extends CanvasPart
 {
 	
 	private int frame = 0;
@@ -21,9 +21,9 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	private int offset = 10;
 	private int exponent = 3;
 	
-	public PointCloudVisualizationCanvasPart()
+	public CloudCanvasPart(String title, String domain, String range)
 	{
-		super("Point cloud visualization", "Current (in A)", "Voltage (in V)");
+		super(title, domain, range);
 		
 		// Offset
 		
@@ -164,45 +164,9 @@ public class PointCloudVisualizationCanvasPart extends CanvasPart
 	}
 
 	@Override
-	protected double getDomainMinimum(ASDFile file)
-	{
-		return file.getMinCurrentDisplayed();
-	}
-
-	@Override
-	protected double getRangeMinimum(ASDFile file)
-	{
-		return file.getMinVoltageDisplayed();
-	}
-
-	@Override
-	protected double getDomainMaximum(ASDFile file)
-	{
-		return file.getMaxCurrentDisplayed();
-	}
-
-	@Override
-	protected double getRangeMaximum(ASDFile file)
-	{
-		return file.getMaxVoltageDisplayed();
-	}
-
-	@Override
 	protected int getDataLength(ASDFile file)
 	{
 		return file.getLengthDisplayed();
-	}
-
-	@Override
-	protected double getDomainValue(ASDFile file, int index)
-	{
-		return file.getCurrentDisplayed(index);
-	}
-
-	@Override
-	protected double getRangeValue(ASDFile file, int index)
-	{
-		return file.getVoltageDisplayed(index);
 	}
 
 }

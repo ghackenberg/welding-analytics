@@ -1,4 +1,4 @@
-package com.hyperkit.analysis.parts.canvas.pointclouds;
+package com.hyperkit.analysis.parts.canvas;
 
 import java.awt.Graphics;
 import java.util.HashMap;
@@ -13,20 +13,26 @@ import com.hyperkit.analysis.events.values.WindowChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
-public class PointCloudAnimationCanvasPart extends CanvasPart
+public abstract class TraceCanvasPart extends CanvasPart
 {
+	
+	private Map<ASDFile, Integer> starts = new HashMap<>();
+	private Map<ASDFile, Integer> ends = new HashMap<>();
+	private Map<ASDFile, Integer> counts = new HashMap<>();
 
 	private int frame = 0;
-	private int window_backward = 1000;
-	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
-	public PointCloudAnimationCanvasPart()
+	private int window;
+	
+	public TraceCanvasPart(String title, String domain, String range, int initial_window)
 	{
-		super("Point cloud animation", "Current (in A)", "Voltage (in V)");
+		super(title, domain, range);
+		
+		this.window = initial_window;
 		
 		// Point
 		
-		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(window_backward, 100, 100000, 100));
+		JSpinner pointSpinner = new JSpinner(new SpinnerNumberModel(window, 100, 100000, 100));
 		pointSpinner.addChangeListener(
 			event ->
 			{
@@ -40,7 +46,7 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 	
 	public boolean handleEvent(WindowChangeEvent event)
 	{
-		window_backward = event.getValue();
+		window = event.getValue();
 		
 		getPanel().repaint();
 		
@@ -59,54 +65,40 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 	@Override
 	protected void prepareData()
 	{
-		series.clear();
+		starts.clear();
+		ends.clear();
+		counts.clear();
 		
 		for (ASDFile file : getFiles())
 		{
-			series.put(file, file.getCurrentVoltage(frame, window_backward));	
+			int end = Math.min(frame + 1, file.getLengthDisplayed());
+			int start = Math.max(frame + 1 - window, 0);
+			int count = Math.max(0, end - start);
+			
+			starts.put(file, start);
+			ends.put(file, end);
+			counts.put(file, count);
+			
+			System.out.println(frame + " " + window + " " + start + " " + end + " " + count);
 		}
-	}
-
-	@Override
-	protected double getDomainMinimum(ASDFile file)
-	{
-		return file.getMinCurrentDisplayed();
-	}
-
-	@Override
-	protected double getRangeMinimum(ASDFile file)
-	{
-		return file.getMinVoltageDisplayed();
-	}
-
-	@Override
-	protected double getDomainMaximum(ASDFile file)
-	{
-		return file.getMaxCurrentDisplayed();
-	}
-
-	@Override
-	protected double getRangeMaximum(ASDFile file)
-	{
-		return file.getMaxVoltageDisplayed();
 	}
 
 	@Override
 	protected int getDataLength(ASDFile file)
 	{
-		return series.get(file)[0].length;
+		return counts.get(file);
 	}
 
 	@Override
 	protected double getDomainValue(ASDFile file, int index)
 	{
-		return series.get(file)[0][index];
+		return getRawDomainValue(file, starts.get(file) + index);
 	}
 
 	@Override
 	protected double getRangeValue(ASDFile file, int index)
 	{
-		return series.get(file)[1][index];
+		return getRawRangeValue(file, starts.get(file) + index);
 	}
 	
 	@Override
@@ -116,6 +108,8 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 		{	
 			for (int index = 1; index < getDataLength(file); index++)
 			{	
+				System.out.println("Drawing line " + index);
+				
 				double x1 = getDomainValue(file, index - 1);
 				double y1 = getRangeValue(file, index - 1);
 
@@ -132,11 +126,16 @@ public class PointCloudAnimationCanvasPart extends CanvasPart
 				double x = getDomainValue(file, index);
 				double y = getRangeValue(file, index);
 
+				System.out.println("Drawing point " + index + " = " + x + ", " + y);
+
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
 				drawPoint(graphics, calculateColor(file, 0.5, Math.sqrt(progress)), x, y);
 			}
 		}
 	}
+	
+	protected abstract double getRawDomainValue(ASDFile file, int index);
+	protected abstract double getRawRangeValue(ASDFile file, int index);
 
 }
