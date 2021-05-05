@@ -85,8 +85,6 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 			min = Math.min(min, getRawRangeValue(file, index));
 		}
 		
-		System.out.println("Min = " + min);
-		
 		return min;
 	}
 	
@@ -98,8 +96,6 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 		{
 			max = Math.max(max, getRawRangeValue(file, index));
 		}
-		
-		System.out.println("Max = " + max);
 		
 		return max;
 	}

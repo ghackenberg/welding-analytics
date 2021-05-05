@@ -8,6 +8,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.hyperkit.analysis.events.parts.FilePartAddEvent;
+import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
+import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
@@ -18,8 +21,10 @@ public abstract class HistogramCanvasPart extends CanvasPart
 
 	private int frame = 0;
 	private int histogram = 100;
-	private Map<ASDFile, Double> mins = new HashMap<>();
-	private Map<ASDFile, Double> maxs = new HashMap<>();
+	private Map<ASDFile, Double> minDomain = new HashMap<>();
+	private Map<ASDFile, Double> maxDomain = new HashMap<>();
+	private Map<ASDFile, Double> minRange = new HashMap<>();
+	private Map<ASDFile, Double> maxRange = new HashMap<>();
 	private Map<ASDFile, Double> deltas = new HashMap<>();
 	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
@@ -45,6 +50,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		histogram = event.getValue();
 		
+		for (ASDFile file : getFiles())
+		{
+			updateHistogram(file);	
+		}
+		
 		getPanel().repaint();
 		
 		return true;
@@ -59,6 +69,33 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return true;
 	}
 	
+	@Override
+	public boolean handleEvent(FilePartAddEvent event)
+	{
+		updateHistogram(event.getASDFile());
+		
+		return super.handleEvent(event);
+	}
+	
+	@Override
+	public boolean handleEvent(FilePartRemoveEvent event)
+	{
+		minDomain.remove(event.getASDFile());
+		maxDomain.remove(event.getASDFile());
+		deltas.remove(event.getASDFile());
+		series.remove(event.getASDFile());
+		
+		return super.handleEvent(event);
+	}
+	
+	@Override
+	public boolean handleEvent(PropertyPartChangeEvent event)
+	{
+		updateHistogram(event.getASDFile());
+		
+		return super.handleEvent(event);
+	}
+	
 	protected int getFrame()
 	{
 		return frame;
@@ -69,118 +106,93 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return histogram;
 	}
 	
-	@Override
-	protected void prepareData()
+	private void updateHistogram(ASDFile file)
 	{
-		mins.clear();
-		maxs.clear();
-		deltas.clear();
-		series.clear();
+		// Find limits
 		
-		for (ASDFile file : getFiles())
+		double min = getRawMinimum(file);
+		double max = getRawMaximum(file);
+		
+		// Create density
+		
+		double[][] density = new double[2][histogram];
+		
+		// Calculate x
+		
+		for (int i = 0; i < histogram; i++)
 		{
-			// Find limits
-			
-			double min = getRawMinimum(file);
-			double max = getRawMaximum(file);
-			
-			// Create density
-			
-			double[][] density = new double[2][histogram];
-			
-			// Calculate x
-			
-			for (int i = 0; i < histogram; i++)
-			{
-				density[0][i] = min + (max - min) / histogram * (i + 0.5);
-			}
-			
-			// Calculate y
-			
-			int count = 0;
-			
-			for (int i = 0; i < getRawDataLength(file); i++)
-			{
-				double voltage = getRawValue(file, i);
-				
-				int bin = Math.min((int) Math.floor((voltage - min) / (max - min) * histogram), histogram - 1);
-				
-				density[1][bin]++;
-				
-				count++;
-			}
-			
-			// Normalize y
-			
-			for (int i = 0; i < histogram; i++)
-			{
-				density[1][i] /= count;
-				density[1][i] *= 100;
-			}
-			
-			// Remember
-			
-			mins.put(file, min);
-			maxs.put(file, max);
-			deltas.put(file, (density[0][1] - density[0][0]) / 2);
-			series.put(file, density);
+			density[0][i] = min + (max - min) / histogram * (i + 0.5);
 		}
+		
+		// Calculate y
+		
+		int count = 0;
+		
+		for (int i = 0; i < getRawDataLength(file); i++)
+		{
+			double voltage = getRawValue(file, i);
+			
+			int bin = Math.min((int) Math.floor((voltage - min) / (max - min) * histogram), histogram - 1);
+			
+			density[1][bin]++;
+			
+			count++;
+		}
+		
+		// Normalize y
+		
+		double minProb = 100;
+		double maxProb = 0;
+		
+		for (int i = 0; i < histogram; i++)
+		{
+			density[1][i] /= count;
+			density[1][i] *= 100;
+			
+			minProb = Math.min(minProb, density[1][i]);
+			maxProb = Math.max(maxProb, density[1][i]);
+		}
+		
+		// Remember
+		
+		minDomain.put(file, min);
+		maxDomain.put(file, max);
+		
+		minRange.put(file, minProb);
+		maxRange.put(file, maxProb);
+		
+		deltas.put(file, (density[0][1] - density[0][0]) / 2);
+		series.put(file, density);
 	}
 	
 	@Override
 	protected double getDomainMinimum(ASDFile file)
 	{
-		double result = Double.MAX_VALUE;
-		
-		double delta = deltas.get(file);
-		
-		for (int index = 0; index < getDataLength(file); index++)
-		{
-			result = Math.min(result, getDomainValue(file, index) - delta);
-		}
-		
-		return result;
+		return minDomain.get(file);
 	}
 	
 	@Override
 	protected double getDomainMaximum(ASDFile file)
 	{
-		double result = -Double.MAX_VALUE;
-		
-		double delta = deltas.get(file);
-		
-		for (int index = 0; index < getDataLength(file); index++)
-		{
-			result = Math.max(result, getDomainValue(file, index) + delta);
-		}
-		
-		return result;
+		return maxDomain.get(file);
 	}
 	
 	@Override
 	protected double getRangeMinimum(ASDFile file)
 	{
-		double result = Double.MAX_VALUE;
-		
-		for (int index = 0; index < getDataLength(file); index++)
-		{
-			result = Math.min(result, getRangeValue(file, index));
-		}
-		
-		return result;
+		return minRange.get(file);
 	}
 	
 	@Override
 	protected double getRangeMaximum(ASDFile file)
 	{
-		double result = -Double.MAX_VALUE;
-		
-		for (int index = 0; index < getDataLength(file); index++)
-		{
-			result = Math.max(result, getRangeValue(file, index));
-		}
-		
-		return result;
+		return maxRange.get(file);
+	}
+	
+	@Override
+	protected void prepareData()
+	{
+		// empty
 	}
 
 	@Override
@@ -255,8 +267,8 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		double value = getDomainMarkerValue(file);
 		
-		double min = mins.get(file);
-		double max = maxs.get(file);
+		double min = minDomain.get(file);
+		double max = maxDomain.get(file);
 		
 		int bin = Math.min((int) Math.floor((value - min) / (max - min) * histogram), histogram - 1);
 		

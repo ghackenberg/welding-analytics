@@ -110,6 +110,18 @@ public abstract class CloudCanvasPart extends CanvasPart
 		
 		return true;
 	}
+
+	@Override
+	protected void prepareData()
+	{
+		// empty
+	}
+
+	@Override
+	protected int getDataLength(ASDFile file)
+	{
+		return file.getLengthDisplayed();
+	}
 	
 	@Override
 	protected void paintComponent(Graphics graphics)
@@ -177,18 +189,6 @@ public abstract class CloudCanvasPart extends CanvasPart
 				// TODO graphics.fillRect(x - spread, y - spread, spread * 2 + 1, spread * 2 + 1);
 			}
 		}
-	}
-
-	@Override
-	protected void prepareData()
-	{
-		// empty
-	}
-
-	@Override
-	protected int getDataLength(ASDFile file)
-	{
-		return file.getLengthDisplayed();
 	}
 
 }
