@@ -360,7 +360,7 @@ public abstract class CanvasPart extends Part
 	
 	protected double calculateColor(int value, double shade, double progress)
 	{
-		return value + (255 - value) * progress;
+		return shade * value + (255 - shade * value) * progress;
 	}
 	
 	protected Color calculateColor(Color color, double shade, double progress)
