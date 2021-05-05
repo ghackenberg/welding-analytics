@@ -8,7 +8,7 @@ public class CurrentVoltageTraceCanvasPart extends TraceCanvasPart
 
 	public CurrentVoltageTraceCanvasPart()
 	{
-		super("Current-voltage trace", "Current (in A)", "Voltage (in V)", 1000);
+		super("Current-voltage trace", "Current (in A)", "Voltage (in V)", 1000, 0);
 	}
 
 	@Override

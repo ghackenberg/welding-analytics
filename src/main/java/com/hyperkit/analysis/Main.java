@@ -23,6 +23,9 @@ import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvas.clouds.CurrentVoltageCloudCanvasPart;
+import com.hyperkit.analysis.parts.canvas.derivatives.CurrentDerivativeCanvasPart;
+import com.hyperkit.analysis.parts.canvas.derivatives.ResistanceDerivativeCanvasPart;
+import com.hyperkit.analysis.parts.canvas.derivatives.VoltageDerivativeCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.CurrentHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.ResistanceHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
@@ -174,49 +177,43 @@ public class Main
 		
 		// Part
 		Part part_file = new FilePart();
+		Part part_property = new PropertyPart();
 		
-		//Part part_voltage_timeseries_chart = new VoltageTimeseriesChartPart();
-		//Part part_current_timeseries_chart = new CurrentTimeseriesChartPart();
-		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart();
-		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart();
-		Part part_resistance_timeseries_canvas = new ResistanceTimeseriesCanvasPart();
-		
-		//Part part_voltage_density_chart = new VoltageHistogramChartPart();
-		//Part part_current_density_chart = new CurrentHistogramChartPart();
 		Part part_voltage_density_canvas = new VoltageHistogramCanvasPart();
 		Part part_current_density_canvas = new CurrentHistogramCanvasPart();
 		Part part_resistance_density_canvas = new ResistanceHistogramCanvasPart();
 		
-		//Part part_point_cloud_actual = new ActualPointCloudChartPart();
-		//Part part_point_cloud_statistical = new StatisticalPointCloudChartPart();
+		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart();
+		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart();
+		Part part_resistance_timeseries_canvas = new ResistanceTimeseriesCanvasPart();
+		
+		Part part_voltage_derivative_canvas = new VoltageDerivativeCanvasPart();
+		Part part_current_derivative_canvas = new CurrentDerivativeCanvasPart();
+		Part part_resistance_derivative_canvas = new ResistanceDerivativeCanvasPart();
+		
 		Part part_current_voltage_trace_canvas = new CurrentVoltageTraceCanvasPart();
 		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart();
-		
-		Part part_property = new PropertyPart();
 		
 		// Grid
 		SplitDockGrid grid = new SplitDockGrid();
 		
 		grid.addDockable(0, 0, 2, 1, part_file.getDockable());
+		grid.addDockable(0, 1, 2, 3, part_property.getDockable());
 		
-		//grid.addDockable(2, 0, 2, 1, part_voltage_density_chart.getDockable());
-		//grid.addDockable(4, 0, 2, 1, part_current_density_chart.getDockable());
 		grid.addDockable(2, 0, 2, 1, part_voltage_density_canvas.getDockable());
 		grid.addDockable(4, 0, 2, 1, part_current_density_canvas.getDockable());
 		grid.addDockable(6, 0, 2, 1, part_resistance_density_canvas.getDockable());
 		
-		//grid.addDockable(2, 1, 2, 1, part_voltage_timeseries_chart.getDockable());
-		//grid.addDockable(4, 1, 2, 1, part_current_timeseries_chart.getDockable());
 		grid.addDockable(2, 1, 2, 1, part_voltage_timeseries_canvas.getDockable());
 		grid.addDockable(4, 1, 2, 1, part_current_timeseries_canvas.getDockable());
 		grid.addDockable(6, 1, 2, 1, part_resistance_timeseries_canvas.getDockable());
 		
-		grid.addDockable(0, 1, 2, 2, part_property.getDockable());
+		grid.addDockable(2, 2, 2, 1, part_voltage_derivative_canvas.getDockable());
+		grid.addDockable(4, 2, 2, 1, part_current_derivative_canvas.getDockable());
+		grid.addDockable(6, 2, 2, 1, part_resistance_derivative_canvas.getDockable());
 		
-		//grid.addDockable(2, 2, 3, 1, part_point_cloud_actual.getDockable());
-		//grid.addDockable(5, 2, 3, 1, part_point_cloud_statistical.getDockable());
-		grid.addDockable(2, 2, 3, 1, part_current_voltage_trace_canvas.getDockable());
-		grid.addDockable(5, 2, 3, 1, part_current_voltage_cloud_canvas.getDockable());
+		grid.addDockable(2, 3, 3, 1, part_current_voltage_trace_canvas.getDockable());
+		grid.addDockable(5, 3, 3, 1, part_current_voltage_cloud_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

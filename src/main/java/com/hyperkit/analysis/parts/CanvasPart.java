@@ -123,14 +123,23 @@ public abstract class CanvasPart extends Part {
 					double dx;
 					double dy;
 					
+					double unit;
+					
 					do
 					{
 						dx = crop((domain_upper - domain_lower) / xticks);
 						
 						string = String.format("%." + digits(dx) + "f", domain_upper);
 						bounds = metrics.getStringBounds(string, graphics);
+						
+						unit = bounds.getWidth();
+						
+						string = String.format("%." + digits(dx) + "f", domain_lower);
+						bounds = metrics.getStringBounds(string, graphics);
+						
+						unit = Math.max(unit, bounds.getWidth());
 					}
-					while (xticks++ < (width - padding_left - padding_right) / bounds.getWidth() / 2);
+					while (xticks++ < (width - padding_left - padding_right) / unit / 2);
 					
 					do
 					{
@@ -138,8 +147,15 @@ public abstract class CanvasPart extends Part {
 						
 						string = String.format("%." + digits(dy) + "f", range_upper);
 						bounds = metrics.getStringBounds(string, graphics);
+						
+						unit = bounds.getWidth();
+						
+						string = String.format("%." + digits(dy) + "f", range_lower);
+						bounds = metrics.getStringBounds(string, graphics);
+						
+						unit = Math.max(unit, bounds.getWidth());
 					}
-					while (yticks++ < (height - padding_top - padding_bottom) / bounds.getWidth() / 2);
+					while (yticks++ < (height - padding_top - padding_bottom) / unit / 2);
 					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{	
@@ -168,7 +184,7 @@ public abstract class CanvasPart extends Part {
 					{
 						string = String.format("%." + digits(dx) + "f", x * dx);
 						
-						if (string.startsWith("-"))
+						if (x == 0 && string.startsWith("-"))
 						{
 							string = string.substring(1);
 						}
@@ -184,7 +200,7 @@ public abstract class CanvasPart extends Part {
 					{
 						string = String.format("%." + digits(dy) + "f", y * dy);
 						
-						if (string.startsWith("-"))
+						if (y == 0 && string.startsWith("-"))
 						{
 							string = string.substring(1);
 						}

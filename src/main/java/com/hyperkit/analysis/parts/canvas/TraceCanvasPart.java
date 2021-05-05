@@ -23,12 +23,14 @@ public abstract class TraceCanvasPart extends CanvasPart
 	private int frame = 0;
 	
 	private int window;
+	private int padding;
 	
-	public TraceCanvasPart(String title, String domain, String range, int initial_window)
+	public TraceCanvasPart(String title, String domain, String range, int window, int padding)
 	{
 		super(title, domain, range);
 		
-		this.window = initial_window;
+		this.window = window;
+		this.padding = padding;
 		
 		// Point
 		
@@ -78,8 +80,6 @@ public abstract class TraceCanvasPart extends CanvasPart
 			starts.put(file, start);
 			ends.put(file, end);
 			counts.put(file, count);
-			
-			System.out.println(frame + " " + window + " " + start + " " + end + " " + count);
 		}
 	}
 
@@ -106,10 +106,8 @@ public abstract class TraceCanvasPart extends CanvasPart
 	{		
 		for (ASDFile file : getFiles())
 		{	
-			for (int index = 1; index < getDataLength(file); index++)
-			{	
-				System.out.println("Drawing line " + index);
-				
+			for (int index = 1 + padding; index < getDataLength(file) - padding; index++)
+			{				
 				double x1 = getDomainValue(file, index - 1);
 				double y1 = getRangeValue(file, index - 1);
 
@@ -118,19 +116,17 @@ public abstract class TraceCanvasPart extends CanvasPart
 
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawLine(graphics, calculateColor(file, 1, Math.sqrt(progress)), x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), x1, y1, x2, y2);
 			}
 			
-			for (int index = Math.max(getDataLength(file) - 1, 0); index < getDataLength(file); index++)
+			for (int index = Math.max(getDataLength(file) - 1 - padding, padding); index < getDataLength(file) - padding; index++)
 			{	
 				double x = getDomainValue(file, index);
 				double y = getRangeValue(file, index);
 
-				System.out.println("Drawing point " + index + " = " + x + ", " + y);
-
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawPoint(graphics, calculateColor(file, 0.5, Math.sqrt(progress)), x, y);
+				drawPoint(graphics, calculateColor(file, 0.5, Math.pow(progress, 10)), x, y);
 			}
 		}
 	}
