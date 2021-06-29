@@ -33,6 +33,7 @@ import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.ResistanceTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.VoltageTimeseriesCanvasPart;
+import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageAverageTraceCanvasPart;
 import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageTraceCanvasPart;
 
 import bibliothek.extension.gui.dock.theme.EclipseTheme;
@@ -219,6 +220,7 @@ public class Main
 		Part part_resistance_derivative_canvas = new ResistanceDerivativeCanvasPart();
 		
 		Part part_current_voltage_trace_canvas = new CurrentVoltageTraceCanvasPart();
+		Part part_current_voltage_average_trace_canvas = new CurrentVoltageAverageTraceCanvasPart();
 		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart();
 		
 		// Grid
@@ -239,8 +241,9 @@ public class Main
 		grid.addDockable(2, 2, 1, 1, part_resistance_timeseries_canvas.getDockable());
 		grid.addDockable(3, 2, 1, 1, part_resistance_derivative_canvas.getDockable());
 		
-		grid.addDockable(4, 0.0, 2, 1.5, part_current_voltage_trace_canvas.getDockable());
-		grid.addDockable(4, 1.5, 2, 1.5, part_current_voltage_cloud_canvas.getDockable());
+		grid.addDockable(4, 0, 2, 1, part_current_voltage_trace_canvas.getDockable());
+		grid.addDockable(4, 1, 2, 1, part_current_voltage_average_trace_canvas.getDockable());
+		grid.addDockable(4, 2, 2, 1, part_current_voltage_cloud_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

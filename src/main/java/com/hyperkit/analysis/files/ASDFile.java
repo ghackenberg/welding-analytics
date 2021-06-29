@@ -235,6 +235,34 @@ public class ASDFile extends File
 		return activeData.get(index)[CURRENT_INDEX];
 	}
 	
+	public double getAverageVoltageDisplayed(int index, int window)
+	{
+		double average = 0;
+		int count = 0;
+		
+		for (int i = Math.max(index - window, 0); i < Math.min(index + window + 1, getLengthDisplayed()); i++)
+		{
+			average += activeData.get(i)[VOLTAGE_INDEX];
+			count++;
+		}
+		
+		return average / count;
+	}
+	
+	public double getAverageCurrentDisplayed(int index, int window)
+	{
+		double average = 0;
+		int count = 0;
+		
+		for (int i = Math.max(index - window, 0); i < Math.min(index + window + 1, getLengthDisplayed()); i++)
+		{
+			average += activeData.get(i)[CURRENT_INDEX];
+			count++;
+		}
+		
+		return average / count;
+	}
+	
 	public double getResistanceDisplayed(int index)
 	{
 		return getVoltageDisplayed(index) / getCurrentDisplayed(index);
