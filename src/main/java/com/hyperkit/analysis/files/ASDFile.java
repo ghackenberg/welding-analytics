@@ -238,12 +238,15 @@ public class ASDFile extends File
 	public double getAverageVoltageDisplayed(int index, int window)
 	{
 		double average = 0;
-		int count = 0;
+		double count = 0;
 		
 		for (int i = Math.max(index - window, 0); i < Math.min(index + window + 1, getLengthDisplayed()); i++)
 		{
-			average += activeData.get(i)[VOLTAGE_INDEX];
-			count++;
+			double delta = i - index;
+			double factor = delta / (window + 1);
+			double weight = 1 - factor * factor;
+			average += activeData.get(i)[VOLTAGE_INDEX] * weight;
+			count += weight;
 		}
 		
 		return average / count;
@@ -252,12 +255,15 @@ public class ASDFile extends File
 	public double getAverageCurrentDisplayed(int index, int window)
 	{
 		double average = 0;
-		int count = 0;
+		double count = 0;
 		
 		for (int i = Math.max(index - window, 0); i < Math.min(index + window + 1, getLengthDisplayed()); i++)
 		{
-			average += activeData.get(i)[CURRENT_INDEX];
-			count++;
+			double delta = i - index;
+			double factor = delta / (window + 1);
+			double weight = 1 - factor * factor;
+			average += activeData.get(i)[CURRENT_INDEX] * weight;
+			count += weight;
 		}
 		
 		return average / count;

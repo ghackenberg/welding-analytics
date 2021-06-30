@@ -23,6 +23,8 @@ public class CurrentVoltageAverageTraceCanvasPart extends TraceCanvasPart
 			event ->
 			{
 				average = (int) spinner.getValue();
+				
+				getPanel().repaint();
 			}
 		);
 
