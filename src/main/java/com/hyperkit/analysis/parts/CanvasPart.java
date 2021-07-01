@@ -507,7 +507,7 @@ public abstract class CanvasPart extends Part
 		int sx2 = (int) projectX(x2);
 		int sy2 = (int) projectY(y2);
 		
-		graphics.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+		graphics.setComposite(AlphaComposite.SrcOver.derive(0.25f));
 		
 		graphics.setColor(color);
 		graphics.fillRect(Math.min(sx1, sx2), Math.min(sy1, sy2), Math.abs(sx2 - sx1), Math.abs(sy2 - sy1));
