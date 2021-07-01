@@ -5,6 +5,11 @@ import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.net.URL;
@@ -249,6 +254,55 @@ public abstract class CanvasPart extends Part
 				}
 			}
 		};
+		panel.addMouseListener(new MouseListener()
+		{
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				System.out.println("[Released] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				System.out.println("[Pressed] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				System.out.println("[Exited] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				System.out.println("[Entered] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				System.out.println("[Clicked] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+		});
+		panel.addMouseMotionListener(new MouseMotionListener()
+		{
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				System.out.println("[Moved] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+			@Override
+			public void mouseDragged(MouseEvent e)
+			{
+				System.out.println("[Dragged] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+		});
+		panel.addMouseWheelListener(new MouseWheelListener()
+		{
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				System.out.println("[Wheel] " + getTitle() + " " + e.getX() + " " + e.getY());
+			}
+		});
 		panel.setBackground(Color.white);
 	}
 	

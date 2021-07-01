@@ -114,7 +114,7 @@ public abstract class Part extends Handler
 		{
 			container = new JPanel(new BorderLayout());
 			container.add(getToolBar(), BorderLayout.NORTH);
-			container.add(getComponent(), BorderLayout.CENTER);	
+			container.add(getComponent(), BorderLayout.CENTER);
 		}
 		
 		return container;
