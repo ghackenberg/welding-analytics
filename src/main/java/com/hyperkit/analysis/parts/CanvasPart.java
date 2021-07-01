@@ -1,5 +1,6 @@
 package com.hyperkit.analysis.parts;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FontMetrics;
@@ -46,10 +47,14 @@ public abstract class CanvasPart extends Part
 	private double domain_lower;
 	private double domain_upper;
 	private double domain_delta;
+	private double domain_rect = Double.MAX_VALUE;
+	private double domain_mouse = Double.MAX_VALUE;
 	
 	private double range_lower;
 	private double range_upper;
 	private double range_delta;
+	private double range_rect = Double.MAX_VALUE;
+	private double range_mouse = Double.MAX_VALUE;
 	
 	public CanvasPart(String title, String domain, String range)
 	{
@@ -251,6 +256,25 @@ public abstract class CanvasPart extends Part
 					graphics.drawString(range, 0, 0);
 					
 					graphics2D.setTransform(transform);
+					
+					// Draw interaction markers
+					
+					if (domain_rect != Double.MAX_VALUE && range_rect != Double.MAX_VALUE)
+					{
+						// Draw selection marker
+						
+						drawRectangle(graphics2D, Color.BLACK, domain_rect, range_rect, domain_mouse, range_mouse);
+						
+						drawLine(graphics2D, Color.BLACK, domain_rect, range_rect, domain_mouse, range_rect);
+						drawLine(graphics2D, Color.BLACK, domain_rect, range_rect, domain_rect, range_mouse);
+					}
+					
+					// Draw mouse marker
+					
+					drawPoint(graphics2D, Color.BLACK, domain_mouse, range_mouse);
+					
+					drawLine(graphics2D, Color.BLACK, domain_mouse, Math.min(range_mouse, range_lower), domain_mouse, Math.max(range_mouse, range_upper));
+					drawLine(graphics2D, Color.BLACK, Math.min(domain_mouse, domain_lower), range_mouse, Math.max(domain_mouse, domain_upper), range_mouse);
 				}
 			}
 		};
@@ -259,27 +283,33 @@ public abstract class CanvasPart extends Part
 			@Override
 			public void mouseReleased(MouseEvent e)
 			{
-				System.out.println("[Released] " + getTitle() + " " + e.getX() + " " + e.getY());
+				domain_rect = Double.MAX_VALUE;
+				range_rect = Double.MAX_VALUE;
+				
+				updateMouseMarker(e.getX(), e.getY());
 			}
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				System.out.println("[Pressed] " + getTitle() + " " + e.getX() + " " + e.getY());
+				domain_rect = calculateMouseX(e.getX());
+				range_rect = calculateMouseY(e.getY());
+				
+				updateMouseMarker(e.getX(), e.getY());
 			}
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
-				System.out.println("[Exited] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(Double.MAX_VALUE, Double.MAX_VALUE);
 			}
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
-				System.out.println("[Entered] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(e.getX(), e.getY());
 			}
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
-				System.out.println("[Clicked] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(e.getX(), e.getY());
 			}
 		});
 		panel.addMouseMotionListener(new MouseMotionListener()
@@ -287,12 +317,12 @@ public abstract class CanvasPart extends Part
 			@Override
 			public void mouseMoved(MouseEvent e)
 			{
-				System.out.println("[Moved] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(e.getX(), e.getY());
 			}
 			@Override
 			public void mouseDragged(MouseEvent e)
 			{
-				System.out.println("[Dragged] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(e.getX(), e.getY());
 			}
 		});
 		panel.addMouseWheelListener(new MouseWheelListener()
@@ -300,10 +330,36 @@ public abstract class CanvasPart extends Part
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e)
 			{
-				System.out.println("[Wheel] " + getTitle() + " " + e.getX() + " " + e.getY());
+				updateMouseMarker(e.getX(), e.getY());
 			}
 		});
 		panel.setBackground(Color.white);
+	}
+	
+	private double calculateMouseX(double sx)
+	{
+		double width = panel.getWidth();
+		
+		double px = (sx - padding_left) / (width - padding_left - padding_right);
+		
+		return domain_lower + px * domain_delta;
+	}
+	
+	private double calculateMouseY(double sy)
+	{
+		double height = panel.getHeight();
+		
+		double py = (sy - padding_top) / (height - padding_top - padding_bottom);
+		
+		return range_upper - py * range_delta;
+	}
+	
+	private void updateMouseMarker(double sx, double sy)
+	{
+		domain_mouse = calculateMouseX(sx);
+		range_mouse = calculateMouseY(sy);
+		
+		panel.repaint();
 	}
 	
 	protected double crop(double value)
@@ -441,6 +497,22 @@ public abstract class CanvasPart extends Part
 	{	
 		graphics.setColor(color);
 		graphics.drawLine((int) projectX(x1), (int) projectY(y1), (int) projectX(x2), (int) projectY(y2));
+	}
+	
+	protected void drawRectangle(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
+	{
+		int sx1 = (int) projectX(x1);
+		int sy1 = (int) projectY(y1);
+		
+		int sx2 = (int) projectX(x2);
+		int sy2 = (int) projectY(y2);
+		
+		graphics.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+		
+		graphics.setColor(color);
+		graphics.fillRect(Math.min(sx1, sx2), Math.min(sy1, sy2), Math.abs(sx2 - sx1), Math.abs(sy2 - sy1));
+		
+		graphics.setComposite(AlphaComposite.SrcOver);
 	}
 	
 	protected abstract void prepareData();
