@@ -30,7 +30,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 	
 	public CloudCanvasPart(String title, String domain, String range, int frame, int window, int average)
 	{
-		super(title, domain, range, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"));
+		super(title, domain, range, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), true, true);
 		
 		this.frame = frame;
 		this.window = window;
@@ -169,7 +169,6 @@ public abstract class CloudCanvasPart extends CanvasPart
 	@Override
 	protected void paintComponent(Graphics2D graphics)
 	{
-		
 		int width = getPanel().getWidth();
 		int height = getPanel().getHeight();
 
@@ -188,7 +187,13 @@ public abstract class CloudCanvasPart extends CanvasPart
 				double x = projectDomain(getDomainValue(file, index));
 				double y = projectRange(getRangeValue(file, index));
 
-				max[number] = Math.max(max[number], ++count[number][(int) x][(int) y]);
+				if (x >= getPaddingLeft() && x <= getPanel().getWidth() - getPaddingRight())
+				{
+					if (y >= getPaddingTop() && y <= getPanel().getHeight() - getPaddingBottom())
+					{
+						max[number] = Math.max(max[number], ++count[number][(int) x][(int) y]);
+					}
+				}
 			}
 		}
 		

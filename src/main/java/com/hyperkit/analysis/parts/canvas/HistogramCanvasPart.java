@@ -33,7 +33,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
 	{
-		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"));
+		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), false, false);
 		
 		this.frame = frame;
 		this.average = average;
@@ -299,12 +299,15 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				ASDFile file = entry.getKey();
 				
 				int index = entry.getValue();
-				
-				double domain = getRawValue(file, index);
-				
-				double range = calculateRangeValue(file, domain);
-				
-				drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+			
+				if (minDomain.containsKey(file) && maxDomain.containsKey(file) && series.containsKey(file))
+				{
+					double domain = getRawValue(file, index);
+					
+					double range = calculateRangeValue(file, domain);
+					
+					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+				}
 			}
 		}
 	}

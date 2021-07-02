@@ -8,7 +8,7 @@ public class CurrentVoltageTraceCanvasPart extends TraceCanvasPart
 
 	public CurrentVoltageTraceCanvasPart(int frame, int window, int average)
 	{
-		super("Current-voltage average trace", "Current (in A)", "Voltage (in V)", CurrentVoltageTraceCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), frame, window, average, 0);
+		super("Current-voltage average trace", "Current (in A)", "Voltage (in V)", CurrentVoltageTraceCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), true, true, frame, window, average, 0);
 	}
 
 	@Override

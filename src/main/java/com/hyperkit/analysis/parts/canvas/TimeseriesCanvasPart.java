@@ -7,7 +7,7 @@ public abstract class TimeseriesCanvasPart extends TraceCanvasPart
 	
 	public TimeseriesCanvasPart(String title, String range, int frame, int window, int average)
 	{
-		super(title, "Time (in s)", range, TimeseriesCanvasPart.class.getClassLoader().getResource("icons/parts/timeseries.png"), frame, window, average, 0);
+		super(title, "Time (in s)", range, TimeseriesCanvasPart.class.getClassLoader().getResource("icons/parts/timeseries.png"), false, true, frame, window, average, 0);
 	}
 	
 	@Override

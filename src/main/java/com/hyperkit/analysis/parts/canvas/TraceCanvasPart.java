@@ -30,9 +30,9 @@ public abstract class TraceCanvasPart extends CanvasPart
 	
 	private Map<ASDFile, Integer> marker;
 	
-	public TraceCanvasPart(String title, String domain, String range, URL icon, int frame, int window, int average, int padding)
+	public TraceCanvasPart(String title, String domain, String range, URL icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
 	{
-		super(title, domain, range, icon);
+		super(title, domain, range, icon, zoom_domain, zoom_range);
 		
 		this.frame = frame;
 		this.window = window;
@@ -173,7 +173,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 
 				double x2 = getDomainValue(file, index);
 				double y2 = getRangeValue(file, index);
-
+				
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
 				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), x1, y1, x2, y2);
@@ -206,15 +206,18 @@ public abstract class TraceCanvasPart extends CanvasPart
 					double x = getDomainValue(file, index);
 					double y = getRangeValue(file, index);
 					
-					double domain_delta = getMouseCurrentX() - projectDomain(x);
-					double range_delta = getMouseCurrentY() - projectRange(y);
-					
-					double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
-					
-					if (temp < marker_distance)
+					if (check(x, y))
 					{
-						marker_index = index;
-						marker_distance = temp;
+						double domain_delta = getMouseCurrentX() - projectDomain(x);
+						double range_delta = getMouseCurrentY() - projectRange(y);
+						
+						double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
+						
+						if (temp < marker_distance)
+						{
+							marker_index = index;
+							marker_distance = temp;
+						}
 					}
 				}
 				
