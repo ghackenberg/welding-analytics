@@ -91,6 +91,8 @@ public abstract class Part extends Handler
 			toolbar = new JToolBar();
 			toolbar.setFloatable(false);
 			toolbar.setLayout(new WrapLayout(FlowLayout.LEFT));
+			
+			getContainer().add(toolbar, BorderLayout.NORTH);
 		}
 		
 		return toolbar;
@@ -113,7 +115,6 @@ public abstract class Part extends Handler
 		if (container == null)
 		{
 			container = new JPanel(new BorderLayout());
-			container.add(getToolBar(), BorderLayout.NORTH);
 			container.add(getComponent(), BorderLayout.CENTER);
 		}
 		

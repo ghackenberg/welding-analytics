@@ -69,8 +69,6 @@ public class PropertyPart extends Part
 	public PropertyPart()
 	{
 		super("Properties", PropertyPart.class.getClassLoader().getResource("icons/parts/property.png"));
-		
-		getToolBar().add(new JLabel("No settings"));
 	}
 
 	@Override

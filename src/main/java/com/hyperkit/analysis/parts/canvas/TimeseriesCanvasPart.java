@@ -1,7 +1,5 @@
 package com.hyperkit.analysis.parts.canvas;
 
-import javax.swing.JLabel;
-
 import com.hyperkit.analysis.files.ASDFile;
 
 public abstract class TimeseriesCanvasPart extends TraceCanvasPart
@@ -10,8 +8,6 @@ public abstract class TimeseriesCanvasPart extends TraceCanvasPart
 	public TimeseriesCanvasPart(String title, String range, int frame, int window, int average)
 	{
 		super(title, "Time (in s)", range, TimeseriesCanvasPart.class.getClassLoader().getResource("icons/parts/timeseries.png"), frame, window, average, 0);
-		
-		getToolBar().add(new JLabel("No settings"));
 	}
 	
 	@Override

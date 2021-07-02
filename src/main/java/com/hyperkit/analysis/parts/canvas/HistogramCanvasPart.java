@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.JLabel;
-
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
@@ -40,8 +38,6 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		this.frame = frame;
 		this.average = average;
 		this.histogram = histogram;
-		
-		getToolBar().add(new JLabel("No settings"));
 	}
 	
 	public boolean handleEvent(FrameChangeEvent event)

@@ -225,7 +225,7 @@ public class Main
 		
 		JToolBar headbar = new JToolBar("Headbar");
 		headbar.setFloatable(false);
-		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
+		headbar.setLayout(new WrapLayout(FlowLayout.LEFT));
 		
 		headbar.add(new JLabel("Load progress:"));
 		headbar.add(progress);
@@ -243,8 +243,6 @@ public class Main
 		headbar.add(averageSpinner);
 		
 		headbar.add(button_play);
-		
-		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
 		// Footbar

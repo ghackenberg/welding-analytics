@@ -3,8 +3,6 @@ package com.hyperkit.analysis.parts.canvas;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JLabel;
-
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
@@ -20,8 +18,6 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	public DerivativeCanvasPart(String title, String range, int frame, int window, int average)
 	{
 		super(title, "Time (in s)", range, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), frame, window, average, 1);
-		
-		getToolBar().add(new JLabel("No settings"));
 	}
 	
 	@Override
