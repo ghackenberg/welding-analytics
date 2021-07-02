@@ -19,8 +19,11 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
+import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
+import com.hyperkit.analysis.events.values.WindowChangeEvent;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvas.clouds.CurrentVoltageCloudCanvasPart;
@@ -33,7 +36,7 @@ import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.ResistanceTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.VoltageTimeseriesCanvasPart;
-import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageAverageTraceCanvasPart;
+import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageTraceCanvasPart;
 
 import bibliothek.extension.gui.dock.theme.EclipseTheme;
 import bibliothek.gui.DockController;
@@ -42,6 +45,11 @@ import bibliothek.gui.dock.station.split.SplitDockGrid;
 
 public class Main
 {
+	
+	private static int frame = 0;
+	private static int window = 5000;
+	private static int average = 0;
+	private static int histogram = 100;
 	
 	public static void main(String[] arguments)
 	{
@@ -77,13 +85,51 @@ public class Main
 			}
 		);
 		
-		// Progress
+		// Frame
 		
-		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(frame, 0, 10000000, 1));
 		progressSpinner.addChangeListener(
 			event ->
 			{
-				Bus.getInstance().broadcastEvent(new FrameChangeEvent((int) progressSpinner.getValue()));
+				frame = (int) progressSpinner.getValue();
+				
+				Bus.getInstance().broadcastEvent(new FrameChangeEvent(frame));
+			}
+		);
+		
+		// Window
+		
+		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 100, 100000, 100));
+		windowSpinner.addChangeListener(
+			event ->
+			{
+				window = (int) windowSpinner.getValue();
+				
+				Bus.getInstance().broadcastEvent(new WindowChangeEvent(window));
+			}
+		);
+		
+		// Average
+		
+		JSpinner averageSpinner = new JSpinner(new SpinnerNumberModel(average, 0, 100, 1));
+		averageSpinner.addChangeListener(
+			event ->
+			{
+				average = (int) averageSpinner.getValue();
+				
+				Bus.getInstance().broadcastEvent(new AverageChangeEvent(average));
+			}
+		);
+		
+		// Histogram
+		
+		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 10000, 100));
+		histogramSpinner.addChangeListener(
+			event ->
+			{
+				histogram = (int) histogramSpinner.getValue();
+						
+				Bus.getInstance().broadcastEvent(new HistogramChangeEvent(histogram));
 			}
 		);
 		
@@ -180,8 +226,10 @@ public class Main
 		JToolBar headbar = new JToolBar("Headbar");
 		headbar.setFloatable(false);
 		headbar.setLayout(new FlowLayout(FlowLayout.LEFT));
+		
 		headbar.add(new JLabel("Load progress:"));
 		headbar.add(progress);
+		
 		headbar.add(new JLabel("Frame:"));
 		headbar.add(progressSpinner);
 		headbar.add(new JLabel("Step:"));
@@ -189,7 +237,13 @@ public class Main
 		headbar.add(deltaSpinner);
 		headbar.add(new JLabel("FPS:"));
 		headbar.add(delay);
+		headbar.add(new JLabel("Window:"));
+		headbar.add(windowSpinner);
+		headbar.add(new JLabel("Average:"));
+		headbar.add(averageSpinner);
+		
 		headbar.add(button_play);
+		
 		headbar.add(new JLabel("User documentation:"));
 		headbar.add(button_help);
 		
@@ -206,21 +260,20 @@ public class Main
 		Part part_file = new FilePart();
 		Part part_property = new PropertyPart();
 		
-		Part part_voltage_density_canvas = new VoltageHistogramCanvasPart();
-		Part part_current_density_canvas = new CurrentHistogramCanvasPart();
-		Part part_resistance_density_canvas = new ResistanceHistogramCanvasPart();
+		Part part_voltage_density_canvas = new VoltageHistogramCanvasPart(frame, average, histogram);
+		Part part_current_density_canvas = new CurrentHistogramCanvasPart(frame, average, histogram);
+		Part part_resistance_density_canvas = new ResistanceHistogramCanvasPart(frame, average, histogram);
 		
-		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart();
-		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart();
-		Part part_resistance_timeseries_canvas = new ResistanceTimeseriesCanvasPart();
+		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart(frame, window, average);
+		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart(frame, window, average);
+		Part part_resistance_timeseries_canvas = new ResistanceTimeseriesCanvasPart(frame, window, average);
 		
-		Part part_voltage_derivative_canvas = new VoltageDerivativeCanvasPart();
-		Part part_current_derivative_canvas = new CurrentDerivativeCanvasPart();
-		Part part_resistance_derivative_canvas = new ResistanceDerivativeCanvasPart();
+		Part part_voltage_derivative_canvas = new VoltageDerivativeCanvasPart(frame, window, average);
+		Part part_current_derivative_canvas = new CurrentDerivativeCanvasPart(frame, window, average);
+		Part part_resistance_derivative_canvas = new ResistanceDerivativeCanvasPart(frame, window, average);
 		
-		//Part part_current_voltage_trace_canvas = new CurrentVoltageTraceCanvasPart();
-		Part part_current_voltage_average_trace_canvas = new CurrentVoltageAverageTraceCanvasPart();
-		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart();
+		Part part_current_voltage_average_trace_canvas = new CurrentVoltageTraceCanvasPart(frame, window, average);
+		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart(frame, window, average);
 		
 		// Grid
 		SplitDockGrid grid = new SplitDockGrid();
@@ -240,7 +293,6 @@ public class Main
 		grid.addDockable(2, 2, 1, 1, part_resistance_timeseries_canvas.getDockable());
 		grid.addDockable(3, 2, 1, 1, part_resistance_derivative_canvas.getDockable());
 		
-		//grid.addDockable(4, 0.0, 2, 1.5, part_current_voltage_trace_canvas.getDockable());
 		grid.addDockable(4, 0.0, 2, 1.5, part_current_voltage_average_trace_canvas.getDockable());
 		grid.addDockable(4, 1.5, 2, 1.5, part_current_voltage_cloud_canvas.getDockable());
 		

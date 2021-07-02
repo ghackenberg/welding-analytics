@@ -36,6 +36,7 @@ public class ASDFile extends File
 	
 	private List<double[]> data;
 	private List<double[]> activeData;
+	private Map<Integer, List<double[]>> averageActiveData;
 
 	private double minTimestampMeasured = Double.MAX_VALUE;
 	private double maxTimestampMeasured = -Double.MAX_VALUE;
@@ -80,6 +81,7 @@ public class ASDFile extends File
 		
 		data = new ArrayList<>();
 		activeData = new ArrayList<>();
+		averageActiveData = new HashMap<>();
 		
 		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(0));
 		
@@ -230,12 +232,7 @@ public class ASDFile extends File
 		return activeData.get(index)[VOLTAGE_INDEX];
 	}
 	
-	public double getCurrentDisplayed(int index)
-	{
-		return activeData.get(index)[CURRENT_INDEX];
-	}
-	
-	public double getAverageVoltageDisplayed(int index, int window)
+	private double calculateAverageVoltageDisplayed(int index, int window)
 	{
 		double average = 0;
 		double count = 0;
@@ -252,7 +249,22 @@ public class ASDFile extends File
 		return average / count;
 	}
 	
-	public double getAverageCurrentDisplayed(int index, int window)
+	public double getAverageVoltageDisplayed(int index, int window)
+	{
+		if (!averageActiveData.containsKey(window))
+		{
+			updateAverageActiveData(window);
+		}
+		
+		return averageActiveData.get(window).get(index)[VOLTAGE_INDEX];
+	}
+	
+	public double getCurrentDisplayed(int index)
+	{
+		return activeData.get(index)[CURRENT_INDEX];
+	}
+	
+	private double calculateAverageCurrentDisplayed(int index, int window)
 	{
 		double average = 0;
 		double count = 0;
@@ -269,9 +281,24 @@ public class ASDFile extends File
 		return average / count;
 	}
 	
+	public double getAverageCurrentDisplayed(int index, int window)
+	{
+		if (!averageActiveData.containsKey(window))
+		{
+			updateAverageActiveData(window);
+		}
+		
+		return averageActiveData.get(window).get(index)[CURRENT_INDEX];
+	}
+	
 	public double getResistanceDisplayed(int index)
 	{
 		return getVoltageDisplayed(index) / getCurrentDisplayed(index);
+	}
+	
+	public double getAverageResistanceDisplayed(int index, int window)
+	{
+		return getAverageVoltageDisplayed(index, window) / getAverageCurrentDisplayed(index, window);
 	}
 	
 	public double getMinTimestampMeasured()
@@ -1121,6 +1148,26 @@ public class ASDFile extends File
 				this.maxTimestamp = Math.max(this.maxTimestamp, timestamp);
 			}
 		}
+		
+		averageActiveData.clear();
+	}
+	
+	private void updateAverageActiveData(int window)
+	{
+		List<double[]> data = new ArrayList<>();
+		
+		for (int index = 0; index < getLengthDisplayed(); index++)
+		{
+			double[] line = new double[3];
+			
+			line[TIMESTAMP_INDEX] = activeData.get(index)[TIMESTAMP_INDEX];
+			line[CURRENT_INDEX] = calculateAverageCurrentDisplayed(index, window);
+			line[VOLTAGE_INDEX] = calculateAverageVoltageDisplayed(index, window);
+			
+			data.add(line);
+		}
+		
+		averageActiveData.put(window, data);
 	}
 	
 	private double parseDouble(String string) throws NumberFormatException, ParseException

@@ -1,31 +1,40 @@
 package com.hyperkit.analysis.parts.canvas;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.hyperkit.analysis.events.values.AnimateChangeEvent;
+import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.ExponentChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.OffsetChangeEvent;
+import com.hyperkit.analysis.events.values.WindowChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class CloudCanvasPart extends CanvasPart
 {
 	
-	private int frame = 0;
+	private int frame;
+	private int window;
+	private int average;
+	
 	private int offset = 10;
 	private int exponent = 3;
-	private int window = 10000;
 	private boolean animate = false;
 	
-	public CloudCanvasPart(String title, String domain, String range)
+	public CloudCanvasPart(String title, String domain, String range, int frame, int window, int average)
 	{
 		super(title, domain, range, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"));
+		
+		this.frame = frame;
+		this.window = window;
+		this.average = average;
 		
 		// Offset
 		
@@ -47,27 +56,13 @@ public abstract class CloudCanvasPart extends CanvasPart
 			}
 		);
 		
-		// Window
-		
-		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 1000, 100000, 1000));
-		windowSpinner.addChangeListener(
-			event ->
-			{
-				window = (int) windowSpinner.getValue();
-				
-				getPanel().repaint();
-			}
-		);
-		
 		// Animate
 		
 		JCheckBox animateCheck = new JCheckBox("", animate);
 		animateCheck.addChangeListener(
 			event ->
 			{
-				animate = animateCheck.isSelected();
-				
-				getPanel().repaint();
+				this.handleEvent(new AnimateChangeEvent(animateCheck.isSelected()));
 			}
 		);
 		
@@ -75,40 +70,88 @@ public abstract class CloudCanvasPart extends CanvasPart
 		getToolBar().add(offsetSpinner);
 		getToolBar().add(new JLabel("Exponent:"));
 		getToolBar().add(exponentSpinner);
-		getToolBar().add(new JLabel("Point count:"));
-		getToolBar().add(windowSpinner);
-		getToolBar().add(new JLabel("Animation:"));
+		getToolBar().add(new JLabel("Animate:"));
 		getToolBar().add(animateCheck);
+	}
+	
+	public boolean handleEvent(FrameChangeEvent event)
+	{
+		if (frame != event.getValue())
+		{
+			frame = event.getValue();
+			
+			if (animate)
+			{
+				getPanel().repaint();
+			}
+		}
+		
+		return true;
+	}
+	
+	public boolean handleEvent(WindowChangeEvent event)
+	{
+		if (window != event.getValue())
+		{
+			window = event.getValue();
+			
+			getPanel().repaint();
+		}
+		
+		return true;
+	}
+	
+	public boolean handleEvent(AverageChangeEvent event)
+	{
+		if (average != event.getValue())
+		{
+			average = event.getValue();
+			
+			getPanel().repaint();
+		}
+		
+		return true;
 	}
 	
 	public boolean handleEvent(OffsetChangeEvent event)
 	{
-		offset = event.getValue();
-		
-		getPanel().repaint();
+		if (offset != event.getValue())
+		{
+			offset = event.getValue();
+			
+			getPanel().repaint();
+		}
 		
 		return true;
 	}
 	
 	public boolean handleEvent(ExponentChangeEvent event)
 	{
-		exponent = event.getValue();
-		
-		getPanel().repaint();
-		
-		return true;
-	}
-	
-	public boolean handleEvent(FrameChangeEvent event)
-	{
-		frame = event.getValue();
-		
-		if (animate)
+		if (exponent != event.getValue())
 		{
+			exponent = event.getValue();
+			
 			getPanel().repaint();
 		}
 		
 		return true;
+	}
+	
+	public boolean handleEvent(AnimateChangeEvent event)
+	{
+		if (animate != event.getValue())
+		{
+			animate = event.getValue();
+			
+			getPanel().repaint();
+		}
+		
+		return true;
+	}
+	
+	public int getAverage()
+	{
+		return average;
 	}
 
 	@Override
@@ -124,7 +167,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics graphics)
+	protected void paintComponent(Graphics2D graphics)
 	{
 		
 		int width = getPanel().getWidth();
@@ -142,8 +185,8 @@ public abstract class CloudCanvasPart extends CanvasPart
 			
 			for (int index = start; index <= end; index++)
 			{	
-				double x = projectX(getDomainValue(file, index));
-				double y = projectY(getRangeValue(file, index));
+				double x = projectDomain(getDomainValue(file, index));
+				double y = projectRange(getRangeValue(file, index));
 
 				max[number] = Math.max(max[number], ++count[number][(int) x][(int) y]);
 			}

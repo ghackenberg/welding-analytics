@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.TimeseriesCanvasPart;
 public class ResistanceTimeseriesCanvasPart extends TimeseriesCanvasPart
 {
 	
-	public ResistanceTimeseriesCanvasPart()
+	public ResistanceTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Resistance timeseries", "Resistance (in V/A)");
+		super("Resistance timeseries", "Resistance (in V/A)", frame, window, average);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class ResistanceTimeseriesCanvasPart extends TimeseriesCanvasPart
 	@Override
 	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getResistanceDisplayed(index);
+		return file.getAverageResistanceDisplayed(index, getAverage());
 	}
 
 }

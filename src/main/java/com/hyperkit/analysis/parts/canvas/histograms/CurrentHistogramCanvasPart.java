@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.HistogramCanvasPart;
 public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 {
 	
-	public CurrentHistogramCanvasPart()
+	public CurrentHistogramCanvasPart(int frame, int average, int histogram)
 	{
-		super("Current histogram", "Current (in A)");
+		super("Current histogram", "Current (in A)", frame, average, histogram);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 	@Override
 	protected double getRawValue(ASDFile file, int index)
 	{
-		return file.getCurrentDisplayed(index);
+		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 }

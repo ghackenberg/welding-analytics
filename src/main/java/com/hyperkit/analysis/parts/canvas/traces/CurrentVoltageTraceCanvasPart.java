@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.TraceCanvasPart;
 public class CurrentVoltageTraceCanvasPart extends TraceCanvasPart
 {
 
-	public CurrentVoltageTraceCanvasPart()
+	public CurrentVoltageTraceCanvasPart(int frame, int window, int average)
 	{
-		super("Current-voltage trace", "Current (in A)", "Voltage (in V)", CurrentVoltageTraceCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), 1000, 0);
+		super("Current-voltage average trace", "Current (in A)", "Voltage (in V)", CurrentVoltageTraceCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), frame, window, average, 0);
 	}
 
 	@Override
@@ -38,13 +38,13 @@ public class CurrentVoltageTraceCanvasPart extends TraceCanvasPart
 	@Override
 	protected double getRawDomainValue(ASDFile file, int index)
 	{
-		return file.getCurrentDisplayed(index);
+		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 	@Override
 	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getVoltageDisplayed(index);
+		return file.getAverageVoltageDisplayed(index, getAverage());
 	}
 
 }

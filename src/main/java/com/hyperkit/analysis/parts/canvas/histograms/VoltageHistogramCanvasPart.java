@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.HistogramCanvasPart;
 public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 {
 	
-	public VoltageHistogramCanvasPart()
+	public VoltageHistogramCanvasPart(int frame, int average, int histogram)
 	{
-		super("Voltage histogram", "Voltage (in V)");
+		super("Voltage histogram", "Voltage (in V)", frame, average, histogram);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 	@Override
 	protected double getRawValue(ASDFile file, int index)
 	{
-		return file.getVoltageDisplayed(index);
+		return file.getAverageVoltageDisplayed(index, getAverage());
 	}
 
 }

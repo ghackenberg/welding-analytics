@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.TimeseriesCanvasPart;
 public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
 {
 	
-	public VoltageTimeseriesCanvasPart()
+	public VoltageTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Voltage timeseries", "Voltage (in V)");
+		super("Voltage timeseries", "Voltage (in V)", frame, window, average);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
 	@Override
 	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getVoltageDisplayed(index);
+		return file.getAverageVoltageDisplayed(index, getAverage());
 	}
 
 }

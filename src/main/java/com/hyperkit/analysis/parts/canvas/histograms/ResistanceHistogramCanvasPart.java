@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.HistogramCanvasPart;
 public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 {
 	
-	public ResistanceHistogramCanvasPart()
+	public ResistanceHistogramCanvasPart(int frame, int average, int histogram)
 	{
-		super("Resistance histogram", "Resistance (in V/A)");
+		super("Resistance histogram", "Resistance (in V/A)", frame, average, histogram);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 	@Override
 	protected double getRawValue(ASDFile file, int index)
 	{
-		return file.getResistanceDisplayed(index);
+		return file.getAverageResistanceDisplayed(index, getAverage());
 	}
 
 }

@@ -6,15 +6,15 @@ import com.hyperkit.analysis.parts.canvas.DerivativeCanvasPart;
 public class CurrentDerivativeCanvasPart extends DerivativeCanvasPart
 {
 
-	public CurrentDerivativeCanvasPart()
+	public CurrentDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Current derivative", "Current (in A)");
+		super("Current derivative", "Current (in A)", frame, window, average);
 	}
 
 	@Override
 	protected double getIntegratedRawRangeValue(ASDFile file, int index)
 	{
-		return file.getCurrentDisplayed(index);
+		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 }

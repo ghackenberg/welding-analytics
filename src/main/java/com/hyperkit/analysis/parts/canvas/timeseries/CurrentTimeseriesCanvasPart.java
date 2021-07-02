@@ -6,9 +6,9 @@ import com.hyperkit.analysis.parts.canvas.TimeseriesCanvasPart;
 public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart
 {
 	
-	public CurrentTimeseriesCanvasPart()
+	public CurrentTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Current timeseries", "Current (in A)");
+		super("Current timeseries", "Current (in A)", frame, window, average);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class CurrentTimeseriesCanvasPart extends TimeseriesCanvasPart
 	@Override
 	protected double getRawRangeValue(ASDFile file, int index)
 	{
-		return file.getCurrentDisplayed(index);
+		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 }

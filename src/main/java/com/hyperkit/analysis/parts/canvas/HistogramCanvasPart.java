@@ -1,26 +1,31 @@
 package com.hyperkit.analysis.parts.canvas;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
+import com.hyperkit.analysis.events.values.MarkerChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class HistogramCanvasPart extends CanvasPart
 {
 
-	private int frame = 0;
-	private int histogram = 100;
+	private int frame;
+	private int average;
+	private int histogram;
+	
+	private Map<ASDFile, Integer> marker;
+	
 	private Map<ASDFile, Double> minDomain = new HashMap<>();
 	private Map<ASDFile, Double> maxDomain = new HashMap<>();
 	private Map<ASDFile, Double> minRange = new HashMap<>();
@@ -28,43 +33,71 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private Map<ASDFile, Double> deltas = new HashMap<>();
 	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
-	public HistogramCanvasPart(String title, String domain)
+	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
 	{
 		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"));
 		
-		// Point
+		this.frame = frame;
+		this.average = average;
+		this.histogram = histogram;
 		
-		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 1000, 100));
-		histogramSpinner.addChangeListener(
-			event ->
-			{
-				this.handleEvent(new HistogramChangeEvent((int) histogramSpinner.getValue()));
-			}
-		);
-
-		getToolBar().add(new JLabel("Histogram bins:"));
-		getToolBar().add(histogramSpinner);
-	}
-	
-	public boolean handleEvent(HistogramChangeEvent event)
-	{
-		histogram = event.getValue();
-		
-		for (ASDFile file : getFiles())
-		{
-			updateHistogram(file);	
-		}
-		
-		getPanel().repaint();
-		
-		return true;
+		getToolBar().add(new JLabel("No settings"));
 	}
 	
 	public boolean handleEvent(FrameChangeEvent event)
 	{
-		frame = event.getValue();
+		if (frame != event.getValue())
+		{
+			frame = event.getValue();
+			
+			getPanel().repaint();
+		}
 		
-		getPanel().repaint();
+		return true;
+	}
+	
+	public boolean handleEvent(AverageChangeEvent event)
+	{
+		if (average != event.getValue())
+		{
+			average = event.getValue();
+			
+			for (ASDFile file : getFiles())
+			{
+				updateHistogram(file);	
+			}
+			
+			getPanel().repaint();
+		}
+		
+		return true;
+	}
+	
+	public boolean handleEvent(HistogramChangeEvent event)
+	{
+		if (histogram != event.getValue())
+		{
+			histogram = event.getValue();
+			
+			for (ASDFile file : getFiles())
+			{
+				updateHistogram(file);	
+			}
+			
+			getPanel().repaint();
+		}
+		
+		return true;
+	}
+	
+	public boolean handleEvent(MarkerChangeEvent event)
+	{
+		if (marker != event.getValue())
+		{
+			marker = event.getValue();
+			
+			getPanel().repaint();
+		}
 		
 		return true;
 	}
@@ -82,6 +115,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		minDomain.remove(event.getASDFile());
 		maxDomain.remove(event.getASDFile());
+		
 		deltas.remove(event.getASDFile());
 		series.remove(event.getASDFile());
 		
@@ -99,6 +133,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	protected int getFrame()
 	{
 		return frame;
+	}
+	
+	protected int getAverage()
+	{
+		return average;
 	}
 	
 	protected int getHistogram()
@@ -214,7 +253,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics graphics)
+	protected void paintComponent(Graphics2D graphics)
 	{		
 		for (ASDFile file : getFiles())
 		{
@@ -256,6 +295,32 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				drawPoint(graphics, calculateColor(file, 0.5, progress), x, y);
 			}
 		}
+		
+		if (marker != null)
+		{
+			for (Entry<ASDFile, Integer> entry : marker.entrySet())
+			{
+				ASDFile file = entry.getKey();
+				
+				int index = entry.getValue();
+				
+				double domain = getRawValue(file, index);
+				
+				double range = calculateRangeValue(file, domain);
+				
+				drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+			}
+		}
+	}
+	
+	private double calculateRangeValue(ASDFile file, double value)
+	{
+		double min = minDomain.get(file);
+		double max = maxDomain.get(file);
+		
+		int bin = Math.min((int) Math.floor((value - min) / (max - min) * histogram), histogram - 1);
+		
+		return series.get(file)[1][bin];
 	}
 	
 	protected double getDomainMarkerValue(ASDFile file)
@@ -265,14 +330,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	protected double getRangeMarkerValue(ASDFile file)
 	{
-		double value = getDomainMarkerValue(file);
-		
-		double min = minDomain.get(file);
-		double max = maxDomain.get(file);
-		
-		int bin = Math.min((int) Math.floor((value - min) / (max - min) * histogram), histogram - 1);
-		
-		return series.get(file)[1][bin];
+		return calculateRangeValue(file, getDomainMarkerValue(file));
 	}
 	
 	protected double getRawDataLength(ASDFile file)

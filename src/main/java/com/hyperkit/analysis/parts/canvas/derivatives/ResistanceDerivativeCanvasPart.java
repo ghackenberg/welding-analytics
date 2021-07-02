@@ -6,15 +6,15 @@ import com.hyperkit.analysis.parts.canvas.DerivativeCanvasPart;
 public class ResistanceDerivativeCanvasPart extends DerivativeCanvasPart
 {
 
-	public ResistanceDerivativeCanvasPart()
+	public ResistanceDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Resistance derivative", "Resistance (in V/A)");
+		super("Resistance derivative", "Resistance (in V/A)", frame, window, average);
 	}
 
 	@Override
 	protected double getIntegratedRawRangeValue(ASDFile file, int index)
 	{
-		return file.getVoltageDisplayed(index) / file.getCurrentDisplayed(index);
+		return file.getAverageVoltageDisplayed(index, getAverage()) / file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 }

@@ -3,9 +3,12 @@ package com.hyperkit.analysis.parts.canvas;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JLabel;
+
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 
 public abstract class DerivativeCanvasPart extends TraceCanvasPart
@@ -14,9 +17,11 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	private Map<ASDFile, Double> rangeMin = new HashMap<>();
 	private Map<ASDFile, Double> rangeMax = new HashMap<>();
 	
-	public DerivativeCanvasPart(String title, String range)
+	public DerivativeCanvasPart(String title, String range, int frame, int window, int average)
 	{
-		super(title, "Time (in s)", range, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), 5000, 1);
+		super(title, "Time (in s)", range, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), frame, window, average, 1);
+		
+		getToolBar().add(new JLabel("No settings"));
 	}
 	
 	@Override
@@ -42,6 +47,18 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	{
 		rangeMin.put(event.getASDFile(), calculateRangeMinimum(event.getASDFile()));
 		rangeMax.put(event.getASDFile(), calculateRangeMaximum(event.getASDFile()));
+		
+		return super.handleEvent(event);
+	}
+	
+	@Override
+	public boolean handleEvent(AverageChangeEvent event)
+	{
+		for (ASDFile file : getFiles())
+		{
+			rangeMin.put(file, calculateRangeMinimum(file));
+			rangeMax.put(file, calculateRangeMaximum(file));
+		}
 		
 		return super.handleEvent(event);
 	}
