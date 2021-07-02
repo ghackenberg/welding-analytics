@@ -123,7 +123,7 @@ public class Main
 		
 		// Histogram
 		
-		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 10000, 100));
+		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 10, 1000, 10));
 		histogramSpinner.addChangeListener(
 			event ->
 			{
@@ -227,7 +227,7 @@ public class Main
 		headbar.setFloatable(false);
 		headbar.setLayout(new WrapLayout(FlowLayout.LEFT));
 		
-		headbar.add(new JLabel("Load progress:"));
+		headbar.add(new JLabel("Progress:"));
 		headbar.add(progress);
 		
 		headbar.add(new JLabel("Frame:"));
@@ -241,6 +241,8 @@ public class Main
 		headbar.add(windowSpinner);
 		headbar.add(new JLabel("Average:"));
 		headbar.add(averageSpinner);
+		headbar.add(new JLabel("Histogram:"));
+		headbar.add(histogramSpinner);
 		
 		headbar.add(button_play);
 		headbar.add(button_help);
