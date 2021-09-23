@@ -739,10 +739,46 @@ public abstract class CanvasPart extends Part
 	
 	protected void drawMarker(Graphics2D graphics, Color color, double x, double y)
 	{
+		
+		String sx = String.format("%.2f", x);
+		String sy = String.format("%.2f", y);
+		
+		String string = "(" + sx + "/" + sy + ")";
+		
+		FontMetrics metrics = graphics.getFontMetrics();
+		
+		Rectangle2D bounds = metrics.getStringBounds(string, graphics);
+		
+		int width = panel.getWidth();
+		int height = panel.getHeight();
+		
+		int px = (int) projectDomain(x);
+		int py = (int) projectRange(y);
+		
+		int tw = (int) bounds.getWidth();
+		int th = (int) bounds.getHeight();
+		
+		int tx = px < width / 2. ? px - tw - 5 : px + 5;
+		int ty = py < height / 2. ? py - 5 : py + th + 5;
+		
+		int rx = px < width / 2. ? px - tw - 10 : px;
+		int ry = py < height / 2. ? py - th - 10 : py;
+
+		graphics.setComposite(AlphaComposite.SrcOver.derive(0.75f));
+		graphics.setColor(Color.WHITE);
+		graphics.fillRect(rx, ry, tw + 10, th + 10);
+		graphics.setComposite(AlphaComposite.SrcOver);
+		
+		graphics.setColor(Color.BLACK);
+		graphics.drawRect(rx, ry, tw + 10, th + 10);
+		
 		drawLine(graphics, Color.BLACK, x, range_lower, x, range_upper);
 		drawLine(graphics, Color.BLACK, domain_lower, y, domain_upper, y);
 		
 		drawPoint(graphics, color, x, y);
+
+		graphics.setColor(Color.BLACK);
+		graphics.drawString(string, (int) tx, (int) ty);
 	}
 	
 	protected void drawRectangle(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
