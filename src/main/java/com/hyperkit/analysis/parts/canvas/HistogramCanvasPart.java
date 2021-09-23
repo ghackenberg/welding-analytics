@@ -281,6 +281,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
 			}
 			
+			/*
 			if (frame >= 0 && frame < getRawDataLength(file))
 			{
 				double x = getDomainMarkerValue(file);
@@ -290,6 +291,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				
 				drawPoint(graphics, calculateColor(file, 0.5, progress), x, y);
 			}
+			*/
 		}
 		
 		if (marker != null)
