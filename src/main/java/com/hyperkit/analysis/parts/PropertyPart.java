@@ -269,40 +269,40 @@ public class PropertyPart extends Part
 			rootMeanSquareResistanceField = createTextField(file.getRootMeanSquareResistance());
 			rootMeanSquarePowerField = createTextField(file.getRootMeanSquarePower());
 			
-			// Single parameters
+			// Parameters
 			
-			addRow("Parameter", "Value");
+			addRow("Parameters", "Value");
 			addRow("Color", colorButton);
 			
-			// Min/max parameters
+			// Originals
 			
-			addRow("Parameter", "Minimum", "Maximum");
-			addRow("Timestamp", minTimestampSpinner, maxTimestampSpinner);
-			addRow("Voltage", minVoltageSpinner, maxVoltageSpinner);
-			addRow("Current", minCurrentSpinner, maxCurrentSpinner);
-			
-			// Min/max measurements
-			
-			addRow("Measurement", "Minimum", "Maximum");
+			addRow("Originals", "Minimum", "Maximum");
 			addRow("Timestamp", minTimestampField, maxTimestampField);
 			addRow("Voltage", minVoltageField, maxVoltageField);
 			addRow("Current", minCurrentField, maxCurrentField);
 			
-			// Percentage measurements
+			// Filters
 			
-			addRow("Measurement", "Minimum", "Maximum", "Percentage");
+			addRow("Filters", "Minimum", "Maximum");
+			addRow("Timestamp", minTimestampSpinner, maxTimestampSpinner);
+			addRow("Voltage", minVoltageSpinner, maxVoltageSpinner);
+			addRow("Current", minCurrentSpinner, maxCurrentSpinner);
+			
+			// Statistics
+			
+			addRow("Statistics", "Minimum", "Maximum", "Percentage");
 			addRow("Voltage", minVoltagePercentageField, maxVoltagePercentageField, voltagePercentageField);
 			addRow("Current", minCurrentPercentageField, maxCurrentPercentageField, currentPercentageField);
 			addRow("Resistance", minResistancePercentageField, maxResistancePercentageField, resistancePercentageField);
 			addRow("Power", minPowerPercentageField, maxPowerPercentageField, powerPercentageField);
 			
-			addRow("Measurement", "Mean", "Stdev");
+			addRow("Statistics", "Mean", "Stdev");
 			addRow("Voltage", meanVoltageField, stdevVoltageField);
 			addRow("Current", meanCurrentField, stdevCurrentField);
 			addRow("Resistance", meanResistanceField, stdevResistanceField);
 			addRow("Power", meanPowerField, stdevPowerField);
 			
-			addRow("Measurement", "Median", "Root mean square");
+			addRow("Statistics", "Median", "Root mean square");
 			addRow("Voltage", medianVoltageField, rootMeanSquareVoltageField);
 			addRow("Current", medianCurrentField, rootMeanSquareCurrentField);
 			addRow("Resistance", medianResistanceField, rootMeanSquareResistanceField);
@@ -492,6 +492,7 @@ public class PropertyPart extends Part
 	{
 		JTextField field = new JTextField(format.format(value));
 		
+		field.setColumns(4);
 		field.setEnabled(false);
 		field.setHorizontalAlignment(JTextField.RIGHT);
 		
@@ -511,6 +512,8 @@ public class PropertyPart extends Part
 	private JSpinner createSpinner(double minimumValue, double maximumValue, double value)
 	{
 		JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, (maximumValue - minimumValue) / 100));
+		
+		((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setColumns(4);
 		
 		return spinner;
 	}
