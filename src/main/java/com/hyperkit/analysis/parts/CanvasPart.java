@@ -132,10 +132,24 @@ public abstract class CanvasPart extends Part
 					domain_delta = domain_upper - domain_lower;
 					range_delta = range_upper - range_lower;
 					
-					domain_lower -= domain_delta * 0.1;
+					if (domain_lower >= 0 && domain_lower - domain_delta * 0.1 < 0)
+					{
+						domain_lower = 0;
+					}
+					else
+					{
+						domain_lower -= domain_delta * 0.1;
+					}
 					domain_upper += domain_delta * 0.1;
 					
-					range_lower -= range_delta * 0.1;
+					if (range_lower >= 0 && range_lower - range_delta * 0.1 < 0)
+					{
+						range_lower = 0;
+					}
+					else
+					{
+						range_lower -= range_delta * 0.1;
+					}
 					range_upper += range_delta * 0.1;
 					
 					domain_lower = Math.max(domain_lower, domain_lower_custom);
@@ -174,7 +188,7 @@ public abstract class CanvasPart extends Part
 						
 						unit = Math.max(unit, bounds.getWidth());
 					}
-					while (xticks++ < (width - padding_left - padding_right) / unit / 2);
+					while (xticks++ < (width - padding_left - padding_right) / unit / 3);
 					
 					do
 					{
@@ -190,7 +204,7 @@ public abstract class CanvasPart extends Part
 						
 						unit = Math.max(unit, bounds.getWidth());
 					}
-					while (yticks++ < (height - padding_top - padding_bottom) / unit / 2);
+					while (yticks++ < (height - padding_top - padding_bottom) / unit / 3);
 					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{	
