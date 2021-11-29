@@ -28,12 +28,15 @@ import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvas.clouds.CurrentVoltageCloudCanvasPart;
 import com.hyperkit.analysis.parts.canvas.derivatives.CurrentDerivativeCanvasPart;
+import com.hyperkit.analysis.parts.canvas.derivatives.PowerDerivativeCanvasPart;
 import com.hyperkit.analysis.parts.canvas.derivatives.ResistanceDerivativeCanvasPart;
 import com.hyperkit.analysis.parts.canvas.derivatives.VoltageDerivativeCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.CurrentHistogramCanvasPart;
+import com.hyperkit.analysis.parts.canvas.histograms.PowerHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.ResistanceHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.histograms.VoltageHistogramCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.CurrentTimeseriesCanvasPart;
+import com.hyperkit.analysis.parts.canvas.timeseries.PowerTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.ResistanceTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.timeseries.VoltageTimeseriesCanvasPart;
 import com.hyperkit.analysis.parts.canvas.traces.CurrentVoltageTraceCanvasPart;
@@ -263,14 +266,17 @@ public class Main
 		Part part_voltage_density_canvas = new VoltageHistogramCanvasPart(frame, average, histogram);
 		Part part_current_density_canvas = new CurrentHistogramCanvasPart(frame, average, histogram);
 		Part part_resistance_density_canvas = new ResistanceHistogramCanvasPart(frame, average, histogram);
+		Part part_power_density_canvas = new PowerHistogramCanvasPart(frame, average, histogram);
 		
 		Part part_voltage_timeseries_canvas = new VoltageTimeseriesCanvasPart(frame, window, average);
 		Part part_current_timeseries_canvas = new CurrentTimeseriesCanvasPart(frame, window, average);
 		Part part_resistance_timeseries_canvas = new ResistanceTimeseriesCanvasPart(frame, window, average);
+		Part part_power_timeseries_canvas = new PowerTimeseriesCanvasPart(frame, window, average);
 		
 		Part part_voltage_derivative_canvas = new VoltageDerivativeCanvasPart(frame, window, average);
 		Part part_current_derivative_canvas = new CurrentDerivativeCanvasPart(frame, window, average);
 		Part part_resistance_derivative_canvas = new ResistanceDerivativeCanvasPart(frame, window, average);
+		Part part_power_derivative_canvas = new PowerDerivativeCanvasPart(frame, window, average);
 		
 		Part part_current_voltage_average_trace_canvas = new CurrentVoltageTraceCanvasPart(frame, window, average);
 		Part part_current_voltage_cloud_canvas = new CurrentVoltageCloudCanvasPart(frame, window, average);
@@ -293,8 +299,12 @@ public class Main
 		grid.addDockable(2, 2, 1, 1, part_resistance_timeseries_canvas.getDockable());
 		grid.addDockable(3, 2, 1, 1, part_resistance_derivative_canvas.getDockable());
 		
-		grid.addDockable(4, 0.0, 2, 1.5, part_current_voltage_average_trace_canvas.getDockable());
-		grid.addDockable(4, 1.5, 2, 1.5, part_current_voltage_cloud_canvas.getDockable());
+		grid.addDockable(1, 3, 1, 1, part_power_density_canvas.getDockable());
+		grid.addDockable(2, 3, 1, 1, part_power_timeseries_canvas.getDockable());
+		grid.addDockable(3, 3, 1, 1, part_power_derivative_canvas.getDockable());
+		
+		grid.addDockable(4, 0, 2, 2, part_current_voltage_average_trace_canvas.getDockable());
+		grid.addDockable(4, 2, 2, 2, part_current_voltage_cloud_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();
