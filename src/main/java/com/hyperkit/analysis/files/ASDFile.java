@@ -29,6 +29,8 @@ public class ASDFile extends File
 	private static final int TIMESTAMP_INDEX = 0;
 	private static final int VOLTAGE_INDEX = 1;
 	private static final int CURRENT_INDEX = 2;
+	private static final int RESISTANCE_INDEX = 3;
+	private static final int POWER_INDEX = 4;
 	
 	private String name;
 	private Color color;
@@ -82,6 +84,12 @@ public class ASDFile extends File
 	
 	private double minCurrentPercentage = Double.MAX_VALUE;
 	private double maxCurrentPercentage = -Double.MAX_VALUE;
+	
+	private double minResistancePercentage = Double.MAX_VALUE;
+	private double maxResistancePercentage = -Double.MAX_VALUE;
+	
+	private double minPowerPercentage = Double.MAX_VALUE;
+	private double maxPowerPercentage = -Double.MAX_VALUE;
 
 	public ASDFile(java.io.File file) throws IOException
 	{
@@ -120,7 +128,7 @@ public class ASDFile extends File
 					double second = parseDouble(parts[1]);
 					double third = parseDouble(parts[2]);
 					
-					data.add(new double[] {first, second, third});
+					data.add(new double[] {first, second, third, second / third, second * third});
 				}
 				else if (parts.length == 4)
 				{
@@ -128,7 +136,7 @@ public class ASDFile extends File
 					double second = parseDouble(parts[3]);
 					double third = parseDouble(parts[2]);
 					
-					data.add(new double[] {first, second, third});
+					data.add(new double[] {first, second, third, second / third, second * third});
 				}
 				else
 				{
@@ -228,12 +236,12 @@ public class ASDFile extends File
 	
 	public double getResistanceMeasured(int index)
 	{
-		return getVoltageMeasured(index) / getCurrentMeasured(index);
+		return data.get(index)[RESISTANCE_INDEX];
 	}
 	
 	public double getPowerMeasured(int index)
 	{
-		return getVoltageMeasured(index) * getCurrentMeasured(index);
+		return data.get(index)[POWER_INDEX];
 	}
 	
 	// Displayed
@@ -253,39 +261,24 @@ public class ASDFile extends File
 		return activeData.get(index)[VOLTAGE_INDEX];
 	}
 	
-	private double calculateAverageVoltageDisplayed(int index, int window)
-	{
-		double average = 0;
-		double count = 0;
-		
-		for (int i = Math.max(index - window, 0); i < Math.min(index + window + 1, getLengthDisplayed()); i++)
-		{
-			double delta = i - index;
-			double factor = delta / (window + 1);
-			double weight = 1 - factor * factor;
-			average += activeData.get(i)[VOLTAGE_INDEX] * weight;
-			count += weight;
-		}
-		
-		return average / count;
-	}
-	
-	public double getAverageVoltageDisplayed(int index, int window)
-	{
-		if (!averageActiveData.containsKey(window))
-		{
-			updateAverageActiveData(window);
-		}
-		
-		return averageActiveData.get(window).get(index)[VOLTAGE_INDEX];
-	}
-	
 	public double getCurrentDisplayed(int index)
 	{
 		return activeData.get(index)[CURRENT_INDEX];
 	}
 	
-	private double calculateAverageCurrentDisplayed(int index, int window)
+	public double getResistanceDisplayed(int index)
+	{
+		return activeData.get(index)[RESISTANCE_INDEX];
+	}
+	
+	public double getPowerDisplayed(int index)
+	{
+		return activeData.get(index)[POWER_INDEX];
+	}
+	
+	// Average displayed - calculate
+
+	private double calculateAverageDisplayed(int column, int index, int window)
 	{
 		double average = 0;
 		double count = 0;
@@ -295,172 +288,142 @@ public class ASDFile extends File
 			double delta = i - index;
 			double factor = delta / (window + 1);
 			double weight = 1 - factor * factor;
-			average += activeData.get(i)[CURRENT_INDEX] * weight;
+			average += activeData.get(i)[column] * weight;
 			count += weight;
 		}
 		
 		return average / count;
 	}
+
+	private double calculateAverageVoltageDisplayed(int index, int window)
+	{
+		return calculateAverageDisplayed(VOLTAGE_INDEX, index, window);
+	}
 	
-	public double getAverageCurrentDisplayed(int index, int window)
+	private double calculateAverageCurrentDisplayed(int index, int window)
+	{
+		return calculateAverageDisplayed(CURRENT_INDEX, index, window);
+	}
+	
+	private double calculateAverageResistanceDisplayed(int index, int window)
+	{
+		return calculateAverageDisplayed(RESISTANCE_INDEX, index, window);
+	}
+	
+	private double calculateAveragePowerDisplayed(int index, int window)
+	{
+		return calculateAverageDisplayed(POWER_INDEX, index, window);
+	}
+	
+	// Average displayed - get
+	
+	private double getAverageDisplayed(int column, int index, int window)
 	{
 		if (!averageActiveData.containsKey(window))
 		{
 			updateAverageActiveData(window);
 		}
 		
-		return averageActiveData.get(window).get(index)[CURRENT_INDEX];
+		return averageActiveData.get(window).get(index)[column];
 	}
 	
-	public double getResistanceDisplayed(int index)
+	public double getAverageVoltageDisplayed(int index, int window)
 	{
-		return getVoltageDisplayed(index) / getCurrentDisplayed(index);
+		return getAverageDisplayed(VOLTAGE_INDEX, index, window);
+	}
+	
+	public double getAverageCurrentDisplayed(int index, int window)
+	{
+		return getAverageDisplayed(CURRENT_INDEX, index, window);
 	}
 	
 	public double getAverageResistanceDisplayed(int index, int window)
 	{
-		return getAverageVoltageDisplayed(index, window) / getAverageCurrentDisplayed(index, window);
-	}
-	
-	public double getPowerDisplayed(int index)
-	{
-		return getVoltageDisplayed(index) * getCurrentDisplayed(index);
+		return getAverageDisplayed(RESISTANCE_INDEX, index, window);
 	}
 	
 	public double getAveragePowerDisplayed(int index, int window)
 	{
-		return getAverageVoltageDisplayed(index, window) * getAverageCurrentDisplayed(index, window);
+		return getAverageDisplayed(POWER_INDEX, index, window);
+	}
+	
+	// Min/max measured
+	
+	private double getMinMeasured(int column, double min)
+	{
+		if (min == +Double.MAX_VALUE)
+		{
+			for (double[] item : data)
+			{
+				min = Math.min(min,  item[column]);
+			}
+		}
+		return min;
+	}
+	
+	private double getMaxMeasured(int column, double max)
+	{
+		if (max == -Double.MAX_VALUE)
+		{
+			for (double[] item : data)
+			{
+				max = Math.max(max,  item[column]);
+			}
+		}
+		return max;
 	}
 	
 	public double getMinTimestampMeasured()
 	{
-		if (minTimestampMeasured == Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				minTimestampMeasured = Math.min(minTimestampMeasured, item[TIMESTAMP_INDEX]);
-			}
-		}
-		
-		return minTimestampMeasured;
+		return minTimestampMeasured = getMinMeasured(TIMESTAMP_INDEX, minTimestampMeasured);
 	}
 	
 	public double getMaxTimestampMeasured()
 	{
-		if (maxTimestampMeasured == -Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				maxTimestampMeasured = Math.max(maxTimestampMeasured, item[TIMESTAMP_INDEX]);
-			}
-		}
-		
-		return maxTimestampMeasured;
+		return maxTimestampMeasured = getMaxMeasured(TIMESTAMP_INDEX, maxTimestampMeasured);
 	}
 	
 	public double getMinVoltageMeasured()
 	{
-		if (minVoltageMeasured == Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				minVoltageMeasured = Math.min(minVoltageMeasured, item[VOLTAGE_INDEX]);
-			}
-		}
-		
-		return minVoltageMeasured;
+		return minVoltageMeasured = getMinMeasured(VOLTAGE_INDEX, minVoltageMeasured);
 	}
 	
 	public double getMaxVoltageMeasured()
 	{
-		if (maxVoltageMeasured == -Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				maxVoltageMeasured = Math.max(maxVoltageMeasured, item[VOLTAGE_INDEX]);
-			}
-		}
-		
-		return maxVoltageMeasured;
+		return maxVoltageMeasured = getMaxMeasured(VOLTAGE_INDEX, maxVoltageMeasured);
 	}
 	
 	public double getMinCurrentMeasured()
 	{
-		if (minCurrentMeasured == Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				minCurrentMeasured = Math.min(minCurrentMeasured, item[CURRENT_INDEX]);
-			}
-		}
-		
-		return minCurrentMeasured;
+		return minCurrentMeasured = getMinMeasured(CURRENT_INDEX, minCurrentMeasured);
 	}
 	
 	public double getMaxCurrentMeasured()
 	{
-		if (maxCurrentMeasured == -Double.MAX_VALUE)
-		{
-			for (double[] item : data)
-			{
-				maxCurrentMeasured = Math.max(maxCurrentMeasured, item[CURRENT_INDEX]);
-			}
-		}
-		
-		return maxCurrentMeasured;
+		return maxCurrentMeasured = getMaxMeasured(CURRENT_INDEX, maxCurrentMeasured);
 	}
 	
 	public double getMinResistanceMeasured()
 	{
-		if (minResistanceMeasured == Double.MAX_VALUE)
-		{
-			for (int index = 0; index < data.size(); index++)
-			{
-				minResistanceMeasured = Math.min(minResistanceMeasured, getResistanceMeasured(index));
-			}
-		}
-		
-		return minResistanceMeasured;
+		return minResistanceMeasured = getMinMeasured(RESISTANCE_INDEX, minResistanceMeasured);
 	}
 	
 	public double getMaxResistanceMeasured()
 	{
-		if (maxResistanceMeasured == -Double.MAX_VALUE)
-		{
-			for (int index = 0; index < data.size(); index++)
-			{
-				maxResistanceMeasured = Math.max(maxResistanceMeasured, getResistanceMeasured(index));
-			}
-		}
-		
-		return maxResistanceMeasured;
+		return maxResistanceMeasured = getMaxMeasured(RESISTANCE_INDEX, maxResistanceMeasured);
 	}
 	
 	public double getMinPowerMeasured()
 	{
-		if (minPowerMeasured == Double.MAX_VALUE)
-		{
-			for (int index = 0; index < data.size(); index++)
-			{
-				minPowerMeasured = Math.min(minPowerMeasured, getPowerMeasured(index));
-			}
-		}
-		
-		return minPowerMeasured;
+		return minPowerMeasured = getMinMeasured(POWER_INDEX, minPowerMeasured);
 	}
 	
 	public double getMaxPowerMeasured()
 	{
-		if (maxPowerMeasured == -Double.MAX_VALUE)
-		{
-			for (int index = 0; index < data.size(); index++)
-			{
-				maxPowerMeasured = Math.max(maxPowerMeasured, getPowerMeasured(index));
-			}
-		}
-		
-		return maxPowerMeasured;
+		return maxPowerMeasured = getMaxMeasured(POWER_INDEX, maxPowerMeasured);
 	}
+	
+	// Min/max displayed
 	
 	public double getMinTimestampDisplayed()
 	{
@@ -582,6 +545,8 @@ public class ASDFile extends File
 		}
 	}
 	
+	// Min/max percentage
+	
 	public double getMinVoltagePercentage()
 	{
 		if (minVoltagePercentage == Double.MAX_VALUE)
@@ -630,6 +595,56 @@ public class ASDFile extends File
 		}
 	}
 	
+	public double getMinResistancePercentage()
+	{
+		if (minResistancePercentage == Double.MAX_VALUE)
+		{
+			return getMinResistanceDisplayed();
+		}
+		else
+		{
+			return minResistancePercentage;
+		}
+	}
+	
+	public double getMaxResistancePercentage()
+	{
+		if (maxResistancePercentage == -Double.MAX_VALUE)
+		{
+			return getMaxResistanceDisplayed();
+		}
+		else
+		{
+			return maxResistancePercentage;
+		}
+	}
+	
+	public double getMinPowerPercentage()
+	{
+		if (minPowerPercentage == Double.MAX_VALUE)
+		{
+			return getMinPowerDisplayed();
+		}
+		else
+		{
+			return minPowerPercentage;
+		}
+	}
+	
+	public double getMaxPowerPercentage()
+	{
+		if (maxPowerPercentage == -Double.MAX_VALUE)
+		{
+			return getMaxPowerDisplayed();
+		}
+		else
+		{
+			return maxPowerPercentage;
+		}
+	}
+	
+	// Set min/max displayed
+	
 	public void setMinTimestampDisplayed(double value)
 	{
 		minTimestampDisplayed = value;
@@ -672,6 +687,36 @@ public class ASDFile extends File
 		updateActiveData();
 	}
 	
+	public void setMinResistanceDisplayed(double value)
+	{
+		minResistanceDisplayed = value;
+		
+		updateActiveData();
+	}
+	
+	public void setMaxResistanceDisplayed(double value)
+	{
+		maxResistanceDisplayed = value;
+		
+		updateActiveData();
+	}
+	
+	public void setMinPowerDisplayed(double value)
+	{
+		minPowerDisplayed = value;
+		
+		updateActiveData();
+	}
+	
+	public void setMaxPowerDisplayed(double value)
+	{
+		maxPowerDisplayed = value;
+		
+		updateActiveData();
+	}
+	
+	// Set min/max percentage
+	
 	public void setMinVoltagePercentage(double value)
 	{
 		minVoltagePercentage = value;
@@ -692,7 +737,29 @@ public class ASDFile extends File
 		maxCurrentPercentage = value;
 	}
 	
-	public double[][] getVoltageTimeseries(int frame, int window)
+	public void setMinResistancePercentage(double value)
+	{
+		minResistancePercentage = value;
+	}
+	
+	public void setMaxResistancePercentage(double value)
+	{
+		maxResistancePercentage = value;
+	}
+	
+	public void setMinPowerPercentage(double value)
+	{
+		minPowerPercentage = value;
+	}
+	
+	public void setMaxPowerPercentage(double value)
+	{
+		maxPowerPercentage = value;
+	}
+	
+	// Get timeseries
+	
+	private double[][] getTimeseries(int column, int frame, int window)
 	{
 		int end = Math.min(frame + 1, activeData.size());
 		
@@ -705,131 +772,100 @@ public class ASDFile extends File
 		for (int index = start; index < end; index++)
 		{
 			double timestamp = activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
-			double voltage = activeData.get(index)[VOLTAGE_INDEX];
+			double value = activeData.get(index)[column];
 			
 			timeseries[0][index - start] = timestamp;
-			timeseries[1][index - start] = voltage;
+			timeseries[1][index - start] = value;
 		}
 		
 		return timeseries;
+	}
+	
+	public double[][] getVoltageTimeseries(int frame, int window)
+	{
+		return getTimeseries(VOLTAGE_INDEX, frame, window);
 	}
 	
 	public double[][] getCurrentTimeseries(int frame, int window)
 	{
-		int end = Math.min(frame + 1, activeData.size());
+		return getTimeseries(CURRENT_INDEX, frame, window);
+	}
+	
+	public double[][] getResistanceTimeseries(int frame, int window)
+	{
+		return getTimeseries(RESISTANCE_INDEX, frame, window);
+	}
+	
+	public double[][] getPowerTimeseries(int frame, int window)
+	{
+		return getTimeseries(POWER_INDEX, frame, window);
+	}
+	
+	// Get density
+	
+	private double[][] getDensity(int column, double min, double max, int steps)
+	{		
+		// Create density
 		
-		int start = Math.max(frame + 1 - window, 0);
+		double[][] density = new double[2][steps];
 		
-		int count = Math.max(0, end - start);
+		// Calculate x
 		
-		double[][] timeseries = new double[2][count];
-
-		for (int index = start; index < end; index++)
+		for (int i = 0; i < steps; i++)
 		{
-			double timestamp = activeData.get(index)[TIMESTAMP_INDEX] - minTimestamp;
-			double current = activeData.get(index)[CURRENT_INDEX];
-			
-			timeseries[0][index - start] = timestamp;
-			timeseries[1][index - start] = current;
+			density[0][i] = min + (max - min) / steps * (i + 0.5);
 		}
 		
-		return timeseries;
+		// Calculate y
+		
+		int count = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+			
+			int bin = Math.min((int) Math.floor((value - min) / (max - min) * steps), steps - 1);
+			
+			density[1][bin]++;
+			
+			count++;
+		}
+		
+		// Normalize y
+		
+		for (int i = 0; i < steps; i++)
+		{
+			density[1][i] /= count;
+		}
+		
+		return density;
 	}
 	
 	public double[][] getVoltageDensity(int steps)
 	{
-		// Find limits
-		
-		double minVoltage = getMinVoltageDisplayed();
-		double maxVoltage = getMaxVoltageDisplayed();
-		
-		// Create density
-		
-		double[][] density = new double[2][steps];
-		
-		// Calculate x
-		
-		for (int i = 0; i < steps; i++)
-		{
-			density[0][i] = minVoltage + (maxVoltage - minVoltage) / steps * (i + 0.5);
-		}
-		
-		// Calculate y
-		
-		int count = 0;
-		
-		for (double[] line : activeData)
-		{
-			double voltage = line[VOLTAGE_INDEX];
-			
-			int bin = Math.min((int) Math.floor((voltage - minVoltage) / (maxVoltage - minVoltage) * steps), steps - 1);
-			
-			density[1][bin]++;
-			
-			count++;
-		}
-		
-		// Normalize y
-		
-		for (int i = 0; i < steps; i++)
-		{
-			density[1][i] /= count;
-		}
-		
-		return density;
+		return getDensity(VOLTAGE_INDEX, getMinVoltageDisplayed(), getMaxVoltageDisplayed(), steps);
 	}
 	
 	public double[][] getCurrentDensity(int steps)
 	{
-		// Find limits
-		
-		double minCurrent = getMinCurrentDisplayed();
-		double maxCurrent = getMaxCurrentDisplayed();
-		
-		// Create density
-		
-		double[][] density = new double[2][steps];
-		
-		// Calculate x
-		
-		for (int i = 0; i < steps; i++)
-		{
-			density[0][i] = minCurrent + (maxCurrent - minCurrent) / steps * (i + 0.5);
-		}
-		
-		// Calculate y
-		
-		int count = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			
-			int bin = Math.min((int) Math.floor((current - minCurrent) / (maxCurrent - minCurrent) * steps), steps - 1);
-			
-			density[1][bin]++;
-			
-			count++;
-		}
-		
-		// Normalize y
-		
-		for (int i = 0; i < steps; i++)
-		{
-			density[1][i] /= count;
-		}
-		
-		return density;
+		return getDensity(CURRENT_INDEX, getMinCurrentDisplayed(), getMaxCurrentDisplayed(), steps);
 	}
 	
-	public double getCurrentProbability(int steps, int frame)
+	public double[][] getResistanceDensity(int steps)
 	{
-		double[][] density = getCurrentDensity(steps);
-		
-		double min = getMinCurrentDisplayed();
-		double max = getMaxCurrentDisplayed();
-		
-		double value = activeData.get(frame)[CURRENT_INDEX];
+		return getDensity(RESISTANCE_INDEX, getMinResistanceDisplayed(), getMaxResistanceDisplayed(), steps);
+	}
+	
+	public double[][] getPowerDensity(int steps)
+	{
+		return getDensity(POWER_INDEX, getMinPowerDisplayed(), getMaxPowerDisplayed(), steps);
+	}
+	
+	// Get probability
+	
+	private double getProbability(int column, double[][] density, double min, double max, int steps, int frame)
+	{
+		double value = activeData.get(frame)[column];
 		
 		int bin = Math.min((int) Math.floor((value - min) / (max - min) * steps), steps - 1);
 		
@@ -838,17 +874,265 @@ public class ASDFile extends File
 	
 	public double getVoltageProbability(int steps, int frame)
 	{
-		double[][] density = getVoltageDensity(steps);
-		
-		double min = getMinVoltageDisplayed();
-		double max = getMaxVoltageDisplayed();
-		
-		double value = activeData.get(frame)[VOLTAGE_INDEX];
-		
-		int bin = Math.min((int) Math.floor((value - min) / (max - min) * steps), steps - 1);
-		
-		return density[1][bin];
+		return getProbability(VOLTAGE_INDEX, getVoltageDensity(steps), getMinVoltageDisplayed(), getMaxVoltageDisplayed(), steps, frame);
 	}
+	
+	public double getCurrentProbability(int steps, int frame)
+	{
+		return getProbability(CURRENT_INDEX, getCurrentDensity(steps), getMinCurrentDisplayed(), getMaxCurrentDisplayed(), steps, frame);
+	}
+	
+	public double getResistanceProbability(int steps, int frame)
+	{
+		return getProbability(RESISTANCE_INDEX, getResistanceDensity(steps), getMinResistanceDisplayed(), getMaxResistanceDisplayed(), steps, frame);
+	}
+	
+	public double getPowerProbability(int steps, int frame)
+	{
+		return getProbability(POWER_INDEX, getPowerDensity(steps), getMinPowerDisplayed(), getMaxPowerDisplayed(), steps, frame);
+	}
+	
+	// Get percentage
+	
+	private double getPercentage(int column, double min, double max)
+	{		
+		int count = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+			
+			if (value >= min && value <= max)
+			{
+				count++;
+			}
+		}
+		
+		return count * 100.0 / activeData.size();
+	}
+	
+	public double getVoltagePercentage()
+	{
+		return getPercentage(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getCurrentPercentage()
+	{
+		return getPercentage(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getResistancePercentage()
+	{
+		return getPercentage(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getPowerPercentage()
+	{
+		return getPercentage(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
+	}
+	
+	// Get count
+	
+	private int getCount(int column, double min, double max)
+	{
+		int count = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+			
+			if (value >= min && value <= max)
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+	
+	// Get median
+	
+	private double getMedian(int column, double min, double max)
+	{
+		List<Double> values = new ArrayList<>();
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+
+			if (value >= min && value <= max)
+			{
+				values.add(value);
+			}
+		}
+		
+		values.sort((a, b) ->
+		{
+			double delta = a - b;
+			
+			if (delta < 0)
+			{
+				return -1;
+			}
+			else if (delta > 0)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		});
+		
+		return values.get((int) Math.floor(values.size() / 2));
+	}
+	
+	public double getMedianVoltage()
+	{
+		return getMedian(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getMedianCurrent()
+	{
+		return getMedian(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getMedianResistance()
+	{
+		return getMedian(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getMedianPower()
+	{
+		return getMedian(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
+	}
+	
+	// Get mean
+	
+	private double getMean(int column, double min, double max)
+	{
+		int count = getCount(column, min, max);
+		
+		double result = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+
+			if (value >= min && value <= max)
+			{
+				result += value / count;
+			}
+		}
+		
+		return result;
+	}
+	
+	public double getMeanVoltage()
+	{
+		return getMean(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getMeanCurrent()
+	{
+		return getMean(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getMeanResistance()
+	{
+		return getMean(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getMeanPower()
+	{
+		return getMean(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
+	}
+	
+	// Get stdev
+	
+	private double getStdev(int column, double min, double max, double mean)
+	{
+		int count = getCount(column, min, max);
+		
+		double stdev = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+
+			if (value >= min && value <= max)
+			{
+				double delta = value - mean;
+				
+				stdev += Math.sqrt(delta * delta) / count;
+			}
+		}
+		
+		return stdev;
+	}
+	
+	public double getStdevVoltage()
+	{
+		return getStdev(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage(), getMeanVoltage());
+	}
+	
+	public double getStdevCurrent()
+	{
+		return getStdev(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage(), getMeanCurrent());
+	}
+
+	public double getStdevResistance()
+	{
+		return getStdev(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage(), getMeanResistance());
+	}
+
+	public double getStdevPower()
+	{
+		return getStdev(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage(), getMeanPower());
+	}
+	
+	// Get root mean square
+	
+	private double getRootMeanSquare(int column, double min, double max)
+	{
+		int count = getCount(column, min, max);
+		
+		double result = 0;
+		
+		for (double[] line : activeData)
+		{
+			double value = line[column];
+
+			if (value >= min && value <= max)
+			{
+				result += value * value / count;
+			}
+		}
+		
+		return Math.sqrt(result);
+	}
+	
+	public double getRootMeanSquareVoltage()
+	{
+		return getRootMeanSquare(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getRootMeanSquareCurrent()
+	{
+		return getRootMeanSquare(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getRootMeanSquareResistance()
+	{
+		return getRootMeanSquare(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getRootMeanSquarePower()
+	{
+		return getRootMeanSquare(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
+	}
+	
+	// Get other
 	
 	public double[][] getCurrentVoltage(int frame, int window_backward)
 	{
@@ -1067,126 +1351,6 @@ public class ASDFile extends File
 		return regression;
 	}
 	
-	public double getMeanPower()
-	{
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			double voltage = line[VOLTAGE_INDEX];
-			
-			result += current * voltage / activeData.size();
-		}
-		
-		return result;
-	}
-	
-	public double getMeanCurrent()
-	{
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			
-			result += current / activeData.size();
-		}
-		
-		return result;
-	}
-	
-	public double getMeanVoltage() {
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double voltage = line[VOLTAGE_INDEX];
-			
-			result += voltage / activeData.size();
-		}
-		
-		return result;
-	}
-	
-	public double getRootMeanSquareCurrent()
-	{	
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			
-			result += current * current / activeData.size();
-		}
-		
-		return Math.sqrt(result);
-	}
-	
-	public double getRootMeanSquareVoltage()
-	{
-		// Calculate result
-		
-		double result = 0;
-		
-		for (double[] line : activeData)
-		{
-			double voltage = line[VOLTAGE_INDEX];
-			
-			result += voltage * voltage / activeData.size();
-		}
-		
-		return Math.sqrt(result);
-	}
-	
-	public double getVoltagePercentage()
-	{
-		double min = getMinVoltagePercentage();
-		double max = getMaxVoltagePercentage();
-		
-		int count = 0;
-		
-		for (double[] line : activeData)
-		{
-			double voltage = line[VOLTAGE_INDEX];
-			
-			if (voltage >= min && voltage <= max)
-			{
-				count++;
-			}
-		}
-		
-		return count * 100.0 / activeData.size();
-	}
-	
-	public double getCurrentPercentage()
-	{
-		double min = getMinCurrentPercentage();
-		double max = getMaxCurrentPercentage();
-		
-		int count = 0;
-		
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			
-			if (current >= min && current <= max)
-			{
-				count++;
-			}
-		}
-		
-		return count * 100.0 / activeData.size();
-	}
-	
 	@Override
 	public String toString()
 	{
@@ -1206,6 +1370,12 @@ public class ASDFile extends File
 		double minVoltage = getMinVoltageDisplayed();
 		double maxVoltage = getMaxVoltageDisplayed();
 		
+		double minResistance = getMinResistanceDisplayed();
+		double maxResistance = getMaxResistanceDisplayed();
+		
+		double minPower = getMinPowerDisplayed();
+		double maxPower = getMaxPowerDisplayed();
+		
 		// Clear active data
 		
 		activeData.clear();
@@ -1220,8 +1390,16 @@ public class ASDFile extends File
 			double timestamp = line[TIMESTAMP_INDEX];
 			double current = line[CURRENT_INDEX];
 			double voltage = line[VOLTAGE_INDEX];
+			double resistance = line[RESISTANCE_INDEX];
+			double power = line[POWER_INDEX];
+			
+			boolean timestampOk = timestamp >= minTimestamp && timestamp <= maxTimestamp;
+			boolean currentOk = current >= minCurrent && current <= maxCurrent;
+			boolean voltageOk = voltage >= minVoltage && voltage <= maxVoltage;
+			boolean resistanceOk = resistance >= minResistance && resistance <= maxResistance;
+			boolean powerOk = power >= minPower && power <= maxPower;
 
-			if (timestamp >= minTimestamp && timestamp <= maxTimestamp && current >= minCurrent && current <= maxCurrent && voltage >= minVoltage && voltage <= maxVoltage)
+			if (timestampOk && currentOk && voltageOk && resistanceOk && powerOk)
 			{	
 				activeData.add(line);
 				
@@ -1239,11 +1417,13 @@ public class ASDFile extends File
 		
 		for (int index = 0; index < getLengthDisplayed(); index++)
 		{
-			double[] line = new double[3];
+			double[] line = new double[5];
 			
 			line[TIMESTAMP_INDEX] = activeData.get(index)[TIMESTAMP_INDEX];
 			line[CURRENT_INDEX] = calculateAverageCurrentDisplayed(index, window);
 			line[VOLTAGE_INDEX] = calculateAverageVoltageDisplayed(index, window);
+			line[RESISTANCE_INDEX] = calculateAverageResistanceDisplayed(index, window);
+			line[POWER_INDEX] = calculateAveragePowerDisplayed(index, window);
 			
 			data.add(line);
 		}

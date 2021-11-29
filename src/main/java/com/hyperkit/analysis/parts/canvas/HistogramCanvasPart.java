@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
@@ -124,6 +125,21 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		updateHistogram(event.getASDFile());
 		
 		return super.handleEvent(event);
+	}
+	
+	public boolean handleEvent(ZoomChangeEvent event)
+	{
+		if (event.getPart() == this)
+		{
+			double min = getDomainLowerCustom();
+			double max = getDomainUpperCustom();
+			
+			for (ASDFile file : getFiles())
+			{
+				updatePercentage(file, min, max);
+			}
+		}
+		return true;
 	}
 	
 	protected int getFrame()
@@ -429,5 +445,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	protected abstract double getRawMaximum(ASDFile file);
 	
 	protected abstract double getRawValue(ASDFile file, int index);
+	
+	protected abstract void updatePercentage(ASDFile file, double min, double max);
 
 }

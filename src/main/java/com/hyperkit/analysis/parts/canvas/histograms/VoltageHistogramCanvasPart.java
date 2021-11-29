@@ -29,4 +29,11 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 		return file.getAverageVoltageDisplayed(index, getAverage());
 	}
 
+	@Override
+	protected void updatePercentage(ASDFile file, double min, double max)
+	{
+		file.setMinVoltagePercentage(min == -Double.MAX_VALUE ? file.getMinVoltageDisplayed() : min);
+		file.setMaxVoltagePercentage(max == +Double.MAX_VALUE ? file.getMaxVoltageDisplayed() : max);
+	}
+
 }

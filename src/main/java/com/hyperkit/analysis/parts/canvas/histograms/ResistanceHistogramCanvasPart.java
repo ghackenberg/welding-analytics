@@ -29,4 +29,11 @@ public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 		return file.getAverageResistanceDisplayed(index, getAverage());
 	}
 
+	@Override
+	protected void updatePercentage(ASDFile file, double min, double max)
+	{
+		file.setMinResistancePercentage(min == -Double.MAX_VALUE ? file.getMinResistanceDisplayed() : min);
+		file.setMaxResistancePercentage(max == +Double.MAX_VALUE ? file.getMaxResistanceDisplayed() : max);
+	}
+
 }

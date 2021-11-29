@@ -29,4 +29,11 @@ public class PowerHistogramCanvasPart extends HistogramCanvasPart
 		return file.getAveragePowerDisplayed(index, getAverage());
 	}
 
+	@Override
+	protected void updatePercentage(ASDFile file, double min, double max)
+	{
+		file.setMinPowerPercentage(min == -Double.MAX_VALUE ? file.getMinPowerDisplayed() : min);
+		file.setMaxPowerPercentage(max == +Double.MAX_VALUE ? file.getMaxPowerDisplayed() : max);
+	}
+
 }

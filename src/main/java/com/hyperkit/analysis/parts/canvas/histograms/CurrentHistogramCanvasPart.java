@@ -29,4 +29,11 @@ public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
+	@Override
+	protected void updatePercentage(ASDFile file, double min, double max)
+	{
+		file.setMinCurrentPercentage(min == -Double.MAX_VALUE ? file.getMinCurrentDisplayed() : min);
+		file.setMaxCurrentPercentage(max == +Double.MAX_VALUE ? file.getMaxCurrentDisplayed() : max);
+	}
+
 }

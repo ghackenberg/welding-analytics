@@ -19,10 +19,12 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
+import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 
 public abstract class CanvasPart extends Part
@@ -364,6 +366,8 @@ public abstract class CanvasPart extends Part
 				
 				updateMousePrevious(Integer.MAX_VALUE, Integer.MAX_VALUE);
 				updateMouseCurrent(e.getX(), e.getY());
+				
+				Bus.getInstance().broadcastEvent(new ZoomChangeEvent(self));
 			}
 			@Override
 			public void mousePressed(MouseEvent e)
