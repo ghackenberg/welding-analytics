@@ -204,8 +204,6 @@ public abstract class CanvasPart extends Part
 						graphics.drawLine((int) projectDomain(domain_lower), (int) projectRange(y * dy), (int) projectDomain(domain_upper), (int) projectRange(y * dy));
 					}
 					
-					self.paintComponent(graphics2D);
-					
 					drawLine(graphics2D, LOW, domain_lower, range_lower, domain_upper, range_lower);
 					drawLine(graphics2D, LOW, domain_lower, range_upper, domain_lower, range_lower);
 					
@@ -270,6 +268,10 @@ public abstract class CanvasPart extends Part
 					graphics.drawString(range, 0, 0);
 					
 					graphics2D.setTransform(transform);
+					
+					// Draw chart
+					
+					self.paintComponent(graphics2D);
 
 					// Draw selection marker
 					
