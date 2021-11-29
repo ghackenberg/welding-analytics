@@ -294,6 +294,46 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			*/
 		}
 		
+		// Update marker
+		
+		boolean hover = getMouseCurrentX() != Integer.MAX_VALUE && getMouseCurrentY() != Integer.MAX_VALUE;
+		
+		if (hover)
+		{
+			marker = new HashMap<>();
+			
+			for (ASDFile file : getFiles())
+			{
+				int marker_index = Integer.MAX_VALUE;
+				double marker_distance = Double.MAX_VALUE;
+				
+				for (int index = 0; index < getDataLength(file); index++)
+				{
+					double x = getDomainValue(file, index);
+					double y = getRangeValue(file, index);
+					
+					if (check(x, y))
+					{
+						double domain_delta = getMouseCurrentX() - projectDomain(x);
+						double range_delta = getMouseCurrentY() - projectRange(y);
+						
+						double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
+						
+						if (temp < marker_distance)
+						{
+							marker_index = index;
+							marker_distance = temp;
+						}
+					}
+				}
+				
+				if (marker_index != Integer.MAX_VALUE)
+				{
+					marker.put(file, marker_index);
+				}
+			}
+		}
+		
 		if (marker != null)
 		{
 			for (Entry<ASDFile, Integer> entry : marker.entrySet())
@@ -302,13 +342,25 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				
 				int index = entry.getValue();
 			
-				if (minDomain.containsKey(file) && maxDomain.containsKey(file) && series.containsKey(file))
+				if (hover)
 				{
-					double domain = getRawValue(file, index);
-					
-					double range = calculateRangeValue(file, domain);
-					
-					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+					if (series.containsKey(file))
+					{
+						double domain = getDomainValue(file, index);
+						double range = getRangeValue(file, index);
+						
+						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+					}
+				}
+				else
+				{
+					if (minDomain.containsKey(file) && maxDomain.containsKey(file) && series.containsKey(file))
+					{
+						double domain = getRawValue(file, index);	
+						double range = calculateRangeValue(file, domain);
+						
+						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+					}
 				}
 			}
 		}
