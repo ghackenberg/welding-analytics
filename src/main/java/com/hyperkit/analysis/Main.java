@@ -285,7 +285,7 @@ public class Main
 		SplitDockGrid grid = new SplitDockGrid();
 		
 		grid.addDockable(0, 0, 1, 1, part_file.getDockable());
-		grid.addDockable(0, 1, 1, 2, part_property.getDockable());
+		grid.addDockable(0, 1, 1, 3, part_property.getDockable());
 		
 		grid.addDockable(1, 0, 1, 1, part_voltage_density_canvas.getDockable());
 		grid.addDockable(2, 0, 1, 1, part_voltage_timeseries_canvas.getDockable());

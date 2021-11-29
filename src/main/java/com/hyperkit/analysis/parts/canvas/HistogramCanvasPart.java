@@ -33,7 +33,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
 	{
-		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, true);
+		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
 		
 		this.frame = frame;
 		this.average = average;
@@ -221,7 +221,41 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	@Override
 	protected double getRangeMaximum(ASDFile file)
 	{
-		return maxRange.get(file);
+		if (getDomainLowerCustom() == -Double.MAX_VALUE)
+		{
+			return maxRange.get(file);
+		}
+		else
+		{
+			double delta = deltas.get(file);
+			
+			double max = -Double.MAX_VALUE;
+			
+			for (int i = 0; i < histogram; i++)
+			{
+				double x = getDomainValue(file, i);
+				double y = getRangeValue(file, i);
+				
+				if (x - delta >= getDomainLowerCustom() && x - delta <= getDomainUpperCustom())
+				{
+					max = Math.max(max, y);
+				}
+				else if (x + delta >= getDomainLowerCustom() && x + delta <= getDomainUpperCustom())
+				{
+					max = Math.max(max, y);
+				}
+				else if (x - delta <= getDomainLowerCustom() && x + delta >= getDomainLowerCustom())
+				{
+					max = Math.max(max, y);
+				}
+				else if (x - delta <= getDomainUpperCustom() && x + delta >= getDomainUpperCustom())
+				{
+					max = Math.max(max, y);
+				}
+			}
+			
+			return max;
+		}
 	}
 	
 	@Override

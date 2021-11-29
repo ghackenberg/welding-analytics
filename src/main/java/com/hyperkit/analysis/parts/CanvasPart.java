@@ -537,18 +537,34 @@ public abstract class CanvasPart extends Part
 	{
 		return domain_lower;
 	}
+	protected double getDomainLowerCustom()
+	{
+		return domain_lower_custom;
+	}
 	protected double getDomainUpper()
 	{
 		return domain_upper;
+	}
+	protected double getDomainUpperCustom()
+	{
+		return domain_upper_custom;
 	}
 	
 	protected double getRangeLower()
 	{
 		return range_lower;
 	}
+	protected double getRangeLowerCustom()
+	{
+		return range_lower_custom;
+	}
 	protected double getRangeUpper()
 	{
 		return range_upper;
+	}
+	protected double getRangeUpperCustom()
+	{
+		return range_upper_custom;
 	}
 
 	protected int getMousePreviousX()
