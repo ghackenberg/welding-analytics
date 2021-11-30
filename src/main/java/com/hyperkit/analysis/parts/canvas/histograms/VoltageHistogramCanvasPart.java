@@ -30,10 +30,40 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
-	protected void updatePercentage(ASDFile file, double min, double max)
+	protected void updateZoom(ASDFile file, double min, double max)
 	{
 		file.setMinVoltagePercentage(min == -Double.MAX_VALUE ? file.getMinVoltageDisplayed() : min);
 		file.setMaxVoltagePercentage(max == +Double.MAX_VALUE ? file.getMaxVoltageDisplayed() : max);
+	}
+
+	@Override
+	protected double getPercentage(ASDFile file)
+	{
+		return file.getVoltagePercentage();
+	}
+
+	@Override
+	protected double getMean(ASDFile file)
+	{
+		return file.getMeanVoltage();
+	}
+
+	@Override
+	protected double getStdev(ASDFile file)
+	{
+		return file.getStdevVoltage();
+	}
+
+	@Override
+	protected double getMedian(ASDFile file)
+	{
+		return file.getMedianVoltage();
+	}
+
+	@Override
+	protected double getRootMeanSquare(ASDFile file)
+	{
+		return file.getRootMeanSquareVoltage();
 	}
 
 }

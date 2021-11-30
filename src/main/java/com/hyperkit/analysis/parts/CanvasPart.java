@@ -1,11 +1,13 @@
 package com.hyperkit.analysis.parts;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -687,6 +689,11 @@ public abstract class CanvasPart extends Part
 	
 	protected void drawLine(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
 	{
+		drawLine(graphics, color, new BasicStroke(1), x1, y1, x2, y2);
+	}
+	
+	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, double x1, double y1, double x2, double y2)
+	{
 		boolean check1 = check(x1, y1);
 		boolean check2 = check(x2, y2);
 		
@@ -698,7 +705,7 @@ public abstract class CanvasPart extends Part
 		
 		if (check1 && check2)
 		{	
-			drawLine(graphics, color, sx1, sy1, sx2, sy2);	
+			drawLine(graphics, color, stroke, sx1, sy1, sx2, sy2);	
 		}
 		else
 		{
@@ -760,15 +767,16 @@ public abstract class CanvasPart extends Part
 			{
 				if (sx2 >= left && sx2 <= right && sy2 >= top && sy2 <= bottom)
 				{
-					drawLine(graphics, color, sx1, sy1, sx2, sy2);
+					drawLine(graphics, color, stroke, sx1, sy1, sx2, sy2);
 				}
 			}
 		}
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, int x1, int y1, int x2, int y2)
+	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, int x1, int y1, int x2, int y2)
 	{
 		graphics.setColor(color);
+		graphics.setStroke(stroke);
 		
 		graphics.drawLine(x1, y1, x2, y2);
 	}

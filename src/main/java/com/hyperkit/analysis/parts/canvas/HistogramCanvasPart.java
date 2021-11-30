@@ -1,12 +1,16 @@
 package com.hyperkit.analysis.parts.canvas;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JComboBox;
+
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
+import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
@@ -32,6 +36,16 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private Map<ASDFile, Double> deltas = new HashMap<>();
 	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
+	private JComboBox<String> combo;
+	
+	private ASDFile selected;
+	
+	private double percentage;
+	private double mean;
+	private double stdev;
+	private double median;
+	private double rootMeanSquare;
+	
 	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
 	{
 		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
@@ -39,6 +53,10 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		this.frame = frame;
 		this.average = average;
 		this.histogram = histogram;
+		
+		combo = new JComboBox<>(new String[] { "Mean/Stdev", "Mean/Median/RMS" });
+		
+		getToolBar().add(combo);
 	}
 	
 	public boolean handleEvent(FrameChangeEvent event)
@@ -107,6 +125,21 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return super.handleEvent(event);
 	}
 	
+	public boolean handleEvent(FilePartSelectEvent event)
+	{
+		this.selected = event.getASDFile();
+		
+		percentage = getPercentage(selected);
+		mean = getMean(selected);
+		stdev = getStdev(selected);
+		median = getMedian(selected);
+		rootMeanSquare = getRootMeanSquare(selected);
+		
+		getPanel().repaint();
+		
+		return true;
+	}
+	
 	@Override
 	public boolean handleEvent(FilePartRemoveEvent event)
 	{
@@ -136,8 +169,19 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			
 			for (ASDFile file : getFiles())
 			{
-				updatePercentage(file, min, max);
+				updateZoom(file, min, max);
 			}
+			
+			if (selected != null)
+			{
+				percentage = getPercentage(selected);
+				mean = getMean(selected);
+				stdev = getStdev(selected);
+				median = getMedian(selected);
+				rootMeanSquare = getRootMeanSquare(selected);
+			}
+			
+			getPanel().repaint();
 		}
 		return true;
 	}
@@ -383,6 +427,10 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				}
 			}
 		}
+		else
+		{
+			marker = null;
+		}
 		
 		if (marker != null)
 		{
@@ -413,6 +461,18 @@ public abstract class HistogramCanvasPart extends CanvasPart
 					}
 				}
 			}
+		}
+		
+		if (selected != null)
+		{
+			double yLower = getRangeLower();
+			double yUpper = getRangeUpper();
+			
+			BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
+			
+			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(1), mean, yLower, mean, yUpper);
+			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean - stdev, yLower, mean - stdev, yUpper);
+			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean + stdev, yLower, mean + stdev, yUpper);
 		}
 	}
 	
@@ -445,7 +505,13 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	protected abstract double getRawMaximum(ASDFile file);
 	
 	protected abstract double getRawValue(ASDFile file, int index);
+
+	protected abstract double getPercentage(ASDFile file);
+	protected abstract double getMean(ASDFile file);
+	protected abstract double getStdev(ASDFile file);
+	protected abstract double getMedian(ASDFile file);
+	protected abstract double getRootMeanSquare(ASDFile file);
 	
-	protected abstract void updatePercentage(ASDFile file, double min, double max);
+	protected abstract void updateZoom(ASDFile file, double min, double max);
 
 }

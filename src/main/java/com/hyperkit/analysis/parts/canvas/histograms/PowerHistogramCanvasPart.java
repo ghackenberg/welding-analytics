@@ -30,10 +30,40 @@ public class PowerHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
-	protected void updatePercentage(ASDFile file, double min, double max)
+	protected void updateZoom(ASDFile file, double min, double max)
 	{
 		file.setMinPowerPercentage(min == -Double.MAX_VALUE ? file.getMinPowerDisplayed() : min);
 		file.setMaxPowerPercentage(max == +Double.MAX_VALUE ? file.getMaxPowerDisplayed() : max);
+	}
+
+	@Override
+	protected double getPercentage(ASDFile file)
+	{
+		return file.getPowerPercentage();
+	}
+
+	@Override
+	protected double getMean(ASDFile file)
+	{
+		return file.getMeanPower();
+	}
+
+	@Override
+	protected double getStdev(ASDFile file)
+	{
+		return file.getStdevPower();
+	}
+
+	@Override
+	protected double getMedian(ASDFile file)
+	{
+		return file.getMedianPower();
+	}
+
+	@Override
+	protected double getRootMeanSquare(ASDFile file)
+	{
+		return file.getRootMeanSquarePower();
 	}
 
 }

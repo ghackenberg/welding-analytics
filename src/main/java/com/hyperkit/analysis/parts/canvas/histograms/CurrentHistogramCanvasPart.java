@@ -30,10 +30,40 @@ public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
-	protected void updatePercentage(ASDFile file, double min, double max)
+	protected void updateZoom(ASDFile file, double min, double max)
 	{
 		file.setMinCurrentPercentage(min == -Double.MAX_VALUE ? file.getMinCurrentDisplayed() : min);
 		file.setMaxCurrentPercentage(max == +Double.MAX_VALUE ? file.getMaxCurrentDisplayed() : max);
+	}
+
+	@Override
+	protected double getPercentage(ASDFile file)
+	{
+		return file.getCurrentPercentage();
+	}
+
+	@Override
+	protected double getMean(ASDFile file)
+	{
+		return file.getMeanCurrent();
+	}
+
+	@Override
+	protected double getStdev(ASDFile file)
+	{
+		return file.getStdevCurrent();
+	}
+
+	@Override
+	protected double getMedian(ASDFile file)
+	{
+		return file.getMedianCurrent();
+	}
+
+	@Override
+	protected double getRootMeanSquare(ASDFile file)
+	{
+		return file.getRootMeanSquareCurrent();
 	}
 
 }

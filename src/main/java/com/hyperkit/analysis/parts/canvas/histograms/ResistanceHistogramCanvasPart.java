@@ -30,10 +30,40 @@ public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
-	protected void updatePercentage(ASDFile file, double min, double max)
+	protected void updateZoom(ASDFile file, double min, double max)
 	{
 		file.setMinResistancePercentage(min == -Double.MAX_VALUE ? file.getMinResistanceDisplayed() : min);
 		file.setMaxResistancePercentage(max == +Double.MAX_VALUE ? file.getMaxResistanceDisplayed() : max);
+	}
+
+	@Override
+	protected double getPercentage(ASDFile file)
+	{
+		return file.getResistancePercentage();
+	}
+
+	@Override
+	protected double getMean(ASDFile file)
+	{
+		return file.getMeanResistance();
+	}
+
+	@Override
+	protected double getStdev(ASDFile file)
+	{
+		return file.getStdevResistance();
+	}
+
+	@Override
+	protected double getMedian(ASDFile file)
+	{
+		return file.getMedianResistance();
+	}
+
+	@Override
+	protected double getRootMeanSquare(ASDFile file)
+	{
+		return file.getRootMeanSquareResistance();
 	}
 
 }
