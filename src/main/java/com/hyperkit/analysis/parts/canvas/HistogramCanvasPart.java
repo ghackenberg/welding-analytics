@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -36,15 +37,27 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private Map<ASDFile, Double> deltas = new HashMap<>();
 	private Map<ASDFile, double[][]> series = new HashMap<>();
 	
-	private JComboBox<String> combo;
+	private enum Statistics
+	{
+		MEAN_STDEV("Mean/Stdev"), MEDIAN("Median"), RMS("Root Mean Square");
+		
+		private final String name;
+		
+		private Statistics(String name)
+		{
+			this.name = name;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+	
+	private JComboBox<Statistics> combo;
 	
 	private ASDFile selected;
-	
-	private double percentage;
-	private double mean;
-	private double stdev;
-	private double median;
-	private double rootMeanSquare;
 	
 	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
 	{
@@ -54,8 +67,9 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		this.average = average;
 		this.histogram = histogram;
 		
-		combo = new JComboBox<>(new String[] { "Mean/Stdev", "Mean/Median/RMS" });
+		combo = new JComboBox<>(Statistics.values());
 		
+		getToolBar().add(new JLabel("Statistics:"));
 		getToolBar().add(combo);
 	}
 	
@@ -127,13 +141,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public boolean handleEvent(FilePartSelectEvent event)
 	{
-		this.selected = event.getASDFile();
-		
-		percentage = getPercentage(selected);
-		mean = getMean(selected);
-		stdev = getStdev(selected);
-		median = getMedian(selected);
-		rootMeanSquare = getRootMeanSquare(selected);
+		selected = event.getASDFile();
 		
 		getPanel().repaint();
 		
@@ -170,15 +178,6 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			for (ASDFile file : getFiles())
 			{
 				updateZoom(file, min, max);
-			}
-			
-			if (selected != null)
-			{
-				percentage = getPercentage(selected);
-				mean = getMean(selected);
-				stdev = getStdev(selected);
-				median = getMedian(selected);
-				rootMeanSquare = getRootMeanSquare(selected);
 			}
 			
 			getPanel().repaint();
@@ -468,11 +467,32 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			double yLower = getRangeLower();
 			double yUpper = getRangeUpper();
 			
-			BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
-			
-			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(1), mean, yLower, mean, yUpper);
-			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean - stdev, yLower, mean - stdev, yUpper);
-			drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean + stdev, yLower, mean + stdev, yUpper);
+			switch ((Statistics) combo.getSelectedItem())
+			{
+			case MEAN_STDEV:
+				double mean = getMean(selected);
+				double stdev = getStdev(selected);
+				
+				BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
+				
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), mean, yLower, mean, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean - stdev, yLower, mean - stdev, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean + stdev, yLower, mean + stdev, yUpper);
+				
+				break;
+			case MEDIAN:
+				double median = getMedian(selected);
+				
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), median, yLower, median, yUpper);
+				
+				break;
+			case RMS:
+				double rms = getRootMeanSquare(selected);
+				
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), rms, yLower, rms, yUpper);
+				
+				break;
+			}
 		}
 	}
 	

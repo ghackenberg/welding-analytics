@@ -284,27 +284,27 @@ public class Main
 		// Grid
 		SplitDockGrid grid = new SplitDockGrid();
 		
-		grid.addDockable(0, 0, 2, 1, part_file.getDockable());
-		grid.addDockable(0, 1, 2, 3, part_property.getDockable());
+		grid.addDockable(0, 0, 1, 2, part_file.getDockable());
+		grid.addDockable(0, 2, 1, 2, part_property.getDockable());
 		
-		grid.addDockable(2, 0, 1, 1, part_voltage_density_canvas.getDockable());
-		grid.addDockable(3, 0, 1, 1, part_voltage_timeseries_canvas.getDockable());
-		grid.addDockable(4, 0, 1, 1, part_voltage_derivative_canvas.getDockable());
+		grid.addDockable(1, 0, 1, 1, part_voltage_density_canvas.getDockable());
+		grid.addDockable(2, 0, 1, 1, part_voltage_timeseries_canvas.getDockable());
+		grid.addDockable(3, 0, 1, 1, part_voltage_derivative_canvas.getDockable());
 		
-		grid.addDockable(2, 1, 1, 1, part_current_density_canvas.getDockable());
-		grid.addDockable(3, 1, 1, 1, part_current_timeseries_canvas.getDockable());
-		grid.addDockable(4, 1, 1, 1, part_current_derivative_canvas.getDockable());
+		grid.addDockable(1, 1, 1, 1, part_current_density_canvas.getDockable());
+		grid.addDockable(2, 1, 1, 1, part_current_timeseries_canvas.getDockable());
+		grid.addDockable(3, 1, 1, 1, part_current_derivative_canvas.getDockable());
 		
-		grid.addDockable(2, 2, 1, 1, part_resistance_density_canvas.getDockable());
-		grid.addDockable(3, 2, 1, 1, part_resistance_timeseries_canvas.getDockable());
-		grid.addDockable(4, 2, 1, 1, part_resistance_derivative_canvas.getDockable());
+		grid.addDockable(1, 2, 1, 1, part_resistance_density_canvas.getDockable());
+		grid.addDockable(2, 2, 1, 1, part_resistance_timeseries_canvas.getDockable());
+		grid.addDockable(3, 2, 1, 1, part_resistance_derivative_canvas.getDockable());
 		
-		grid.addDockable(2, 3, 1, 1, part_power_density_canvas.getDockable());
-		grid.addDockable(3, 3, 1, 1, part_power_timeseries_canvas.getDockable());
-		grid.addDockable(4, 3, 1, 1, part_power_derivative_canvas.getDockable());
+		grid.addDockable(1, 3, 1, 1, part_power_density_canvas.getDockable());
+		grid.addDockable(2, 3, 1, 1, part_power_timeseries_canvas.getDockable());
+		grid.addDockable(3, 3, 1, 1, part_power_derivative_canvas.getDockable());
 		
-		grid.addDockable(5, 0, 2, 2, part_current_voltage_average_trace_canvas.getDockable());
-		grid.addDockable(5, 2, 2, 2, part_current_voltage_cloud_canvas.getDockable());
+		grid.addDockable(4, 0, 2, 2, part_current_voltage_average_trace_canvas.getDockable());
+		grid.addDockable(4, 2, 2, 2, part_current_voltage_cloud_canvas.getDockable());
 		
 		// Station
 		SplitDockStation station = new SplitDockStation();

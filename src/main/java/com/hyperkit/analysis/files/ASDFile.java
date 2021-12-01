@@ -892,23 +892,69 @@ public class ASDFile extends File
 		return getProbability(POWER_INDEX, getPowerDensity(steps), getMinPowerDisplayed(), getMaxPowerDisplayed(), steps, frame);
 	}
 	
+	// Get key
+	
+	private String getTimestampKey()
+	{
+		return minTimestampDisplayed + "/" + maxTimestampDisplayed;
+	}
+	
+	private String getVoltageKey()
+	{
+		return minVoltageDisplayed + "/" + maxVoltageDisplayed;
+	}
+	
+	private String getCurrentKey()
+	{
+		return minCurrentDisplayed + "/" + maxCurrentDisplayed;
+	}
+	
+	private String getResistanceKey()
+	{
+		return minResistanceDisplayed + "/" + maxResistanceDisplayed;
+	}
+	
+	private String getPowerKey()
+	{
+		return minPowerDisplayed + "/" + maxPowerDisplayed;
+	}
+	
+	private String getKey()
+	{
+		return getTimestampKey() + "/" + getVoltageKey() + "/" + getCurrentKey() + "/" + getResistanceKey() + "/" + getPowerKey();
+	}
+	
+	private String getKey(int column, double min, double max)
+	{
+		return getKey() + "/" + column + "/" + min + "/" + max;
+	}
+	
 	// Get percentage
 	
+	private Map<String, Double> percentages = new HashMap<>();
+	
 	private double getPercentage(int column, double min, double max)
-	{		
-		int count = 0;
+	{
+		String key = getKey(column, min, max);
 		
-		for (double[] line : activeData)
+		if (!percentages.containsKey(key))
 		{
-			double value = line[column];
+			int count = 0;
 			
-			if (value >= min && value <= max)
+			for (double[] line : activeData)
 			{
-				count++;
+				double value = line[column];
+				
+				if (value >= min && value <= max)
+				{
+					count++;
+				}
 			}
+			
+			percentages.put(key, count * 100.0 / activeData.size());
 		}
 		
-		return count * 100.0 / activeData.size();
+		return percentages.get(key);
 	}
 	
 	public double getVoltagePercentage()
@@ -933,58 +979,76 @@ public class ASDFile extends File
 	
 	// Get count
 	
+	private Map<String, Integer> counts = new HashMap<>();
+	
 	private int getCount(int column, double min, double max)
 	{
-		int count = 0;
+		String key = getKey(column, min, max);
 		
-		for (double[] line : activeData)
+		if (!counts.containsKey(key))
 		{
-			double value = line[column];
+			int count = 0;
 			
-			if (value >= min && value <= max)
+			for (double[] line : activeData)
 			{
-				count++;
+				double value = line[column];
+				
+				if (value >= min && value <= max)
+				{
+					count++;
+				}
 			}
+			
+			counts.put(key, count);
 		}
 		
-		return count;
+		return counts.get(key);
 	}
 	
 	// Get median
 	
+	private Map<String, Double> medians = new HashMap<>();
+	
 	private double getMedian(int column, double min, double max)
 	{
-		List<Double> values = new ArrayList<>();
+		String key = getKey(column, min, max);
 		
-		for (double[] line : activeData)
+		if (!medians.containsKey(key))
 		{
-			double value = line[column];
-
-			if (value >= min && value <= max)
+			List<Double> values = new ArrayList<>();
+			
+			for (double[] line : activeData)
 			{
-				values.add(value);
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					values.add(value);
+				}
 			}
+			
+			values.sort((a, b) ->
+			{
+				double delta = a - b;
+				
+				if (delta < 0)
+				{
+					return -1;
+				}
+				else if (delta > 0)
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			});
+			
+			medians.put(key, values.get((int) Math.floor(values.size() / 2)));
 		}
 		
-		values.sort((a, b) ->
-		{
-			double delta = a - b;
-			
-			if (delta < 0)
-			{
-				return -1;
-			}
-			else if (delta > 0)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
-		});
-		
-		return values.get((int) Math.floor(values.size() / 2));
+		return medians.get(key);
 	}
 	
 	public double getMedianVoltage()
@@ -1009,23 +1073,32 @@ public class ASDFile extends File
 	
 	// Get mean
 	
+	private Map<String, Double> means = new HashMap<>();
+	
 	private double getMean(int column, double min, double max)
 	{
-		int count = getCount(column, min, max);
+		String key = getKey(column, min, max);
 		
-		double result = 0;
-		
-		for (double[] line : activeData)
+		if (!means.containsKey(key))
 		{
-			double value = line[column];
-
-			if (value >= min && value <= max)
+			int count = getCount(column, min, max);
+			
+			double result = 0;
+			
+			for (double[] line : activeData)
 			{
-				result += value / count;
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					result += value / count;
+				}
 			}
+			
+			means.put(key, result);
 		}
 		
-		return result;
+		return means.get(key);
 	}
 	
 	public double getMeanVoltage()
@@ -1050,25 +1123,34 @@ public class ASDFile extends File
 	
 	// Get stdev
 	
+	private Map<String, Double> stdevs = new HashMap<>();
+	
 	private double getStdev(int column, double min, double max, double mean)
 	{
-		int count = getCount(column, min, max);
+		String key = getKey(column, min, max);
 		
-		double stdev = 0;
-		
-		for (double[] line : activeData)
+		if (!stdevs.containsKey(key))
 		{
-			double value = line[column];
-
-			if (value >= min && value <= max)
+			int count = getCount(column, min, max);
+			
+			double stdev = 0;
+			
+			for (double[] line : activeData)
 			{
-				double delta = value - mean;
-				
-				stdev += Math.sqrt(delta * delta) / count;
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					double delta = value - mean;
+					
+					stdev += Math.sqrt(delta * delta) / count;
+				}
 			}
+			
+			stdevs.put(key, stdev);
 		}
 		
-		return stdev;
+		return stdevs.get(key);
 	}
 	
 	public double getStdevVoltage()
@@ -1093,23 +1175,32 @@ public class ASDFile extends File
 	
 	// Get root mean square
 	
+	private Map<String, Double> rootMeanSquares = new HashMap<>();
+	
 	private double getRootMeanSquare(int column, double min, double max)
 	{
-		int count = getCount(column, min, max);
+		String key = getKey(column, min, max);
 		
-		double result = 0;
-		
-		for (double[] line : activeData)
+		if (!rootMeanSquares.containsKey(key))
 		{
-			double value = line[column];
-
-			if (value >= min && value <= max)
+			int count = getCount(column, min, max);
+			
+			double result = 0;
+			
+			for (double[] line : activeData)
 			{
-				result += value * value / count;
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					result += value * value / count;
+				}
 			}
+			
+			rootMeanSquares.put(key, Math.sqrt(result));
 		}
 		
-		return Math.sqrt(result);
+		return rootMeanSquares.get(key);
 	}
 	
 	public double getRootMeanSquareVoltage()
