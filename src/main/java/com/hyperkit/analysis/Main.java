@@ -52,7 +52,7 @@ public class Main
 	private static int frame = 0;
 	private static int window = 5000;
 	private static int average = 0;
-	private static int histogram = 100;
+	private static int histogram = 1000;
 	
 	public static void main(String[] arguments)
 	{
@@ -126,7 +126,7 @@ public class Main
 		
 		// Histogram
 		
-		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 10, 1000, 10));
+		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 10000, 100));
 		histogramSpinner.addChangeListener(
 			event ->
 			{
