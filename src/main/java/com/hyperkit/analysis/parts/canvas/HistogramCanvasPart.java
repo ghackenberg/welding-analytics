@@ -24,6 +24,9 @@ import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class HistogramCanvasPart extends CanvasPart
 {
+	
+	private String domainName;
+	private String domainUnit;
 
 	private int frame;
 	private int average;
@@ -61,9 +64,12 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	private ASDFile selected;
 	
-	public HistogramCanvasPart(String title, String domain, int frame, int average, int histogram)
+	public HistogramCanvasPart(String title, String domainName, String domainUnit, int frame, int average, int histogram)
 	{
-		super(title, domain, "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
+		super(title, domainName + " (in " + domainUnit + ")", "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
+		
+		this.domainName = domainName;
+		this.domainUnit = domainUnit;
 		
 		this.frame = frame;
 		this.average = average;
@@ -71,6 +77,12 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		
 		combo = new JComboBox<>(Statistics.values());
 		combo.setEnabled(false);
+		combo.addActionListener(action ->
+		{
+			updateStatistics();
+			
+			getPanel().repaint();
+		});
 		
 		percentage = new JTextField("", 4);
 		percentage.setEditable(false);
@@ -157,7 +169,8 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			combo.setEnabled(true);
 			
 			percentage.setEnabled(true);
-			percentage.setText(Math.round(getPercentage(selected)) + "%");
+			
+			updateStatistics();
 		}
 		else
 		{
@@ -165,6 +178,8 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			
 			percentage.setEnabled(false);
 			percentage.setText("");
+			
+			setDomain(domainName + " (in " + domainUnit + ")");
 		}
 		
 		getPanel().repaint();
@@ -204,14 +219,42 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				updateZoom(file, min, max);
 			}
 			
-			if (selected != null)
-			{
-				percentage.setText(Math.round(getPercentage(selected)) + "%");
-			}
+			updateStatistics();
 			
 			getPanel().repaint();
 		}
 		return true;
+	}
+	
+	private void updateStatistics()
+	{
+		if (selected != null)
+		{
+			percentage.setText(Math.round(getPercentage(selected)) + "%");
+			
+			switch ((Statistics) combo.getSelectedItem())
+			{
+			case MEAN_STDEV:
+				double mean = getMean(selected);
+				double stdev = getStdev(selected);
+				
+				setDomain(domainName + " (in " + domainUnit + " | Mean=" + String.format("%.2f", mean) + domainUnit + "±" + String.format("%.2f", stdev) + domainUnit + ")");
+				
+				break;
+			case MEDIAN:
+				double median = getMedian(selected);
+				
+				setDomain(domainName + " (in " + domainUnit + " | Median=" + String.format("%.2f", median) + domainUnit + ")");
+				
+				break;
+			case RMS:
+				double rms = getRootMeanSquare(selected);
+				
+				setDomain(domainName + " (in " + domainUnit + " | RMS=" + String.format("%.2f", rms) + domainUnit + ")");
+				
+				break;
+			}
+		}
 	}
 	
 	protected int getFrame()

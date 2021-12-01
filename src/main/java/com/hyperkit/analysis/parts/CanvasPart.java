@@ -36,6 +36,9 @@ public abstract class CanvasPart extends Part
 	private static final Color MEDIUM = new Color(160,160,160);
 	private static final Color HIGH = new Color(224,224,224);
 	
+	private String domain;
+	private String range;
+	
 	private List<ASDFile> files = new ArrayList<>();
 	
 	private JPanel panel;
@@ -76,6 +79,9 @@ public abstract class CanvasPart extends Part
 	public CanvasPart(String title, String domain, String range, URL icon, boolean zoom_domain, boolean zoom_range)
 	{
 		super(title, icon);
+		
+		this.domain = domain;
+		this.range = range;
 		
 		CanvasPart self = this;
 		
@@ -271,19 +277,19 @@ public abstract class CanvasPart extends Part
 						graphics2D.setTransform(transform);
 					}
 					
-					bounds = metrics.getStringBounds(domain, graphics);
+					bounds = metrics.getStringBounds(self.domain, graphics);
 					
 					graphics.setColor(LOW);
-					graphics.drawString(domain, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
+					graphics.drawString(self.domain, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
 					
-					bounds = metrics.getStringBounds(range, graphics);
+					bounds = metrics.getStringBounds(self.range, graphics);
 					
 					transform = graphics2D.getTransform();
 					
 					graphics2D.translate(projectDomain(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(range_lower + range_delta / 2) + bounds.getWidth() / 2);
 					graphics2D.rotate(- Math.PI / 2);
 					graphics.setColor(LOW);
-					graphics.drawString(range, 0, 0);
+					graphics.drawString(self.range, 0, 0);
 					
 					graphics2D.setTransform(transform);
 					
@@ -418,6 +424,20 @@ public abstract class CanvasPart extends Part
 			}
 		});
 		panel.setBackground(Color.white);
+	}
+	
+	protected void setDomain(String domain)
+	{
+		this.domain = domain;
+		
+		panel.repaint();
+	}
+	
+	protected void setRange(String range)
+	{
+		this.range = range;
+		
+		panel.repaint();
 	}
 	
 	protected int getPaddingLeft()

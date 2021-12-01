@@ -8,7 +8,7 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 	
 	public VoltageHistogramCanvasPart(int frame, int average, int histogram)
 	{
-		super("Voltage histogram", "Voltage (in V)", frame, average, histogram);
+		super("Voltage histogram", "Voltage", "V", frame, average, histogram);
 	}
 
 	@Override

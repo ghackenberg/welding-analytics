@@ -8,7 +8,7 @@ public class PowerHistogramCanvasPart extends HistogramCanvasPart
 	
 	public PowerHistogramCanvasPart(int frame, int average, int histogram)
 	{
-		super("Power histogram", "Power (in V*A)", frame, average, histogram);
+		super("Power histogram", "Power", "VA", frame, average, histogram);
 	}
 
 	@Override
