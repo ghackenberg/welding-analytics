@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -56,6 +57,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 	
 	private JComboBox<Statistics> combo;
+	private JTextField percentage;
 	
 	private ASDFile selected;
 	
@@ -69,8 +71,13 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		
 		combo = new JComboBox<>(Statistics.values());
 		
-		getToolBar().add(new JLabel("Statistics:"));
+		percentage = new JTextField("100%", 4);
+		percentage.setEnabled(false);
+		
+		getToolBar().add(new JLabel("Stats:"));
 		getToolBar().add(combo);
+		getToolBar().add(new JLabel("Area:"));
+		getToolBar().add(percentage);
 	}
 	
 	public boolean handleEvent(FrameChangeEvent event)
@@ -143,6 +150,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		selected = event.getASDFile();
 		
+		if (selected != null)
+		{
+			percentage.setText(Math.round(getPercentage(selected)) + "%");
+		}
+		
 		getPanel().repaint();
 		
 		return true;
@@ -178,6 +190,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			for (ASDFile file : getFiles())
 			{
 				updateZoom(file, min, max);
+			}
+			
+			if (selected != null)
+			{
+				percentage.setText(Math.round(getPercentage(selected)) + "%");
 			}
 			
 			getPanel().repaint();
