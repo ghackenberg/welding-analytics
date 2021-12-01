@@ -70,8 +70,10 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		this.histogram = histogram;
 		
 		combo = new JComboBox<>(Statistics.values());
+		combo.setEnabled(false);
 		
-		percentage = new JTextField("100%", 4);
+		percentage = new JTextField("", 4);
+		percentage.setEditable(false);
 		percentage.setEnabled(false);
 		
 		getToolBar().add(new JLabel("Stats:"));
@@ -152,7 +154,17 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		
 		if (selected != null)
 		{
+			combo.setEnabled(true);
+			
+			percentage.setEnabled(true);
 			percentage.setText(Math.round(getPercentage(selected)) + "%");
+		}
+		else
+		{
+			combo.setEnabled(false);
+			
+			percentage.setEnabled(false);
+			percentage.setText("");
 		}
 		
 		getPanel().repaint();
