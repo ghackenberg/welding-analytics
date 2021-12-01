@@ -204,6 +204,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		updateHistogram(event.getASDFile());
 		
+		if (selected != null)
+		{
+			updateStatistics();
+		}
+		
 		return super.handleEvent(event);
 	}
 	

@@ -951,7 +951,7 @@ public class ASDFile extends File
 				}
 			}
 			
-			percentages.put(key, count * 100.0 / activeData.size());
+			percentages.put(key, count * 100.0 / data.size());
 		}
 		
 		return percentages.get(key);
