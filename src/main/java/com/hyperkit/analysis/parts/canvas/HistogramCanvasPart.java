@@ -84,7 +84,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			getPanel().repaint();
 		});
 		
-		percentage = new JTextField("", 4);
+		percentage = new JTextField("", 7);
 		percentage.setEditable(false);
 		percentage.setEnabled(false);
 		
@@ -235,7 +235,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		if (selected != null)
 		{
-			percentage.setText(Math.round(getPercentage(selected)) + "%");
+			percentage.setText(String.format("%.5f", getPercentage(selected)) + "%");
 			
 			switch ((Statistics) combo.getSelectedItem())
 			{
@@ -243,19 +243,19 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				double mean = getMean(selected);
 				double stdev = getStdev(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | Mean=" + String.format("%.2f", mean) + domainUnit + "±" + String.format("%.2f", stdev) + domainUnit + ")");
+				setDomain(domainName + " (in " + domainUnit + " | Mean=" + String.format("%.5f", mean) + domainUnit + "±" + String.format("%.5f", stdev) + domainUnit + ")");
 				
 				break;
 			case MEDIAN:
 				double median = getMedian(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | Median=" + String.format("%.2f", median) + domainUnit + ")");
+				setDomain(domainName + " (in " + domainUnit + " | Median=" + String.format("%.5f", median) + domainUnit + ")");
 				
 				break;
 			case RMS:
 				double rms = getRootMeanSquare(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | RMS=" + String.format("%.2f", rms) + domainUnit + ")");
+				setDomain(domainName + " (in " + domainUnit + " | RMS=" + String.format("%.5f", rms) + domainUnit + ")");
 				
 				break;
 			}
