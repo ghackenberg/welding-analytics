@@ -61,6 +61,12 @@ public class CurrentHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
+	protected double getMode(ASDFile file)
+	{
+		return file.getModeCurrent();
+	}
+
+	@Override
 	protected double getRootMeanSquare(ASDFile file)
 	{
 		return file.getRootMeanSquareCurrent();

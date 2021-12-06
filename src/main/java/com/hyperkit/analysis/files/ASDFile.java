@@ -977,100 +977,6 @@ public class ASDFile extends File
 		return getPercentage(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
 	}
 	
-	// Get count
-	
-	private Map<String, Integer> counts = new HashMap<>();
-	
-	private int getCount(int column, double min, double max)
-	{
-		String key = getKey(column, min, max);
-		
-		if (!counts.containsKey(key))
-		{
-			int count = 0;
-			
-			for (double[] line : activeData)
-			{
-				double value = line[column];
-				
-				if (value >= min && value <= max)
-				{
-					count++;
-				}
-			}
-			
-			counts.put(key, count);
-		}
-		
-		return counts.get(key);
-	}
-	
-	// Get median
-	
-	private Map<String, Double> medians = new HashMap<>();
-	
-	private double getMedian(int column, double min, double max)
-	{
-		String key = getKey(column, min, max);
-		
-		if (!medians.containsKey(key))
-		{
-			List<Double> values = new ArrayList<>();
-			
-			for (double[] line : activeData)
-			{
-				double value = line[column];
-	
-				if (value >= min && value <= max)
-				{
-					values.add(value);
-				}
-			}
-			
-			values.sort((a, b) ->
-			{
-				double delta = a - b;
-				
-				if (delta < 0)
-				{
-					return -1;
-				}
-				else if (delta > 0)
-				{
-					return 1;
-				}
-				else
-				{
-					return 0;
-				}
-			});
-			
-			medians.put(key, values.get((int) Math.floor(values.size() / 2)));
-		}
-		
-		return medians.get(key);
-	}
-	
-	public double getMedianVoltage()
-	{
-		return getMedian(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
-	}
-	
-	public double getMedianCurrent()
-	{
-		return getMedian(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
-	}
-	
-	public double getMedianResistance()
-	{
-		return getMedian(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
-	}
-	
-	public double getMedianPower()
-	{
-		return getMedian(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
-	}
-	
 	// Get mean
 	
 	private Map<String, Double> means = new HashMap<>();
@@ -1171,6 +1077,161 @@ public class ASDFile extends File
 	public double getStdevPower()
 	{
 		return getStdev(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage(), getMeanPower());
+	}
+	
+	// Get count
+	
+	private Map<String, Integer> counts = new HashMap<>();
+	
+	private int getCount(int column, double min, double max)
+	{
+		String key = getKey(column, min, max);
+		
+		if (!counts.containsKey(key))
+		{
+			int count = 0;
+			
+			for (double[] line : activeData)
+			{
+				double value = line[column];
+				
+				if (value >= min && value <= max)
+				{
+					count++;
+				}
+			}
+			
+			counts.put(key, count);
+		}
+		
+		return counts.get(key);
+	}
+	
+	// Get median
+	
+	private Map<String, Double> medians = new HashMap<>();
+	
+	private double getMedian(int column, double min, double max)
+	{
+		String key = getKey(column, min, max);
+		
+		if (!medians.containsKey(key))
+		{
+			List<Double> values = new ArrayList<>();
+			
+			for (double[] line : activeData)
+			{
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					values.add(value);
+				}
+			}
+			
+			values.sort((a, b) ->
+			{
+				double delta = a - b;
+				
+				if (delta < 0)
+				{
+					return -1;
+				}
+				else if (delta > 0)
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			});
+			
+			medians.put(key, values.get((int) Math.floor(values.size() / 2)));
+		}
+		
+		return medians.get(key);
+	}
+	
+	public double getMedianVoltage()
+	{
+		return getMedian(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getMedianCurrent()
+	{
+		return getMedian(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getMedianResistance()
+	{
+		return getMedian(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getMedianPower()
+	{
+		return getMedian(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
+	}
+	
+	// Get median
+	
+	private Map<String, Double> modes = new HashMap<>();
+	
+	private double getMode(int column, double min, double max)
+	{
+		String key = getKey(column, min, max);
+		
+		if (!modes.containsKey(key))
+		{
+			Map<Double, Integer> values = new HashMap<>();
+			
+			double mode = 0;
+			double count = 0;
+			
+			for (double[] line : activeData)
+			{
+				double value = line[column];
+	
+				if (value >= min && value <= max)
+				{
+					// Update value
+					if (values.containsKey(value)) {
+						values.put(value, values.get(value) + 1);
+					} else {
+						values.put(value, 1);
+					}
+					// Update mode
+					if (values.get(value) > count) {
+						mode = value;
+						count = values.get(value);
+					}
+				}
+			}
+			
+			modes.put(key, mode);
+		}
+		
+		return modes.get(key);
+	}
+	
+	public double getModeVoltage()
+	{
+		return getMode(VOLTAGE_INDEX, getMinVoltagePercentage(), getMaxVoltagePercentage());
+	}
+	
+	public double getModeCurrent()
+	{
+		return getMode(CURRENT_INDEX, getMinCurrentPercentage(), getMaxCurrentPercentage());
+	}
+	
+	public double getModeResistance()
+	{
+		return getMode(RESISTANCE_INDEX, getMinResistancePercentage(), getMaxResistancePercentage());
+	}
+	
+	public double getModePower()
+	{
+		return getMode(POWER_INDEX, getMinPowerPercentage(), getMaxPowerPercentage());
 	}
 	
 	// Get root mean square

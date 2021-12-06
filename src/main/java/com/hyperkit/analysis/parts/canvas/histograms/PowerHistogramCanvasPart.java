@@ -61,6 +61,12 @@ public class PowerHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
+	protected double getMode(ASDFile file)
+	{
+		return file.getModePower();
+	}
+
+	@Override
 	protected double getRootMeanSquare(ASDFile file)
 	{
 		return file.getRootMeanSquarePower();

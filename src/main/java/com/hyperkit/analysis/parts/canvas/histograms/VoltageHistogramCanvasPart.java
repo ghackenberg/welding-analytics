@@ -61,6 +61,12 @@ public class VoltageHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
+	protected double getMode(ASDFile file)
+	{
+		return file.getModeVoltage();
+	}
+
+	@Override
 	protected double getRootMeanSquare(ASDFile file)
 	{
 		return file.getRootMeanSquareVoltage();

@@ -61,6 +61,12 @@ public class ResistanceHistogramCanvasPart extends HistogramCanvasPart
 	}
 
 	@Override
+	protected double getMode(ASDFile file)
+	{
+		return file.getModeResistance();
+	}
+
+	@Override
 	protected double getRootMeanSquare(ASDFile file)
 	{
 		return file.getRootMeanSquareResistance();

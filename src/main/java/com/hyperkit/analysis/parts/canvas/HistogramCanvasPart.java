@@ -43,7 +43,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	private enum Statistics
 	{
-		MEAN_STDEV("Mean/Stdev"), MEDIAN("Median"), RMS("Root Mean Square");
+		MEAN_STDEV("Mean/Stdev"), MEDIAN("Median"), MODE("Mode"), RMS("Root Mean Square");
 		
 		private final String name;
 		
@@ -250,6 +250,12 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				double median = getMedian(selected);
 				
 				setDomain(domainName + " (in " + domainUnit + " | Median=" + String.format("%.5f", median) + domainUnit + ")");
+				
+				break;
+			case MODE:
+				double mode = getMode(selected);
+				
+				setDomain(domainName + " (in " + domainUnit + " | Mode=" + String.format("%.5f",  mode) + domainUnit + ")");
 				
 				break;
 			case RMS:
@@ -563,6 +569,12 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), median, yLower, median, yUpper);
 				
 				break;
+			case MODE:
+				double mode = getMode(selected);
+				
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), mode, yLower, mode, yUpper);
+				
+				break;
 			case RMS:
 				double rms = getRootMeanSquare(selected);
 				
@@ -607,6 +619,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	protected abstract double getMean(ASDFile file);
 	protected abstract double getStdev(ASDFile file);
 	protected abstract double getMedian(ASDFile file);
+	protected abstract double getMode(ASDFile file);
 	protected abstract double getRootMeanSquare(ASDFile file);
 	
 	protected abstract void updateZoom(ASDFile file, double min, double max);
