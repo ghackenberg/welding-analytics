@@ -8,7 +8,7 @@ public class PowerDerivativeCanvasPart extends DerivativeCanvasPart
 
 	public PowerDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Power derivative", "Power (in V*A)", frame, window, average);
+		super("Power derivative", "Power", "V*A", frame, window, average);
 	}
 
 	@Override

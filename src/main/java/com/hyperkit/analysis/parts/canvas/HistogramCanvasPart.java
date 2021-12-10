@@ -24,9 +24,6 @@ import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class HistogramCanvasPart extends CanvasPart
 {
-	
-	private String domainName;
-	private String domainUnit;
 
 	private int frame;
 	private int average;
@@ -66,10 +63,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public HistogramCanvasPart(String title, String domainName, String domainUnit, int frame, int average, int histogram)
 	{
-		super(title, domainName + " (in " + domainUnit + ")", "Probability (in %)", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
-		
-		this.domainName = domainName;
-		this.domainUnit = domainUnit;
+		super(title, domainName, domainUnit, "Probability", "%", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
 		
 		this.frame = frame;
 		this.average = average;
@@ -179,7 +173,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			percentage.setEnabled(false);
 			percentage.setText("");
 			
-			setDomain(domainName + " (in " + domainUnit + ")");
+			setDomainLabel(getDomainName() + " (in " + getDomainUnit() + ")");
 		}
 		
 		getPanel().repaint();
@@ -235,7 +229,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	{
 		if (selected != null)
 		{
-			percentage.setText(String.format("%.5f", getPercentage(selected)) + "%");
+			percentage.setText(String.format("%.6f", getPercentage(selected)) + "%");
 			
 			switch ((Statistics) combo.getSelectedItem())
 			{
@@ -243,25 +237,25 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				double mean = getMean(selected);
 				double stdev = getStdev(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | Mean=" + String.format("%.5f", mean) + domainUnit + "±" + String.format("%.5f", stdev) + domainUnit + ")");
+				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | Mean=" + String.format("%.6f", mean) + getDomainUnit() + "±" + String.format("%.6f", stdev) + getDomainUnit() + ")");
 				
 				break;
 			case MEDIAN:
 				double median = getMedian(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | Median=" + String.format("%.5f", median) + domainUnit + ")");
+				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | Median=" + String.format("%.6f", median) + getDomainUnit() + ")");
 				
 				break;
 			case MODE:
 				double mode = getMode(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | Mode=" + String.format("%.5f",  mode) + domainUnit + ")");
+				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | Mode=" + String.format("%.6f",  mode) + getDomainUnit() + ")");
 				
 				break;
 			case RMS:
 				double rms = getRootMeanSquare(selected);
 				
-				setDomain(domainName + " (in " + domainUnit + " | RMS=" + String.format("%.5f", rms) + domainUnit + ")");
+				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | RMS=" + String.format("%.6f", rms) + getDomainUnit() + ")");
 				
 				break;
 			}

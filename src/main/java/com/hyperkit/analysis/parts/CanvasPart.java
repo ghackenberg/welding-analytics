@@ -36,8 +36,13 @@ public abstract class CanvasPart extends Part
 	private static final Color MEDIUM = new Color(160,160,160);
 	private static final Color HIGH = new Color(224,224,224);
 	
-	private String domain;
-	private String range;
+	private String domainName;
+	private String domainUnit;
+	private String domainLabel;
+	
+	private String rangeName;
+	private String rangeUnit;
+	private String rangeLabel;
 	
 	private List<ASDFile> files = new ArrayList<>();
 	
@@ -71,17 +76,22 @@ public abstract class CanvasPart extends Part
 	private int mouse_current_x = Integer.MAX_VALUE;
 	private int mouse_current_y = Integer.MAX_VALUE;
 	
-	public CanvasPart(String title, String domain, String range, boolean zoom_domain, boolean zoom_range)
+	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
-		this(title, domain, range, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"), zoom_domain, zoom_range);
+		this(title, domain, domainUnit, range, rangeUnit, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"), zoom_domain, zoom_range);
 	}
 	
-	public CanvasPart(String title, String domain, String range, URL icon, boolean zoom_domain, boolean zoom_range)
+	public CanvasPart(String title, String domainName, String domainUnit, String rangeName, String rangeUnit, URL icon, boolean zoom_domain, boolean zoom_range)
 	{
 		super(title, icon);
 		
-		this.domain = domain;
-		this.range = range;
+		this.domainName = domainName;
+		this.domainUnit = domainUnit;
+		this.domainLabel = domainName + " (in " + domainUnit + ")";
+		
+		this.rangeName = rangeName;
+		this.rangeUnit = rangeUnit;
+		this.rangeLabel = rangeName + " (in " + rangeUnit + ")";
 		
 		CanvasPart self = this;
 		
@@ -277,19 +287,19 @@ public abstract class CanvasPart extends Part
 						graphics2D.setTransform(transform);
 					}
 					
-					bounds = metrics.getStringBounds(self.domain, graphics);
+					bounds = metrics.getStringBounds(self.domainLabel, graphics);
 					
 					graphics.setColor(LOW);
-					graphics.drawString(self.domain, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
+					graphics.drawString(self.domainLabel, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
 					
-					bounds = metrics.getStringBounds(self.range, graphics);
+					bounds = metrics.getStringBounds(self.rangeLabel, graphics);
 					
 					transform = graphics2D.getTransform();
 					
 					graphics2D.translate(projectDomain(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(range_lower + range_delta / 2) + bounds.getWidth() / 2);
 					graphics2D.rotate(- Math.PI / 2);
 					graphics.setColor(LOW);
-					graphics.drawString(self.range, 0, 0);
+					graphics.drawString(self.rangeLabel, 0, 0);
 					
 					graphics2D.setTransform(transform);
 					
@@ -426,16 +436,32 @@ public abstract class CanvasPart extends Part
 		panel.setBackground(Color.white);
 	}
 	
-	protected void setDomain(String domain)
+	protected String getDomainName() {
+		return domainName;
+	}
+	
+	protected String getDomainUnit() {
+		return domainUnit;
+	}
+	
+	protected String getRangeName() {
+		return rangeName;
+	}
+	
+	protected String getRangeUnit() {
+		return rangeUnit;
+	}
+	
+	protected void setDomainLabel(String domainLabel)
 	{
-		this.domain = domain;
+		this.domainLabel = domainLabel;
 		
 		panel.repaint();
 	}
 	
-	protected void setRange(String range)
+	protected void setRangeLabel(String rangeLabel)
 	{
-		this.range = range;
+		this.rangeLabel = rangeLabel;
 		
 		panel.repaint();
 	}
@@ -804,10 +830,10 @@ public abstract class CanvasPart extends Part
 	protected void drawMarker(Graphics2D graphics, Color color, double x, double y)
 	{
 		
-		String sx = String.format("%.2f", x);
-		String sy = String.format("%.2f", y);
+		String sx = String.format("%.6f", x);
+		String sy = String.format("%.6f", y);
 		
-		String string = "(" + sx + "/" + sy + ")";
+		String string = "(" + sx + getDomainUnit() + " / " + sy + getRangeUnit() + ")";
 		
 		FontMetrics metrics = graphics.getFontMetrics();
 		
@@ -822,11 +848,11 @@ public abstract class CanvasPart extends Part
 		int tw = (int) bounds.getWidth();
 		int th = (int) bounds.getHeight();
 		
-		int tx = px < width / 2. ? px - tw - 5 : px + 5;
-		int ty = py < height / 2. ? py - 5 : py + th + 5;
+		int tx = px < width / 2. ? px + 5 : px - tw - 5;
+		int ty = py < height / 2. ? py + th + 5 : py - 5;
 		
-		int rx = px < width / 2. ? px - tw - 10 : px;
-		int ry = py < height / 2. ? py - th - 10 : py;
+		int rx = px < width / 2. ? px : px - tw - 10;
+		int ry = py < height / 2. ? py : py - th - 10;
 
 		graphics.setComposite(AlphaComposite.SrcOver.derive(0.75f));
 		graphics.setColor(Color.WHITE);

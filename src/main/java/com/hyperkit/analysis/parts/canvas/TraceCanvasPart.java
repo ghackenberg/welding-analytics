@@ -30,9 +30,9 @@ public abstract class TraceCanvasPart extends CanvasPart
 	
 	private Map<ASDFile, Integer> marker;
 	
-	public TraceCanvasPart(String title, String domain, String range, URL icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
+	public TraceCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, URL icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
 	{
-		super(title, domain, range, icon, zoom_domain, zoom_range);
+		super(title, domain, domainUnit, range, rangeUnit, icon, zoom_domain, zoom_range);
 		
 		this.frame = frame;
 		this.window = window;

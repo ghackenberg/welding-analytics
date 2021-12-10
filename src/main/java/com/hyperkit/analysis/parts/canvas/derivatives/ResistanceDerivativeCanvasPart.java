@@ -8,7 +8,7 @@ public class ResistanceDerivativeCanvasPart extends DerivativeCanvasPart
 
 	public ResistanceDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Resistance derivative", "Resistance (in V/A)", frame, window, average);
+		super("Resistance derivative", "Resistance", "V/A", frame, window, average);
 	}
 
 	@Override

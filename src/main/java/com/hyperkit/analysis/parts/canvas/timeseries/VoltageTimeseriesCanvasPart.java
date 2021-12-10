@@ -8,7 +8,7 @@ public class VoltageTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public VoltageTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Voltage timeseries", "Voltage (in V)", frame, window, average);
+		super("Voltage timeseries", "Voltage", "V", frame, window, average);
 	}
 
 	@Override

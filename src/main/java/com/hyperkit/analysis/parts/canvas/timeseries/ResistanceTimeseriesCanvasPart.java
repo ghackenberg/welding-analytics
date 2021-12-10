@@ -8,7 +8,7 @@ public class ResistanceTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public ResistanceTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Resistance timeseries", "Resistance (in V/A)", frame, window, average);
+		super("Resistance timeseries", "Resistance", "V/A", frame, window, average);
 	}
 
 	@Override

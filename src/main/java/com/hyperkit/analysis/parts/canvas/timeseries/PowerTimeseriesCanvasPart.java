@@ -8,7 +8,7 @@ public class PowerTimeseriesCanvasPart extends TimeseriesCanvasPart
 	
 	public PowerTimeseriesCanvasPart(int frame, int window, int average)
 	{
-		super("Power timeseries", "Power (in V*A)", frame, window, average);
+		super("Power timeseries", "Power", "V*A", frame, window, average);
 	}
 
 	@Override

@@ -28,9 +28,9 @@ public abstract class CloudCanvasPart extends CanvasPart
 	private int exponent = 3;
 	private boolean animate = false;
 	
-	public CloudCanvasPart(String title, String domain, String range, int frame, int window, int average)
+	public CloudCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, int frame, int window, int average)
 	{
-		super(title, domain, range, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), true, true);
+		super(title, domain, domainUnit, range, rangeUnit, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), true, true);
 		
 		this.frame = frame;
 		this.window = window;

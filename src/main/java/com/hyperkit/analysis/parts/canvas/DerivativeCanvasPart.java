@@ -15,9 +15,9 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	private Map<ASDFile, Double> rangeMin = new HashMap<>();
 	private Map<ASDFile, Double> rangeMax = new HashMap<>();
 	
-	public DerivativeCanvasPart(String title, String range, int frame, int window, int average)
+	public DerivativeCanvasPart(String title, String range, String rangeUnit, int frame, int window, int average)
 	{
-		super(title, "Time (in s)", range, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), false, true, frame, window, average, 1);
+		super(title, "Time", "s", range, rangeUnit, DerivativeCanvasPart.class.getClassLoader().getResource("icons/parts/derivative.png"), false, true, frame, window, average, 1);
 	}
 	
 	@Override

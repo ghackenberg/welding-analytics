@@ -8,7 +8,7 @@ public class CurrentVoltageCloudCanvasPart extends CloudCanvasPart
 
 	public CurrentVoltageCloudCanvasPart(int frame, int window, int average)
 	{
-		super("Current-voltage cloud", "Current (in A)", "Voltage (in V)", frame, window, average);
+		super("Current-voltage cloud", "Current", "A", "Voltage", "V", frame, window, average);
 	}
 
 	@Override

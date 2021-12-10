@@ -8,7 +8,7 @@ public class VoltageDerivativeCanvasPart extends DerivativeCanvasPart
 
 	public VoltageDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Voltage derivative", "Voltage (in V)", frame, window, average);
+		super("Voltage derivative", "Voltage", "V", frame, window, average);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ public class CurrentDerivativeCanvasPart extends DerivativeCanvasPart
 
 	public CurrentDerivativeCanvasPart(int frame, int window, int average)
 	{
-		super("Current derivative", "Current (in A)", frame, window, average);
+		super("Current derivative", "Current", "A", frame, window, average);
 	}
 
 	@Override
