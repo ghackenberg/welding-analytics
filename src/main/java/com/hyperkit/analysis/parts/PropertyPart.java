@@ -6,8 +6,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileWriter;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -54,8 +52,6 @@ public class PropertyPart extends Part
 	private JSpinner maxCurrentSpinner;
 	
 	private ASDFile file;
-	
-	private NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
 
 	public PropertyPart()
 	{
@@ -330,7 +326,7 @@ public class PropertyPart extends Part
 	
 	private JTextField createTextField(double value)
 	{
-		JTextField field = new JTextField(format.format(value));
+		JTextField field = new JTextField(String.format("%.6f", value));
 		
 		field.setColumns(4);
 		field.setEnabled(false);
@@ -351,7 +347,9 @@ public class PropertyPart extends Part
 	
 	private JSpinner createSpinner(double minimumValue, double maximumValue, double value)
 	{
-		JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, (maximumValue - minimumValue) / 100));
+		JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, minimumValue, maximumValue, 0.000001));
+		
+		spinner.setEditor(new JSpinner.NumberEditor(spinner, "0.000000"));
 		
 		((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setColumns(4);
 		
