@@ -140,7 +140,7 @@ public class Main
 		
 		// Thickness
 		
-		JSpinner thicknessSpinner = new JSpinner(new SpinnerNumberModel(thickness, 1, 10, 1));
+		JSpinner thicknessSpinner = new JSpinner(new SpinnerNumberModel(thickness, 1, 5, 1));
 		thicknessSpinner.addChangeListener(
 			event ->
 			{

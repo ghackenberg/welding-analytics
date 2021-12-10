@@ -550,9 +550,9 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				double mean = getMean(selected);
 				double stdev = getStdev(selected);
 				
-				BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
+				BasicStroke dashed = new BasicStroke(getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), mean, yLower, mean, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), mean, yLower, mean, yUpper);
 				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean - stdev, yLower, mean - stdev, yUpper);
 				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean + stdev, yLower, mean + stdev, yUpper);
 				
@@ -560,19 +560,19 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			case MEDIAN:
 				double median = getMedian(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), median, yLower, median, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), median, yLower, median, yUpper);
 				
 				break;
 			case MODE:
 				double mode = getMode(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), mode, yLower, mode, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), mode, yLower, mode, yUpper);
 				
 				break;
 			case RMS:
 				double rms = getRootMeanSquare(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(2), rms, yLower, rms, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), rms, yLower, rms, yUpper);
 				
 				break;
 			}

@@ -27,6 +27,7 @@ import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
+import com.hyperkit.analysis.events.values.ThicknessChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 
 public abstract class CanvasPart extends Part
@@ -75,6 +76,8 @@ public abstract class CanvasPart extends Part
 	
 	private int mouse_current_x = Integer.MAX_VALUE;
 	private int mouse_current_y = Integer.MAX_VALUE;
+	
+	private int thickness = 1;
 	
 	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
@@ -229,12 +232,14 @@ public abstract class CanvasPart extends Part
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{	
 						graphics.setColor(x == 0 ? MEDIUM : HIGH);
+						graphics2D.setStroke(new BasicStroke(thickness));
 						graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower), (int) projectDomain(x * dx), (int) projectRange(range_upper));
 					}
 					
 					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 					{
 						graphics.setColor(y == 0 ? MEDIUM : HIGH);
+						graphics2D.setStroke(new BasicStroke(thickness));
 						graphics.drawLine((int) projectDomain(domain_lower), (int) projectRange(y * dy), (int) projectDomain(domain_upper), (int) projectRange(y * dy));
 					}
 					
@@ -242,10 +247,10 @@ public abstract class CanvasPart extends Part
 					drawLine(graphics2D, LOW, domain_lower, range_upper, domain_lower, range_lower);
 					
 					graphics.setColor(LOW);
-					graphics.fillPolygon(new int[] {(int) projectDomain(domain_upper), (int) projectDomain(domain_upper), (int) projectDomain(domain_upper) + padding_right / 2}, new int[] {(int) projectRange(range_lower) - padding_right / 3, (int) projectRange(range_lower) + padding_right / 3, (int) projectRange(range_lower)}, 3);
+					graphics.fillPolygon(new int[] {(int) projectDomain(domain_upper), (int) projectDomain(domain_upper), (int) projectDomain(domain_upper) + padding_right / 2 * thickness}, new int[] {(int) projectRange(range_lower) - padding_right / 3 * thickness, (int) projectRange(range_lower) + padding_right / 3 * thickness, (int) projectRange(range_lower)}, 3);
 					
 					graphics.setColor(LOW);
-					graphics.fillPolygon(new int[] {(int) projectDomain(domain_lower) - padding_top / 3, (int) projectDomain(domain_lower) + padding_top / 3, (int) projectDomain(domain_lower)}, new int[] {(int) projectRange(range_upper), (int) projectRange(range_upper), (int) projectRange(range_upper) - padding_top / 2}, 3);
+					graphics.fillPolygon(new int[] {(int) projectDomain(domain_lower) - padding_top / 3 * thickness, (int) projectDomain(domain_lower) + padding_top / 3 * thickness, (int) projectDomain(domain_lower)}, new int[] {(int) projectRange(range_upper), (int) projectRange(range_upper), (int) projectRange(range_upper) - padding_top / 2 * thickness}, 3);
 					
 					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 					{
@@ -515,6 +520,10 @@ public abstract class CanvasPart extends Part
 		panel.repaint();
 	}
 	
+	protected int getThickness() {
+		return thickness;
+	}
+	
 	protected boolean check(double x, double y)
 	{
 		return x >= domain_lower && x <= domain_upper && y >= range_lower && y <= range_upper;
@@ -686,6 +695,15 @@ public abstract class CanvasPart extends Part
 		return true;
 	}
 	
+	public boolean handleEvent(ThicknessChangeEvent event)
+	{
+		thickness = event.getValue();
+		
+		panel.repaint();
+		
+		return true;
+	}
+	
 	protected double projectDomain(double x)
 	{
 		return padding_left + (width - padding_left - padding_right) * (x - domain_lower) / domain_delta;
@@ -735,7 +753,7 @@ public abstract class CanvasPart extends Part
 	
 	protected void drawLine(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
 	{
-		drawLine(graphics, color, new BasicStroke(1), x1, y1, x2, y2);
+		drawLine(graphics, color, new BasicStroke(thickness), x1, y1, x2, y2);
 	}
 	
 	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, double x1, double y1, double x2, double y2)
