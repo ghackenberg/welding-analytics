@@ -40,7 +40,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	private enum Statistics
 	{
-		MEAN_STDEV("Mean/Stdev"), MEDIAN("Median"), MODE("Mode"), RMS("Root Mean Square");
+		MEAN_STDEV("Mean/Stdev"), MEDIAN("Median"), MODE("Mode"), RMS("RMS");
 		
 		private final String name;
 		
@@ -78,7 +78,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			getPanel().repaint();
 		});
 		
-		percentage = new JTextField("", 7);
+		percentage = new JTextField("", 8);
 		percentage.setEditable(false);
 		percentage.setEnabled(false);
 		
