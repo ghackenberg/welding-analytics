@@ -4,15 +4,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -20,6 +22,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
@@ -34,6 +37,7 @@ public class PropertyPart extends Part
 	private JPanel panel;
 	
 	private JButton colorButton;
+	private JButton saveButton;
 	
 	private JTextField minTimestampField;
 	private JTextField maxTimestampField;
@@ -81,25 +85,52 @@ public class PropertyPart extends Part
 			// Buttons
 			
 			colorButton = new JButton(file.getIcon());
-
-			colorButton.addActionListener(new ActionListener()
+			colorButton.addActionListener(e -> {
+				Color newColor = JColorChooser.showDialog(colorButton, "Choose color", file.getColor());
+				
+				if (newColor != null)
 				{
-					@Override
-					public void actionPerformed(ActionEvent e)
-					{
-						Color newColor = JColorChooser.showDialog(colorButton, "Choose color", file.getColor());
-						
-						if (newColor != null)
-						{
-							file.setColor(newColor);
-							
-							colorButton.setIcon(file.getIcon());
-							
-							Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					file.setColor(newColor);
+					
+					colorButton.setIcon(file.getIcon());
+					
+					Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+				}
+			});
+			
+			saveButton = new JButton("Save");
+			saveButton.addActionListener(e -> {
+				JFileChooser chooser = new JFileChooser();
+				
+				chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
+				
+				int result = chooser.showSaveDialog(getComponent());
+				
+				if (result == JFileChooser.APPROVE_OPTION)
+				{
+					File excerpt = chooser.getSelectedFile();
+					
+					if (excerpt.isDirectory()) {
+						JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
+					} else {
+						try (FileWriter writer = new FileWriter(excerpt, true)) {
+							for (int i = 0; i < file.getLengthDisplayed(); i++) {
+								double timestamp = file.getTimestampDisplayed(i);
+								double voltage = file.getVoltageDisplayed(i);
+								double current = file.getCurrentDisplayed(i);
+								
+								String output = "\n" + timestamp + "\t" + voltage + "\t" + current;
+								
+								writer.write(output.replace(".", ","));
+							}
+							JOptionPane.showMessageDialog(getComponent(), "Excerpt saved successfully!");
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							JOptionPane.showMessageDialog(getComponent(), "Excerpt could not be saved!");
 						}
 					}
 				}
-			);
+			});
 			
 			// Text fields (1)
 			
@@ -210,6 +241,11 @@ public class PropertyPart extends Part
 			addRow("Timestamp", minTimestampSpinner, maxTimestampSpinner);
 			addRow("Voltage", minVoltageSpinner, maxVoltageSpinner);
 			addRow("Current", minCurrentSpinner, maxCurrentSpinner);
+			
+			// Actions
+			
+			addRow("Actions", "Button");
+			addRow("Extract", saveButton);
 		}
 		
 		panel.revalidate();
