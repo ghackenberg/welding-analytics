@@ -8,13 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.values.AnimateChangeEvent;
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.ExponentChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.OffsetChangeEvent;
 import com.hyperkit.analysis.events.values.WindowChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class CloudCanvasPart extends CanvasPart
@@ -161,7 +161,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 	}
 
 	@Override
-	protected int getDataLength(ASDFile file)
+	protected int getDataLength(Dataset file)
 	{
 		return file.getLengthDisplayed();
 	}
@@ -174,7 +174,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 		
 		for (int number = 0; number < getFiles().size(); number++)
 		{
-			ASDFile file = getFiles().get(number);
+			Dataset file = getFiles().get(number);
 			
 			int start = animate ? Math.max(frame - window, 0) : 0;
 			int end = animate ? Math.min(frame, getDataLength(file) - 1) : getDataLength(file) - 1;
@@ -204,7 +204,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 				
 				for (int number = 0; number < getFiles().size(); number++)
 				{
-					ASDFile file = getFiles().get(number);
+					Dataset file = getFiles().get(number);
 					
 					Color color = file.getColor();
 					

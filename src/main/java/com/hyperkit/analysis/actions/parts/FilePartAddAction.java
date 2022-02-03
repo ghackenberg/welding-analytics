@@ -9,10 +9,11 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.actions.PartAction;
+import com.hyperkit.analysis.datasets.ASDDataset;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.FilePart;
 
 import bibliothek.gui.Dockable;
@@ -32,7 +33,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 		
 		chooser.setCurrentDirectory(Memory.getCurrentDirectory());
 		
-		chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
+		chooser.setFileFilter(new FileNameExtensionFilter("Data file", "asd", "tdp"));
 		
 		int result = chooser.showOpenDialog(getPart().getComponent());
 		
@@ -42,7 +43,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 			
 			Memory.setCurrentDirectory(file);
 			
-			Enumeration<ASDFile> file_existing = getPart().getModel().elements();
+			Enumeration<Dataset> file_existing = getPart().getModel().elements();
 			
 			while (file_existing.hasMoreElements())
 			{
@@ -57,7 +58,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 			Thread thread = new Thread(() -> {
 				try
 				{
-					ASDFile asdFile = new ASDFile(file);
+					ASDDataset asdFile = new ASDDataset(file);
 					
 					if (asdFile.getLengthMeasured() > 0)
 					{

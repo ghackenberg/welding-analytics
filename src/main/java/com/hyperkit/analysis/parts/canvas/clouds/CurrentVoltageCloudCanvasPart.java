@@ -1,6 +1,6 @@
 package com.hyperkit.analysis.parts.canvas.clouds;
 
-import com.hyperkit.analysis.files.ASDFile;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.parts.canvas.CloudCanvasPart;
 
 public class CurrentVoltageCloudCanvasPart extends CloudCanvasPart
@@ -12,37 +12,37 @@ public class CurrentVoltageCloudCanvasPart extends CloudCanvasPart
 	}
 
 	@Override
-	protected double getDomainMinimum(ASDFile file)
+	protected double getDomainMinimum(Dataset file)
 	{
 		return file.getMinCurrentDisplayed();
 	}
 
 	@Override
-	protected double getRangeMinimum(ASDFile file)
+	protected double getRangeMinimum(Dataset file)
 	{
 		return file.getMinVoltageDisplayed();
 	}
 
 	@Override
-	protected double getDomainMaximum(ASDFile file)
+	protected double getDomainMaximum(Dataset file)
 	{
 		return file.getMaxCurrentDisplayed();
 	}
 
 	@Override
-	protected double getRangeMaximum(ASDFile file)
+	protected double getRangeMaximum(Dataset file)
 	{
 		return file.getMaxVoltageDisplayed();
 	}
 
 	@Override
-	protected double getDomainValue(ASDFile file, int index)
+	protected double getDomainValue(Dataset file, int index)
 	{
 		return file.getAverageCurrentDisplayed(index, getAverage());
 	}
 
 	@Override
-	protected double getRangeValue(ASDFile file, int index)
+	protected double getRangeValue(Dataset file, int index)
 	{
 		return file.getAverageVoltageDisplayed(index, getAverage());
 	}

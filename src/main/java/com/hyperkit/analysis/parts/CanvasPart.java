@@ -33,6 +33,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
@@ -41,7 +42,6 @@ import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
 import com.hyperkit.analysis.events.values.FontChangeEvent;
 import com.hyperkit.analysis.events.values.StrokeChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.ImageHelper;
 
 public abstract class CanvasPart extends Part
@@ -62,7 +62,7 @@ public abstract class CanvasPart extends Part
 	private boolean zoom_domain;
 	private boolean zoom_range;
 	
-	private List<ASDFile> files = new ArrayList<>();
+	private List<Dataset> files = new ArrayList<>();
 	
 	private JButton saveButton;
 	private JPanel panel;
@@ -442,7 +442,7 @@ public abstract class CanvasPart extends Part
 		return panel;
 	}
 	
-	public List<ASDFile> getFiles()
+	public List<Dataset> getFiles()
 	{
 		return files;
 	}
@@ -595,7 +595,7 @@ public abstract class CanvasPart extends Part
 		return new Color((int) r, (int) g, (int) b);
 	}
 	
-	protected Color calculateColor(ASDFile file, double shade, double progress)
+	protected Color calculateColor(Dataset file, double shade, double progress)
 	{
 		return calculateColor(file.getColor(), shade, progress);
 	}
@@ -776,16 +776,16 @@ public abstract class CanvasPart extends Part
 	
 	protected abstract void prepareData();
 	
-	protected abstract double getDomainMinimum(ASDFile file);
-	protected abstract double getRangeMinimum(ASDFile file);
+	protected abstract double getDomainMinimum(Dataset file);
+	protected abstract double getRangeMinimum(Dataset file);
 	
-	protected abstract double getDomainMaximum(ASDFile file);
-	protected abstract double getRangeMaximum(ASDFile file);
+	protected abstract double getDomainMaximum(Dataset file);
+	protected abstract double getRangeMaximum(Dataset file);
 	
-	protected abstract int getDataLength(ASDFile file);
+	protected abstract int getDataLength(Dataset file);
 	
-	protected abstract double getDomainValue(ASDFile file, int index);	
-	protected abstract double getRangeValue(ASDFile file, int index);
+	protected abstract double getDomainValue(Dataset file, int index);	
+	protected abstract double getRangeValue(Dataset file, int index);
 	
 	protected void paintCommon(Graphics2D graphics, int width, int height, int stroke, int font)
 	{
@@ -801,7 +801,7 @@ public abstract class CanvasPart extends Part
 			range_lower = +Double.MAX_VALUE;
 			range_upper = -Double.MAX_VALUE;
 			
-			for (ASDFile file : files)
+			for (Dataset file : files)
 			{
 				domain_lower = Math.min(domain_lower, getDomainMinimum(file));
 				domain_upper = Math.max(domain_upper, getDomainMaximum(file));

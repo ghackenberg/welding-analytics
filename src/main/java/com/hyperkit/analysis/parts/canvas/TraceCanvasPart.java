@@ -8,26 +8,26 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.MarkerChangeEvent;
 import com.hyperkit.analysis.events.values.WindowChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class TraceCanvasPart extends CanvasPart
 {
 	
-	private Map<ASDFile, Integer> starts = new HashMap<>();
-	private Map<ASDFile, Integer> ends = new HashMap<>();
-	private Map<ASDFile, Integer> counts = new HashMap<>();
+	private Map<Dataset, Integer> starts = new HashMap<>();
+	private Map<Dataset, Integer> ends = new HashMap<>();
+	private Map<Dataset, Integer> counts = new HashMap<>();
 
 	private int frame;
 	private int window;
 	private int average;
 	private int padding;
 	
-	private Map<ASDFile, Integer> marker;
+	private Map<Dataset, Integer> marker;
 	
 	public TraceCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, String icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
 	{
@@ -128,7 +128,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 		ends.clear();
 		counts.clear();
 		
-		for (ASDFile file : getFiles())
+		for (Dataset file : getFiles())
 		{
 			int end = Math.min(frame + 1, file.getLengthDisplayed());
 			int start = Math.max(frame + 1 - window, 0);
@@ -141,19 +141,19 @@ public abstract class TraceCanvasPart extends CanvasPart
 	}
 
 	@Override
-	protected int getDataLength(ASDFile file)
+	protected int getDataLength(Dataset file)
 	{
 		return counts.get(file);
 	}
 
 	@Override
-	protected double getDomainValue(ASDFile file, int index)
+	protected double getDomainValue(Dataset file, int index)
 	{
 		return getRawDomainValue(file, starts.get(file) + index);
 	}
 
 	@Override
-	protected double getRangeValue(ASDFile file, int index)
+	protected double getRangeValue(Dataset file, int index)
 	{
 		return getRawRangeValue(file, starts.get(file) + index);
 	}
@@ -163,7 +163,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 	{
 		// Draw trace
 		
-		for (ASDFile file : getFiles())
+		for (Dataset file : getFiles())
 		{			
 			for (int index = 1 + padding; index < getDataLength(file) - padding; index++)
 			{	
@@ -195,7 +195,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 		{
 			marker = new HashMap<>();
 			
-			for (ASDFile file : getFiles())
+			for (Dataset file : getFiles())
 			{
 				int marker_index = Integer.MAX_VALUE;
 				double marker_distance = Double.MAX_VALUE;
@@ -233,9 +233,9 @@ public abstract class TraceCanvasPart extends CanvasPart
 		
 		if (marker != null)
 		{	
-			for (Entry<ASDFile, Integer> entry : marker.entrySet())
+			for (Entry<Dataset, Integer> entry : marker.entrySet())
 			{
-				ASDFile file = entry.getKey();
+				Dataset file = entry.getKey();
 				
 				Integer index = entry.getValue();
 				
@@ -247,7 +247,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 		}
 	}
 	
-	protected abstract double getRawDomainValue(ASDFile file, int index);
-	protected abstract double getRawRangeValue(ASDFile file, int index);
+	protected abstract double getRawDomainValue(Dataset file, int index);
+	protected abstract double getRawRangeValue(Dataset file, int index);
 
 }

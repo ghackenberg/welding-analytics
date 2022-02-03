@@ -3,17 +3,17 @@ package com.hyperkit.analysis.parts.canvas;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 
 public abstract class DerivativeCanvasPart extends TraceCanvasPart
 {
 	
-	private Map<ASDFile, Double> rangeMin = new HashMap<>();
-	private Map<ASDFile, Double> rangeMax = new HashMap<>();
+	private Map<Dataset, Double> rangeMin = new HashMap<>();
+	private Map<Dataset, Double> rangeMax = new HashMap<>();
 	
 	public DerivativeCanvasPart(String title, String range, String rangeUnit, int frame, int window, int average)
 	{
@@ -50,7 +50,7 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	@Override
 	public boolean handleEvent(AverageChangeEvent event)
 	{
-		for (ASDFile file : getFiles())
+		for (Dataset file : getFiles())
 		{
 			rangeMin.put(file, calculateRangeMinimum(file));
 			rangeMax.put(file, calculateRangeMaximum(file));
@@ -60,36 +60,36 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	}
 	
 	@Override
-	protected double getDomainMinimum(ASDFile file)
+	protected double getDomainMinimum(Dataset file)
 	{
 		return getDataLength(file) > 0 ? getDomainValue(file, 0) : Double.MAX_VALUE;
 	}
 	
 	@Override
-	protected double getDomainMaximum(ASDFile file)
+	protected double getDomainMaximum(Dataset file)
 	{	
 		return getDataLength(file) > 0 ? getDomainValue(file, getDataLength(file) - 1) : -Double.MAX_VALUE;
 	}
 	
 	@Override
-	protected double getRawDomainValue(ASDFile file, int index)
+	protected double getRawDomainValue(Dataset file, int index)
 	{
 		return file.getTimestampDisplayed(index);
 	}
 	
 	@Override
-	protected double getRangeMinimum(ASDFile file)
+	protected double getRangeMinimum(Dataset file)
 	{
 		return rangeMin.get(file);
 	}
 	
 	@Override
-	protected double getRangeMaximum(ASDFile file)
+	protected double getRangeMaximum(Dataset file)
 	{	
 		return rangeMax.get(file);
 	}
 	
-	private double calculateRangeMinimum(ASDFile file)
+	private double calculateRangeMinimum(Dataset file)
 	{
 		double min = Double.MAX_VALUE;
 		
@@ -101,7 +101,7 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 		return min;
 	}
 	
-	private double calculateRangeMaximum(ASDFile file)
+	private double calculateRangeMaximum(Dataset file)
 	{
 		double max = -Double.MAX_VALUE;
 		
@@ -114,7 +114,7 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 	}
 	
 	@Override
-	protected double getRawRangeValue(ASDFile file, int index)
+	protected double getRawRangeValue(Dataset file, int index)
 	{
 		double y1 = getIntegratedRawRangeValue(file, index - 1);
 		double y2 = getIntegratedRawRangeValue(file, index);
@@ -126,6 +126,6 @@ public abstract class DerivativeCanvasPart extends TraceCanvasPart
 		return (dy1 + dy2) / 2;
 	}
 	
-	protected abstract double getIntegratedRawRangeValue(ASDFile file, int index);
+	protected abstract double getIntegratedRawRangeValue(Dataset file, int index);
 	
 }

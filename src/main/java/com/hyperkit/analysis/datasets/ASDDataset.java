@@ -1,8 +1,5 @@
-package com.hyperkit.analysis.files;
+package com.hyperkit.analysis.datasets;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,16 +11,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import com.hyperkit.analysis.Bus;
-import com.hyperkit.analysis.File;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 
-public class ASDFile extends File
+public class ASDDataset extends Dataset
 {
 	
 	private static final int TIMESTAMP_INDEX = 0;
@@ -31,10 +25,6 @@ public class ASDFile extends File
 	private static final int CURRENT_INDEX = 2;
 	private static final int RESISTANCE_INDEX = 3;
 	private static final int POWER_INDEX = 4;
-	
-	private String name;
-	private Color color;
-	private Icon icon;
 	
 	private List<double[]> data;
 	private List<double[]> activeData;
@@ -91,13 +81,9 @@ public class ASDFile extends File
 	private double minPowerPercentage = Double.MAX_VALUE;
 	private double maxPowerPercentage = -Double.MAX_VALUE;
 
-	public ASDFile(java.io.File file) throws IOException
+	public ASDDataset(java.io.File file) throws IOException
 	{
 		super(file);
-		
-		name = file.getAbsolutePath();
-		color = new Color(Color.HSBtoRGB((float) Math.random(), 1f, 0.9f));
-		updateIcon();
 		
 		data = new ArrayList<>();
 		activeData = new ArrayList<>();
@@ -183,33 +169,6 @@ public class ASDFile extends File
 		// Update active data
 		
 		updateActiveData();
-	}
-	
-	public String getName()
-	{
-		return name;
-	}
-	
-	public Color getColor()
-	{
-		return color;
-	}
-	
-	public Color getMarkerColor()
-	{
-		return new Color((int) (color.getRed() * 0.8), (int) (color.getGreen() * 0.8), (int) (color.getBlue() * 0.8));
-	}
-	
-	public void setColor(Color color)
-	{
-		this.color = color;
-		
-		updateIcon();
-	}
-	
-	public Icon getIcon()
-	{
-		return icon;
 	}
 	
 	// Measured
@@ -1503,12 +1462,6 @@ public class ASDFile extends File
 		return regression;
 	}
 	
-	@Override
-	public String toString()
-	{
-		return name;
-	}
-	
 	private void updateActiveData()
 	{
 		// Find limits
@@ -1607,18 +1560,6 @@ public class ASDFile extends File
 				throw new NumberFormatException("Number format should be <x>e<y>.");
 			}
 		}
-	}
-	
-	private void updateIcon()
-	{
-		BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
-		
-		Graphics2D graphics = image.createGraphics();
-		
-		graphics.setColor(color);
-		graphics.fillRect(0, 0, 16, 16);
-		
-		icon = new ImageIcon(image);
 	}
 
 }

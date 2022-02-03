@@ -28,7 +28,6 @@ import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.ImageHelper;
 
 public class PropertyPart extends Part
@@ -53,7 +52,7 @@ public class PropertyPart extends Part
 	private JSpinner minCurrentSpinner;
 	private JSpinner maxCurrentSpinner;
 	
-	private ASDFile file;
+	private com.hyperkit.analysis.Dataset file;
 
 	public PropertyPart()
 	{
@@ -78,7 +77,7 @@ public class PropertyPart extends Part
 			
 			PropertyPart self = this;
 			
-			ASDFile file = event.getASDFile();
+			com.hyperkit.analysis.Dataset file = event.getASDFile();
 			
 			// Buttons
 			

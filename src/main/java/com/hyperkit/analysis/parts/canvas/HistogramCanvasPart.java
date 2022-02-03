@@ -10,6 +10,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
@@ -19,7 +20,6 @@ import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.events.values.MarkerChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.CanvasPart;
 
 public abstract class HistogramCanvasPart extends CanvasPart
@@ -29,14 +29,14 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private int average;
 	private int histogram;
 	
-	private Map<ASDFile, Integer> marker;
+	private Map<Dataset, Integer> marker;
 	
-	private Map<ASDFile, Double> minDomain = new HashMap<>();
-	private Map<ASDFile, Double> maxDomain = new HashMap<>();
-	private Map<ASDFile, Double> minRange = new HashMap<>();
-	private Map<ASDFile, Double> maxRange = new HashMap<>();
-	private Map<ASDFile, Double> deltas = new HashMap<>();
-	private Map<ASDFile, double[][]> series = new HashMap<>();
+	private Map<Dataset, Double> minDomain = new HashMap<>();
+	private Map<Dataset, Double> maxDomain = new HashMap<>();
+	private Map<Dataset, Double> minRange = new HashMap<>();
+	private Map<Dataset, Double> maxRange = new HashMap<>();
+	private Map<Dataset, Double> deltas = new HashMap<>();
+	private Map<Dataset, double[][]> series = new HashMap<>();
 	
 	private enum Statistics
 	{
@@ -59,7 +59,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	private JComboBox<Statistics> combo;
 	private JTextField percentage;
 	
-	private ASDFile selected;
+	private Dataset selected;
 	
 	public HistogramCanvasPart(String title, String domainName, String domainUnit, int frame, int average, int histogram)
 	{
@@ -106,7 +106,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		{
 			average = event.getValue();
 			
-			for (ASDFile file : getFiles())
+			for (Dataset file : getFiles())
 			{
 				updateHistogram(file);	
 			}
@@ -123,7 +123,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		{
 			histogram = event.getValue();
 			
-			for (ASDFile file : getFiles())
+			for (Dataset file : getFiles())
 			{
 				updateHistogram(file);	
 			}
@@ -213,7 +213,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 			double min = getDomainLowerCustom();
 			double max = getDomainUpperCustom();
 			
-			for (ASDFile file : getFiles())
+			for (Dataset file : getFiles())
 			{
 				updateZoom(file, min, max);
 			}
@@ -277,7 +277,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return histogram;
 	}
 	
-	private void updateHistogram(ASDFile file)
+	private void updateHistogram(Dataset file)
 	{
 		// Find limits
 		
@@ -337,25 +337,25 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected double getDomainMinimum(ASDFile file)
+	protected double getDomainMinimum(Dataset file)
 	{
 		return minDomain.get(file);
 	}
 	
 	@Override
-	protected double getDomainMaximum(ASDFile file)
+	protected double getDomainMaximum(Dataset file)
 	{
 		return maxDomain.get(file);
 	}
 	
 	@Override
-	protected double getRangeMinimum(ASDFile file)
+	protected double getRangeMinimum(Dataset file)
 	{
 		return minRange.get(file);
 	}
 	
 	@Override
-	protected double getRangeMaximum(ASDFile file)
+	protected double getRangeMaximum(Dataset file)
 	{
 		if (getDomainLowerCustom() == -Double.MAX_VALUE)
 		{
@@ -401,19 +401,19 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 
 	@Override
-	protected int getDataLength(ASDFile file)
+	protected int getDataLength(Dataset file)
 	{
 		return series.get(file)[0].length;
 	}
 
 	@Override
-	protected double getDomainValue(ASDFile file, int index)
+	protected double getDomainValue(Dataset file, int index)
 	{
 		return series.get(file)[0][index];
 	}
 
 	@Override
-	protected double getRangeValue(ASDFile file, int index)
+	protected double getRangeValue(Dataset file, int index)
 	{
 		return series.get(file)[1][index];
 	}
@@ -421,7 +421,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	@Override
 	protected void paintComponent(Graphics2D graphics, int width, int height, int stroke, int font)
 	{		
-		for (ASDFile file : getFiles())
+		for (Dataset file : getFiles())
 		{
 			double delta = deltas.get(file);
 			
@@ -472,7 +472,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		{
 			marker = new HashMap<>();
 			
-			for (ASDFile file : getFiles())
+			for (Dataset file : getFiles())
 			{
 				int marker_index = Integer.MAX_VALUE;
 				double marker_distance = Double.MAX_VALUE;
@@ -510,9 +510,9 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		
 		if (marker != null)
 		{
-			for (Entry<ASDFile, Integer> entry : marker.entrySet())
+			for (Entry<Dataset, Integer> entry : marker.entrySet())
 			{
-				ASDFile file = entry.getKey();
+				Dataset file = entry.getKey();
 				
 				int index = entry.getValue();
 			
@@ -579,7 +579,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		}
 	}
 	
-	private double calculateRangeValue(ASDFile file, double value)
+	private double calculateRangeValue(Dataset file, double value)
 	{
 		double min = minDomain.get(file);
 		double max = maxDomain.get(file);
@@ -589,33 +589,33 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		return series.get(file)[1][bin];
 	}
 	
-	protected double getDomainMarkerValue(ASDFile file)
+	protected double getDomainMarkerValue(Dataset file)
 	{
 		return getRawValue(file, frame);
 	}
 	
-	protected double getRangeMarkerValue(ASDFile file)
+	protected double getRangeMarkerValue(Dataset file)
 	{
 		return calculateRangeValue(file, getDomainMarkerValue(file));
 	}
 	
-	protected double getRawDataLength(ASDFile file)
+	protected double getRawDataLength(Dataset file)
 	{
 		return file.getLengthDisplayed();
 	}
 	
-	protected abstract double getRawMinimum(ASDFile file);
-	protected abstract double getRawMaximum(ASDFile file);
+	protected abstract double getRawMinimum(Dataset file);
+	protected abstract double getRawMaximum(Dataset file);
 	
-	protected abstract double getRawValue(ASDFile file, int index);
+	protected abstract double getRawValue(Dataset file, int index);
 
-	protected abstract double getPercentage(ASDFile file);
-	protected abstract double getMean(ASDFile file);
-	protected abstract double getStdev(ASDFile file);
-	protected abstract double getMedian(ASDFile file);
-	protected abstract double getMode(ASDFile file);
-	protected abstract double getRootMeanSquare(ASDFile file);
+	protected abstract double getPercentage(Dataset file);
+	protected abstract double getMean(Dataset file);
+	protected abstract double getStdev(Dataset file);
+	protected abstract double getMedian(Dataset file);
+	protected abstract double getMode(Dataset file);
+	protected abstract double getRootMeanSquare(Dataset file);
 	
-	protected abstract void updateZoom(ASDFile file, double min, double max);
+	protected abstract void updateZoom(Dataset file, double min, double max);
 
 }

@@ -10,6 +10,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.actions.parts.FilePartAddAction;
 import com.hyperkit.analysis.actions.parts.FilePartRemoveAction;
@@ -18,26 +19,25 @@ import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
-import com.hyperkit.analysis.files.ASDFile;
 
 public class FilePart extends Part
 {
 	
-	private DefaultListModel<ASDFile> model;
-	private JList<ASDFile> list;
+	private DefaultListModel<Dataset> model;
+	private JList<Dataset> list;
 
 	public FilePart()
 	{
 		super("Files", "icons/parts/file.png");
+		
+		FilePart self = this;
 		
 		addAction(new FilePartAddAction(this));
 		addAction(new FilePartRemoveAction(this));
 		
 		model = new DefaultListModel<>();
 		
-		FilePart self = this;
-		
-		list = new JList<ASDFile>(model);
+		list = new JList<Dataset>(model);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setCellRenderer(new FileListCellRenderer());
 		list.addListSelectionListener(
@@ -58,11 +58,11 @@ public class FilePart extends Part
 		return new JScrollPane(list);
 	}
 	
-	public DefaultListModel<ASDFile> getModel()
+	public DefaultListModel<Dataset> getModel()
 	{
 		return model;
 	}
-	public JList<ASDFile> getList()
+	public JList<Dataset> getList()
 	{
 		return list;
 	}

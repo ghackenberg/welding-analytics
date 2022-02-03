@@ -1,6 +1,6 @@
 package com.hyperkit.analysis.parts.canvas;
 
-import com.hyperkit.analysis.files.ASDFile;
+import com.hyperkit.analysis.Dataset;
 
 public abstract class TimeseriesCanvasPart extends TraceCanvasPart
 {
@@ -11,19 +11,19 @@ public abstract class TimeseriesCanvasPart extends TraceCanvasPart
 	}
 	
 	@Override
-	protected double getDomainMinimum(ASDFile file)
+	protected double getDomainMinimum(Dataset file)
 	{
 		return getDataLength(file) > 0 ? getDomainValue(file, 0) : Double.MAX_VALUE;
 	}
 	
 	@Override
-	protected double getDomainMaximum(ASDFile file)
+	protected double getDomainMaximum(Dataset file)
 	{	
 		return getDataLength(file) > 0 ? getDomainValue(file, getDataLength(file) - 1) : -Double.MAX_VALUE;
 	}
 	
 	@Override
-	protected double getRawDomainValue(ASDFile file, int index)
+	protected double getRawDomainValue(Dataset file, int index)
 	{
 		return file.getTimestampDisplayed(index);
 	}

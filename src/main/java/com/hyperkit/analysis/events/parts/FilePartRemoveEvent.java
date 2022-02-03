@@ -1,22 +1,22 @@
 package com.hyperkit.analysis.events.parts;
 
+import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.events.PartEvent;
-import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.FilePart;
 
 public class FilePartRemoveEvent extends PartEvent<FilePart>
 {
 	
-	private ASDFile file;
+	private Dataset file;
 
-	public FilePartRemoveEvent(FilePart part, ASDFile file)
+	public FilePartRemoveEvent(FilePart part, Dataset file)
 	{
 		super(part);
 		
 		this.file = file;
 	}
 	
-	public ASDFile getASDFile()
+	public Dataset getASDFile()
 	{
 		return file;
 	}
