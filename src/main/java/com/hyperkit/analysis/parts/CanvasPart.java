@@ -15,9 +15,13 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -51,10 +55,8 @@ public abstract class CanvasPart extends Part
 	
 	private List<ASDFile> files = new ArrayList<>();
 	
+	private JButton save;
 	private JPanel panel;
-	
-	private int width;
-	private int height;
 	
 	private int padding_top = 10;
 	private int padding_left = 50;
@@ -105,6 +107,28 @@ public abstract class CanvasPart extends Part
 		
 		CanvasPart self = this;
 		
+		save = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
+		save.addActionListener(event -> {
+			try {
+				int width = panel.getWidth();
+				int height = panel.getHeight();
+				
+				BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+				
+				Graphics2D graphics = (Graphics2D) image.getGraphics();
+				
+				graphics.setBackground(Color.WHITE);
+				
+				graphics.clearRect(0, 0, width, height);
+				
+				self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
+				
+				ImageIO.write(image, "png", new File("test.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		
 		panel = new JPanel()
 		{
 			private static final long serialVersionUID = -1222107750580828320L;
@@ -116,7 +140,7 @@ public abstract class CanvasPart extends Part
 				
 				Graphics2D graphics2D = (Graphics2D) graphics;
 				
-				self.paintCommon(graphics2D);
+				self.paintCommon(graphics2D, panel.getWidth(), panel.getHeight());
 			}
 		};
 		panel.addMouseListener(new MouseListener()
@@ -136,8 +160,8 @@ public abstract class CanvasPart extends Part
 						int x1 = Math.min(Math.max(mouse_previous_x, padding_left), panel.getWidth() - padding_right);
 						int x2 = Math.min(Math.max(e.getX(), padding_left), panel.getWidth() - padding_right);
 						
-						domain_lower_custom = projectScreenX(x1);
-						domain_upper_custom = projectScreenX(x2);	
+						domain_lower_custom = projectScreenX(panel.getWidth(), x1);
+						domain_upper_custom = projectScreenX(panel.getWidth(), x2);	
 					}
 				}
 				if (zoom_range)
@@ -152,8 +176,8 @@ public abstract class CanvasPart extends Part
 						int y1 = Math.min(Math.max(mouse_previous_y, padding_top), panel.getHeight() - padding_bottom);
 						int y2 = Math.min(Math.max(e.getY(), padding_top), panel.getHeight() - padding_bottom);
 						
-						range_lower_custom = projectScreenY(y2);
-						range_upper_custom = projectScreenY(y1);
+						range_lower_custom = projectScreenY(panel.getHeight(), y2);
+						range_upper_custom = projectScreenY(panel.getHeight(), y1);
 					}
 				}
 				
@@ -210,7 +234,7 @@ public abstract class CanvasPart extends Part
 		});
 		panel.setBackground(Color.white);
 		
-		getToolBar().add(new JButton(ImageHelper.getImageIcon("icons/parts/save.png")));
+		getToolBar().add(save);
 	}
 	
 	protected String getDomainName() {
@@ -260,19 +284,15 @@ public abstract class CanvasPart extends Part
 		return padding_bottom;
 	}
 	
-	private double projectScreenX(double sx)
-	{
-		double width = panel.getWidth();
-		
+	private double projectScreenX(int width, double sx)
+	{		
 		double px = (sx - padding_left) / (width - padding_left - padding_right);
 		
 		return domain_lower + px * domain_delta;
 	}
 	
-	private double projectScreenY(double sy)
+	private double projectScreenY(int height, double sy)
 	{
-		double height = panel.getHeight();
-		
 		double py = (sy - padding_top) / (height - padding_top - padding_bottom);
 		
 		return range_upper - py * range_delta;
@@ -420,20 +440,20 @@ public abstract class CanvasPart extends Part
 	
 	protected double getMousePreviousDomainValue()
 	{
-		return projectScreenX(mouse_previous_x);
+		return projectScreenX(panel.getWidth(), mouse_previous_x);
 	}
 	protected double getMousePreviousRangeValue()
 	{
-		return projectScreenY(mouse_previous_y);
+		return projectScreenY(panel.getHeight(), mouse_previous_y);
 	}
 	
 	protected double getMouseCurrentDomainValue()
 	{
-		return projectScreenX(mouse_current_x);
+		return projectScreenX(panel.getWidth(), mouse_current_x);
 	}
 	protected double getMouseCurrentRangeValue()
 	{
-		return projectScreenY(mouse_current_y);
+		return projectScreenY(panel.getHeight(), mouse_current_y);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)
@@ -476,12 +496,12 @@ public abstract class CanvasPart extends Part
 		return true;
 	}
 	
-	protected double projectDomain(double x)
+	protected double projectDomain(int width, double x)
 	{
 		return padding_left + (width - padding_left - padding_right) * (x - domain_lower) / domain_delta;
 	}
 	
-	protected double projectRange(double y)
+	protected double projectRange(int height, double y)
 	{
 		return padding_top + (height - padding_top - padding_bottom) - (height - padding_top - padding_bottom) * (y - range_lower) / range_delta;
 	}
@@ -505,12 +525,12 @@ public abstract class CanvasPart extends Part
 		return calculateColor(file.getColor(), shade, progress);
 	}
 	
-	protected void drawPoint(Graphics graphics, Color color, double x, double y)
+	protected void drawPoint(Graphics graphics, Color color, int width, int height, double x, double y)
 	{
 		if (check(x, y))
 		{
-			int sx = (int) projectDomain(x);
-			int sy = (int) projectRange(y);
+			int sx = (int) projectDomain(width, x);
+			int sy = (int) projectRange(height, y);
 			
 			drawPoint(graphics, color, sx, sy);	
 		}
@@ -523,21 +543,21 @@ public abstract class CanvasPart extends Part
 		graphics.fillOval(x - 2, y - 2, 4, 4);
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
+	protected void drawLine(Graphics2D graphics, Color color, int width, int height, double x1, double y1, double x2, double y2)
 	{
-		drawLine(graphics, color, new BasicStroke(thickness), x1, y1, x2, y2);
+		drawLine(graphics, color, new BasicStroke(thickness), width, height, x1, y1, x2, y2);
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, double x1, double y1, double x2, double y2)
+	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, int width, int height, double x1, double y1, double x2, double y2)
 	{
 		boolean check1 = check(x1, y1);
 		boolean check2 = check(x2, y2);
 		
-		int sx1 = (int) projectDomain(x1);
-		int sy1 = (int) projectRange(y1);
+		int sx1 = (int) projectDomain(width, x1);
+		int sy1 = (int) projectRange(height, y1);
 		
-		int sx2 = (int) projectDomain(x2);
-		int sy2 = (int) projectRange(y2);
+		int sx2 = (int) projectDomain(width, x2);
+		int sy2 = (int) projectRange(height, y2);
 		
 		if (check1 && check2)
 		{	
@@ -617,7 +637,7 @@ public abstract class CanvasPart extends Part
 		graphics.drawLine(x1, y1, x2, y2);
 	}
 	
-	protected void drawMarker(Graphics2D graphics, Color color, double x, double y)
+	protected void drawMarker(Graphics2D graphics, Color color, int width, int height, double x, double y)
 	{
 		
 		String sx = String.format("%.6f", x);
@@ -629,11 +649,8 @@ public abstract class CanvasPart extends Part
 		
 		Rectangle2D bounds = metrics.getStringBounds(string, graphics);
 		
-		int width = panel.getWidth();
-		int height = panel.getHeight();
-		
-		int px = (int) projectDomain(x);
-		int py = (int) projectRange(y);
+		int px = (int) projectDomain(width, x);
+		int py = (int) projectRange(height, y);
 		
 		int tw = (int) bounds.getWidth();
 		int th = (int) bounds.getHeight();
@@ -652,22 +669,22 @@ public abstract class CanvasPart extends Part
 		graphics.setColor(Color.BLACK);
 		graphics.drawRect(rx, ry, tw + 10, th + 10);
 		
-		drawLine(graphics, Color.BLACK, x, range_lower, x, range_upper);
-		drawLine(graphics, Color.BLACK, domain_lower, y, domain_upper, y);
+		drawLine(graphics, Color.BLACK, width, height, x, range_lower, x, range_upper);
+		drawLine(graphics, Color.BLACK, width, height, domain_lower, y, domain_upper, y);
 		
-		drawPoint(graphics, color, x, y);
+		drawPoint(graphics, color, width, height, x, y);
 
 		graphics.setColor(Color.BLACK);
 		graphics.drawString(string, (int) tx, (int) ty);
 	}
 	
-	protected void drawRectangle(Graphics2D graphics, Color color, double x1, double y1, double x2, double y2)
+	protected void drawRectangle(Graphics2D graphics, Color color, int width, int height, double x1, double y1, double x2, double y2)
 	{
-		int sx1 = (int) projectDomain(x1);
-		int sy1 = (int) projectRange(y1);
+		int sx1 = (int) projectDomain(width, x1);
+		int sy1 = (int) projectRange(height, y1);
 		
-		int sx2 = (int) projectDomain(x2);
-		int sy2 = (int) projectRange(y2);
+		int sx2 = (int) projectDomain(width, x2);
+		int sy2 = (int) projectRange(height, y2);
 		
 		drawRectangle(graphics, color, sx1, sy1, sx2, sy2);
 	}
@@ -696,13 +713,10 @@ public abstract class CanvasPart extends Part
 	protected abstract double getDomainValue(ASDFile file, int index);	
 	protected abstract double getRangeValue(ASDFile file, int index);
 	
-	protected void paintCommon(Graphics2D graphics)
+	protected void paintCommon(Graphics2D graphics, int width, int height)
 	{
 		synchronized (files)
 		{	
-			width = panel.getWidth();
-			height = panel.getHeight();
-			
 			prepareData();
 			
 			domain_lower = +Double.MAX_VALUE;
@@ -822,24 +836,40 @@ public abstract class CanvasPart extends Part
 			{	
 				graphics.setColor(x == 0 ? MEDIUM : HIGH);
 				graphics.setStroke(new BasicStroke(thickness));
-				graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower), (int) projectDomain(x * dx), (int) projectRange(range_upper));
+				graphics.drawLine((int) projectDomain(width, x * dx), (int) projectRange(height, range_lower), (int) projectDomain(width, x * dx), (int) projectRange(height, range_upper));
 			}
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 			{
 				graphics.setColor(y == 0 ? MEDIUM : HIGH);
 				graphics.setStroke(new BasicStroke(thickness));
-				graphics.drawLine((int) projectDomain(domain_lower), (int) projectRange(y * dy), (int) projectDomain(domain_upper), (int) projectRange(y * dy));
+				graphics.drawLine((int) projectDomain(width, domain_lower), (int) projectRange(height, y * dy), (int) projectDomain(width, domain_upper), (int) projectRange(height, y * dy));
 			}
 			
-			drawLine(graphics, LOW, domain_lower, range_lower, domain_upper, range_lower);
-			drawLine(graphics, LOW, domain_lower, range_upper, domain_lower, range_lower);
+			drawLine(graphics, LOW, width, height, domain_lower, range_lower, domain_upper, range_lower);
+			drawLine(graphics, LOW, width, height, domain_lower, range_upper, domain_lower, range_lower);
 			
 			graphics.setColor(LOW);
-			graphics.fillPolygon(new int[] {(int) projectDomain(domain_upper), (int) projectDomain(domain_upper), (int) projectDomain(domain_upper) + padding_right / 2 * thickness}, new int[] {(int) projectRange(range_lower) - padding_right / 3 * thickness, (int) projectRange(range_lower) + padding_right / 3 * thickness, (int) projectRange(range_lower)}, 3);
+			graphics.fillPolygon(new int[] {
+				(int) projectDomain(width, domain_upper),
+				(int) projectDomain(width, domain_upper),
+				(int) projectDomain(width, domain_upper) + padding_right / 2 * thickness
+			}, new int[] {
+				(int) projectRange(height, range_lower) - padding_right / 3 * thickness,
+				(int) projectRange(height, range_lower) + padding_right / 3 * thickness,
+				(int) projectRange(height, range_lower)
+			}, 3);
 			
 			graphics.setColor(LOW);
-			graphics.fillPolygon(new int[] {(int) projectDomain(domain_lower) - padding_top / 3 * thickness, (int) projectDomain(domain_lower) + padding_top / 3 * thickness, (int) projectDomain(domain_lower)}, new int[] {(int) projectRange(range_upper), (int) projectRange(range_upper), (int) projectRange(range_upper) - padding_top / 2 * thickness}, 3);
+			graphics.fillPolygon(new int[] {
+				(int) projectDomain(width, domain_lower) - padding_top / 3 * thickness,
+				(int) projectDomain(width, domain_lower) + padding_top / 3 * thickness,
+				(int) projectDomain(width, domain_lower)
+			}, new int[] {
+				(int) projectRange(height, range_upper),
+				(int) projectRange(height, range_upper),
+				(int) projectRange(height, range_upper) - padding_top / 2 * thickness
+			}, 3);
 			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 			{
@@ -853,8 +883,8 @@ public abstract class CanvasPart extends Part
 				bounds = metrics.getStringBounds(string, graphics);
 				
 				graphics.setColor(LOW);
-				graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower) - 2, (int) projectDomain(x * dx), (int) projectRange(range_lower) + 2);
-				graphics.drawString(string, (int) (projectDomain(x * dx) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + 2 + bounds.getHeight()));
+				graphics.drawLine((int) projectDomain(width, x * dx), (int) projectRange(height, range_lower) - 2, (int) projectDomain(width, x * dx), (int) projectRange(height, range_lower) + 2);
+				graphics.drawString(string, (int) (projectDomain(width, x * dx) - bounds.getWidth() / 2), (int) (projectRange(height, range_lower) + 2 + bounds.getHeight()));
 			}
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
@@ -869,11 +899,11 @@ public abstract class CanvasPart extends Part
 				bounds = metrics.getStringBounds(string, graphics);
 				
 				graphics.setColor(LOW);
-				graphics.drawLine((int) projectDomain(domain_lower) - 2, (int) projectRange(y * dy), (int) projectDomain(domain_lower) + 2, (int) projectRange(y * dy));
+				graphics.drawLine((int) projectDomain(width, domain_lower) - 2, (int) projectRange(height, y * dy), (int) projectDomain(width, domain_lower) + 2, (int) projectRange(height, y * dy));
 				
 				transform = graphics.getTransform();
 				
-				graphics.translate(projectDomain(domain_lower) - bounds.getHeight() / 2, projectRange(y * dy) + bounds.getWidth() / 2);
+				graphics.translate(projectDomain(width, domain_lower) - bounds.getHeight() / 2, projectRange(height, y * dy) + bounds.getWidth() / 2);
 				graphics.rotate(- Math.PI / 2);
 				graphics.setColor(LOW);
 				graphics.drawString(string, 0, 0);
@@ -884,13 +914,13 @@ public abstract class CanvasPart extends Part
 			bounds = metrics.getStringBounds(domainLabel, graphics);
 			
 			graphics.setColor(LOW);
-			graphics.drawString(domainLabel, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
+			graphics.drawString(domainLabel, (int) (projectDomain(width, domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(height, range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
 			
 			bounds = metrics.getStringBounds(rangeLabel, graphics);
 			
 			transform = graphics.getTransform();
 			
-			graphics.translate(projectDomain(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(range_lower + range_delta / 2) + bounds.getWidth() / 2);
+			graphics.translate(projectDomain(width, domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(height, range_lower + range_delta / 2) + bounds.getWidth() / 2);
 			graphics.rotate(- Math.PI / 2);
 			graphics.setColor(LOW);
 			graphics.drawString(rangeLabel, 0, 0);
@@ -899,7 +929,7 @@ public abstract class CanvasPart extends Part
 			
 			// Draw chart
 			
-			paintComponent(graphics);
+			paintComponent(graphics, width, height);
 
 			// Draw selection marker
 			
@@ -926,18 +956,18 @@ public abstract class CanvasPart extends Part
 				
 				if (zoom_domain)
 				{
-					drawLine(graphics, Color.BLACK, x1, y1, x1, y2);
-					drawLine(graphics, Color.BLACK, x2, y1, x2, y2);
+					drawLine(graphics, Color.BLACK, width, height, x1, y1, x1, y2);
+					drawLine(graphics, Color.BLACK, width, height, x2, y1, x2, y2);
 				}
 				if (zoom_range)
 				{
-					drawLine(graphics, Color.BLACK, x1, y1, x2, y1);
-					drawLine(graphics, Color.BLACK, x1, y2, x2, y2);
+					drawLine(graphics, Color.BLACK, width, height, x1, y1, x2, y1);
+					drawLine(graphics, Color.BLACK, width, height, x1, y2, x2, y2);
 				}
 			}
 		}
 	}
 	
-	protected abstract void paintComponent(Graphics2D graphics);
+	protected abstract void paintComponent(Graphics2D graphics, int width, int height);
 
 }

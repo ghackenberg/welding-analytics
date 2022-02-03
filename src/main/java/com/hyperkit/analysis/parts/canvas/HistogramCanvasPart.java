@@ -419,7 +419,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics2D graphics)
+	protected void paintComponent(Graphics2D graphics, int width, int height)
 	{		
 		for (ASDFile file : getFiles())
 		{
@@ -435,7 +435,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				
 				double progress = 0;
 				
-				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, progress), width, height, x1, y1, x2, y2);
 			}
 			
 			for (int index = 1; index < getDataLength(file); index++)
@@ -448,7 +448,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				
 				double progress = 0;
 				
-				drawLine(graphics, calculateColor(file, 1, progress), x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, progress), width, height, x1, y1, x2, y2);
 			}
 			
 			/*
@@ -484,8 +484,8 @@ public abstract class HistogramCanvasPart extends CanvasPart
 					
 					if (check(x, y))
 					{
-						double domain_delta = getMouseCurrentX() - projectDomain(x);
-						double range_delta = getMouseCurrentY() - projectRange(y);
+						double domain_delta = getMouseCurrentX() - projectDomain(width, x);
+						double range_delta = getMouseCurrentY() - projectRange(height, y);
 						
 						double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
 						
@@ -523,7 +523,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 						double domain = getDomainValue(file, index);
 						double range = getRangeValue(file, index);
 						
-						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), width, height, domain, range);
 					}
 				}
 				else
@@ -533,7 +533,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 						double domain = getRawValue(file, index);	
 						double range = calculateRangeValue(file, domain);
 						
-						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), domain, range);
+						drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), width, height, domain, range);
 					}
 				}
 			}
@@ -552,27 +552,27 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				
 				BasicStroke dashed = new BasicStroke(getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 5, 2 }, 0);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), mean, yLower, mean, yUpper);
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean - stdev, yLower, mean - stdev, yUpper);
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, mean + stdev, yLower, mean + stdev, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), width, height, mean, yLower, mean, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, width, height, mean - stdev, yLower, mean - stdev, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), dashed, width, height, mean + stdev, yLower, mean + stdev, yUpper);
 				
 				break;
 			case MEDIAN:
 				double median = getMedian(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), median, yLower, median, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), width, height, median, yLower, median, yUpper);
 				
 				break;
 			case MODE:
 				double mode = getMode(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), mode, yLower, mode, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), width, height, mode, yLower, mode, yUpper);
 				
 				break;
 			case RMS:
 				double rms = getRootMeanSquare(selected);
 				
-				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), rms, yLower, rms, yUpper);
+				drawLine(graphics, calculateColor(selected, 0.75, Math.pow(0, 10)), new BasicStroke(getThickness() * 2), width, height, rms, yLower, rms, yUpper);
 				
 				break;
 			}

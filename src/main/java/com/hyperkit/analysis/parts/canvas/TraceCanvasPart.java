@@ -159,7 +159,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics2D graphics)
+	protected void paintComponent(Graphics2D graphics, int width, int height)
 	{
 		// Draw trace
 		
@@ -175,7 +175,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 				
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), width, height, x1, y1, x2, y2);
 			}
 			
 			for (int index = Math.max(getDataLength(file) - 1 - padding, padding); index < getDataLength(file) - padding; index++)
@@ -185,7 +185,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawPoint(graphics, calculateColor(file, 0.5, Math.pow(progress, 10)), x, y);
+				drawPoint(graphics, calculateColor(file, 0.5, Math.pow(progress, 10)), width, height, x, y);
 			}
 		}
 		
@@ -207,8 +207,8 @@ public abstract class TraceCanvasPart extends CanvasPart
 					
 					if (check(x, y))
 					{
-						double domain_delta = getMouseCurrentX() - projectDomain(x);
-						double range_delta = getMouseCurrentY() - projectRange(y);
+						double domain_delta = getMouseCurrentX() - projectDomain(width, x);
+						double range_delta = getMouseCurrentY() - projectRange(height, y);
 						
 						double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
 						
@@ -241,7 +241,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 				
 				if (index >= padding && starts.containsKey(file))
 				{
-					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), getRawDomainValue(file, index), getRawRangeValue(file, index));
+					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), width, height, getRawDomainValue(file, index), getRawRangeValue(file, index));
 				}
 			}
 		}

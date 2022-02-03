@@ -167,11 +167,8 @@ public abstract class CloudCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics2D graphics)
+	protected void paintComponent(Graphics2D graphics, int width, int height)
 	{
-		int width = getPanel().getWidth();
-		int height = getPanel().getHeight();
-
 		int[][][] count = new int[getFiles().size()][width][height];
 		int[] max = new int[getFiles().size()];
 		
@@ -184,8 +181,8 @@ public abstract class CloudCanvasPart extends CanvasPart
 			
 			for (int index = start; index <= end; index++)
 			{	
-				double x = projectDomain(getDomainValue(file, index));
-				double y = projectRange(getRangeValue(file, index));
+				double x = projectDomain(width, getDomainValue(file, index));
+				double y = projectRange(height, getRangeValue(file, index));
 
 				if (x >= getPaddingLeft() && x <= getPanel().getWidth() - getPaddingRight())
 				{
