@@ -159,7 +159,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics2D graphics, int width, int height, int stroke)
+	protected void paintComponent(Graphics2D graphics, int width, int height, int stroke, int font)
 	{
 		// Draw trace
 		

@@ -419,7 +419,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	}
 	
 	@Override
-	protected void paintComponent(Graphics2D graphics, int width, int height, int stroke)
+	protected void paintComponent(Graphics2D graphics, int width, int height, int stroke, int font)
 	{		
 		for (ASDFile file : getFiles())
 		{
