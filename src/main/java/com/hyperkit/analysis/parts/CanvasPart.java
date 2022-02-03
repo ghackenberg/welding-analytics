@@ -795,6 +795,8 @@ public abstract class CanvasPart extends Part
 			
 			prepareData();
 			
+			// Calculate domain and range limits
+			
 			domain_lower = +Double.MAX_VALUE;
 			domain_upper = -Double.MAX_VALUE;
 			
@@ -834,6 +836,8 @@ public abstract class CanvasPart extends Part
 			domain_delta = domain_upper - domain_lower;
 			range_delta = range_upper - range_lower;
 			
+			// Fix domain and range limits
+			
 			if (domain_lower >= 0 && domain_lower - domain_delta * 0.1 < 0)
 			{
 				domain_lower = 0;
@@ -854,6 +858,8 @@ public abstract class CanvasPart extends Part
 			}
 			range_upper += range_delta * 0.1;
 			
+			// Crop domain and range limits
+			
 			domain_lower = Math.max(domain_lower, domain_lower_custom);
 			domain_upper = Math.min(domain_upper, domain_upper_custom);
 			
@@ -863,10 +869,14 @@ public abstract class CanvasPart extends Part
 			domain_delta = domain_upper - domain_lower;
 			range_delta = range_upper - range_lower;
 			
+			// Local variables
+			
 			FontMetrics metrics = graphics.getFontMetrics();
 			String string;
 			Rectangle2D bounds;
 			AffineTransform transform;
+			
+			// Calculate ticks
 			
 			int xticks = 1;
 			int yticks = 1;
@@ -875,6 +885,8 @@ public abstract class CanvasPart extends Part
 			double dy;
 			
 			double unit;
+			
+			// Calculate domain ticks
 			
 			do
 			{
@@ -892,6 +904,8 @@ public abstract class CanvasPart extends Part
 			}
 			while (xticks++ < (width - getPaddingLeft(font) - getPaddingRight(stroke)) / unit / 3);
 			
+			// Calculate range ticks
+			
 			do
 			{
 				dy = crop((range_upper - range_lower) / yticks);
@@ -908,12 +922,16 @@ public abstract class CanvasPart extends Part
 			}
 			while (yticks++ < (height - getPaddingTop(stroke) - getPaddingBottom(font)) / unit / 3);
 			
+			// Draw domain ticks
+			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 			{	
 				graphics.setColor(x == 0 ? MEDIUM : HIGH);
 				graphics.setStroke(new BasicStroke(stroke));
 				graphics.drawLine((int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower), (int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_upper));
 			}
+			
+			// Draw range ticks
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 			{
@@ -922,8 +940,12 @@ public abstract class CanvasPart extends Part
 				graphics.drawLine((int) projectDomain(width, stroke, font, domain_lower), (int) projectRange(height, stroke, font, y * dy), (int) projectDomain(width, stroke, font, domain_upper), (int) projectRange(height, stroke, font, y * dy));
 			}
 			
+			// Draw domain and range axis
+			
 			drawLine(graphics, LOW, width, height, stroke, font, domain_lower, range_lower, domain_upper, range_lower);
 			drawLine(graphics, LOW, width, height, stroke, font, domain_lower, range_upper, domain_lower, range_lower);
+			
+			// Draw horizontal arrow head
 			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
@@ -936,6 +958,8 @@ public abstract class CanvasPart extends Part
 				(int) projectRange(height, stroke, font, range_lower)
 			}, 3);
 			
+			// Draw vertical arrow head
+			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
 				(int) projectDomain(width, stroke, font, domain_lower) - padding * stroke / 3,
@@ -946,6 +970,8 @@ public abstract class CanvasPart extends Part
 				(int) projectRange(height, stroke, font, range_upper),
 				(int) projectRange(height, stroke, font, range_upper) - padding * stroke / 2
 			}, 3);
+			
+			// Draw domain tick labels
 			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 			{
@@ -962,6 +988,8 @@ public abstract class CanvasPart extends Part
 				graphics.drawLine((int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower) - 2, (int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower) + 2);
 				graphics.drawString(string, (int) (projectDomain(width, stroke, font, x * dx) - bounds.getWidth() / 2), (int) (projectRange(height, stroke, font, range_lower) + 2 + bounds.getHeight()));
 			}
+			
+			// Draw range tick labels
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 			{
@@ -987,12 +1015,16 @@ public abstract class CanvasPart extends Part
 				graphics.setTransform(transform);
 			}
 			
+			// Draw domain axis label
+			
 			bounds = metrics.getStringBounds(domainLabel, graphics);
 			
 			graphics.setColor(LOW);
 			graphics.drawString(domainLabel, (int) (projectDomain(width, stroke, font, domain_lower + domain_delta / 2) - bounds.getWidth() / 2), height - padding);
 			
 			bounds = metrics.getStringBounds(rangeLabel, graphics);
+			
+			// Draw range axis label
 			
 			transform = graphics.getTransform();
 			
