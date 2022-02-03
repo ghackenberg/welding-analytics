@@ -22,7 +22,7 @@ import com.hyperkit.analysis.events.values.AverageChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
-import com.hyperkit.analysis.events.values.ThicknessChangeEvent;
+import com.hyperkit.analysis.events.values.StrokeChangeEvent;
 import com.hyperkit.analysis.events.values.WindowChangeEvent;
 import com.hyperkit.analysis.helpers.ImageHelper;
 import com.hyperkit.analysis.parts.FilePart;
@@ -54,7 +54,7 @@ public class Main
 	private static int window = 5000;
 	private static int average = 0;
 	private static int histogram = 1000;
-	private static int thickness = 1;
+	private static int stroke = 1;
 	
 	public static void main(String[] arguments)
 	{
@@ -140,13 +140,13 @@ public class Main
 		
 		// Thickness
 		
-		JSpinner thicknessSpinner = new JSpinner(new SpinnerNumberModel(thickness, 1, 5, 1));
-		thicknessSpinner.addChangeListener(
+		JSpinner strokeSpinner = new JSpinner(new SpinnerNumberModel(stroke, 1, 5, 1));
+		strokeSpinner.addChangeListener(
 			event ->
 			{
-				thickness = (int) thicknessSpinner.getValue();
+				stroke = (int) strokeSpinner.getValue();
 						
-				Bus.getInstance().broadcastEvent(new ThicknessChangeEvent(thickness));
+				Bus.getInstance().broadcastEvent(new StrokeChangeEvent(stroke));
 			}
 		);
 		
@@ -256,8 +256,8 @@ public class Main
 		headbar.add(averageSpinner);
 		headbar.add(new JLabel("Histogram:"));
 		headbar.add(histogramSpinner);
-		headbar.add(new JLabel("Thickness:"));
-		headbar.add(thicknessSpinner);
+		headbar.add(new JLabel("Stroke:"));
+		headbar.add(strokeSpinner);
 		
 		headbar.add(button_play);
 		headbar.add(button_help);

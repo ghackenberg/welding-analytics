@@ -40,7 +40,7 @@ import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
-import com.hyperkit.analysis.events.values.ThicknessChangeEvent;
+import com.hyperkit.analysis.events.values.StrokeChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.ImageHelper;
 
@@ -92,7 +92,7 @@ public abstract class CanvasPart extends Part
 	private int mouse_current_x = Integer.MAX_VALUE;
 	private int mouse_current_y = Integer.MAX_VALUE;
 	
-	private int thickness = 1;
+	private int stroke = 1;
 	
 	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
@@ -172,6 +172,7 @@ public abstract class CanvasPart extends Part
 						{
 							int width = (int) diagramWidth.getValue();
 							int height = (int) diagramHeight.getValue();
+							int stroke = (int) diagramStroke.getValue();
 							
 							BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 							
@@ -181,7 +182,7 @@ public abstract class CanvasPart extends Part
 							
 							graphics.clearRect(0, 0, width, height);
 							
-							self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
+							self.paintCommon(graphics, width, height, stroke);
 							
 							ImageIO.write(image, "png", file);
 							
@@ -209,7 +210,7 @@ public abstract class CanvasPart extends Part
 				
 				Graphics2D graphics2D = (Graphics2D) graphics;
 				
-				self.paintCommon(graphics2D, panel.getWidth(), panel.getHeight());
+				self.paintCommon(graphics2D, panel.getWidth(), panel.getHeight(), stroke);
 			}
 		};
 		panel.addMouseListener(new MouseListener()
@@ -379,10 +380,6 @@ public abstract class CanvasPart extends Part
 		mouse_current_y = sy;
 		
 		panel.repaint();
-	}
-	
-	protected int getThickness() {
-		return thickness;
 	}
 	
 	protected boolean check(double x, double y)
@@ -556,9 +553,9 @@ public abstract class CanvasPart extends Part
 		return true;
 	}
 	
-	public boolean handleEvent(ThicknessChangeEvent event)
+	public boolean handleEvent(StrokeChangeEvent event)
 	{
-		thickness = event.getValue();
+		stroke = event.getValue();
 		
 		panel.repaint();
 		
@@ -612,7 +609,7 @@ public abstract class CanvasPart extends Part
 		graphics.fillOval(x - 2, y - 2, 4, 4);
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, int width, int height, double x1, double y1, double x2, double y2)
+	protected void drawLine(Graphics2D graphics, Color color, int thickness, int width, int height, double x1, double y1, double x2, double y2)
 	{
 		drawLine(graphics, color, new BasicStroke(thickness), width, height, x1, y1, x2, y2);
 	}
@@ -706,7 +703,7 @@ public abstract class CanvasPart extends Part
 		graphics.drawLine(x1, y1, x2, y2);
 	}
 	
-	protected void drawMarker(Graphics2D graphics, Color color, int width, int height, double x, double y)
+	protected void drawMarker(Graphics2D graphics, Color color, int thickness, int width, int height, double x, double y)
 	{
 		
 		String sx = String.format("%.6f", x);
@@ -738,8 +735,8 @@ public abstract class CanvasPart extends Part
 		graphics.setColor(Color.BLACK);
 		graphics.drawRect(rx, ry, tw + 10, th + 10);
 		
-		drawLine(graphics, Color.BLACK, width, height, x, range_lower, x, range_upper);
-		drawLine(graphics, Color.BLACK, width, height, domain_lower, y, domain_upper, y);
+		drawLine(graphics, Color.BLACK, thickness, width, height, x, range_lower, x, range_upper);
+		drawLine(graphics, Color.BLACK, thickness, width, height, domain_lower, y, domain_upper, y);
 		
 		drawPoint(graphics, color, width, height, x, y);
 
@@ -782,7 +779,7 @@ public abstract class CanvasPart extends Part
 	protected abstract double getDomainValue(ASDFile file, int index);	
 	protected abstract double getRangeValue(ASDFile file, int index);
 	
-	protected void paintCommon(Graphics2D graphics, int width, int height)
+	protected void paintCommon(Graphics2D graphics, int width, int height, int stroke)
 	{
 		synchronized (files)
 		{	
@@ -904,40 +901,40 @@ public abstract class CanvasPart extends Part
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 			{	
 				graphics.setColor(x == 0 ? MEDIUM : HIGH);
-				graphics.setStroke(new BasicStroke(thickness));
+				graphics.setStroke(new BasicStroke(stroke));
 				graphics.drawLine((int) projectDomain(width, x * dx), (int) projectRange(height, range_lower), (int) projectDomain(width, x * dx), (int) projectRange(height, range_upper));
 			}
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 			{
 				graphics.setColor(y == 0 ? MEDIUM : HIGH);
-				graphics.setStroke(new BasicStroke(thickness));
+				graphics.setStroke(new BasicStroke(stroke));
 				graphics.drawLine((int) projectDomain(width, domain_lower), (int) projectRange(height, y * dy), (int) projectDomain(width, domain_upper), (int) projectRange(height, y * dy));
 			}
 			
-			drawLine(graphics, LOW, width, height, domain_lower, range_lower, domain_upper, range_lower);
-			drawLine(graphics, LOW, width, height, domain_lower, range_upper, domain_lower, range_lower);
+			drawLine(graphics, LOW, stroke, width, height, domain_lower, range_lower, domain_upper, range_lower);
+			drawLine(graphics, LOW, stroke, width, height, domain_lower, range_upper, domain_lower, range_lower);
 			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
 				(int) projectDomain(width, domain_upper),
 				(int) projectDomain(width, domain_upper),
-				(int) projectDomain(width, domain_upper) + padding_right / 2 * thickness
+				(int) projectDomain(width, domain_upper) + padding_right / 2 * stroke
 			}, new int[] {
-				(int) projectRange(height, range_lower) - padding_right / 3 * thickness,
-				(int) projectRange(height, range_lower) + padding_right / 3 * thickness,
+				(int) projectRange(height, range_lower) - padding_right / 3 * stroke,
+				(int) projectRange(height, range_lower) + padding_right / 3 * stroke,
 				(int) projectRange(height, range_lower)
 			}, 3);
 			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
-				(int) projectDomain(width, domain_lower) - padding_top / 3 * thickness,
-				(int) projectDomain(width, domain_lower) + padding_top / 3 * thickness,
+				(int) projectDomain(width, domain_lower) - padding_top / 3 * stroke,
+				(int) projectDomain(width, domain_lower) + padding_top / 3 * stroke,
 				(int) projectDomain(width, domain_lower)
 			}, new int[] {
 				(int) projectRange(height, range_upper),
 				(int) projectRange(height, range_upper),
-				(int) projectRange(height, range_upper) - padding_top / 2 * thickness
+				(int) projectRange(height, range_upper) - padding_top / 2 * stroke
 			}, 3);
 			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
@@ -998,7 +995,7 @@ public abstract class CanvasPart extends Part
 			
 			// Draw chart
 			
-			paintComponent(graphics, width, height);
+			paintComponent(graphics, width, height, stroke);
 
 			// Draw selection marker
 			
@@ -1025,18 +1022,18 @@ public abstract class CanvasPart extends Part
 				
 				if (zoom_domain)
 				{
-					drawLine(graphics, Color.BLACK, width, height, x1, y1, x1, y2);
-					drawLine(graphics, Color.BLACK, width, height, x2, y1, x2, y2);
+					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y1, x1, y2);
+					drawLine(graphics, Color.BLACK, stroke, width, height, x2, y1, x2, y2);
 				}
 				if (zoom_range)
 				{
-					drawLine(graphics, Color.BLACK, width, height, x1, y1, x2, y1);
-					drawLine(graphics, Color.BLACK, width, height, x1, y2, x2, y2);
+					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y1, x2, y1);
+					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y2, x2, y2);
 				}
 			}
 		}
 	}
 	
-	protected abstract void paintComponent(Graphics2D graphics, int width, int height);
+	protected abstract void paintComponent(Graphics2D graphics, int width, int height, int stroke);
 
 }
