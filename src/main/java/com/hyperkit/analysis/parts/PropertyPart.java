@@ -22,6 +22,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -110,6 +112,9 @@ public class PropertyPart extends Part
 					if (excerpt.isDirectory()) {
 						JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
 					} else {
+						if (!FilenameUtils.getExtension(excerpt.getName()).equals(".asd")) {
+							excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");
+						}
 						try (FileWriter writer = new FileWriter(excerpt, true)) {
 							for (int i = 0; i < file.getLengthDisplayed(); i++) {
 								double timestamp = file.getTimestampDisplayed(i);

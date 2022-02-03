@@ -23,7 +23,12 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FilenameUtils;
 
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Part;
@@ -55,7 +60,7 @@ public abstract class CanvasPart extends Part
 	
 	private List<ASDFile> files = new ArrayList<>();
 	
-	private JButton save;
+	private JButton saveButton;
 	private JPanel panel;
 	
 	private int padding_top = 10;
@@ -107,25 +112,47 @@ public abstract class CanvasPart extends Part
 		
 		CanvasPart self = this;
 		
-		save = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
-		save.addActionListener(event -> {
-			try {
-				int width = panel.getWidth();
-				int height = panel.getHeight();
+		saveButton = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
+		saveButton.addActionListener(event -> {
+			JFileChooser chooser = new JFileChooser();
+		
+			chooser.setFileFilter(new FileNameExtensionFilter("PNG file", "png"));
+			
+			int result = chooser.showSaveDialog(getComponent());
+			
+			if (result == JFileChooser.APPROVE_OPTION)
+			{
+				File file = chooser.getSelectedFile();
 				
-				BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-				
-				Graphics2D graphics = (Graphics2D) image.getGraphics();
-				
-				graphics.setBackground(Color.WHITE);
-				
-				graphics.clearRect(0, 0, width, height);
-				
-				self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
-				
-				ImageIO.write(image, "png", new File("test.png"));
-			} catch (IOException e) {
-				e.printStackTrace();
+				if (file.isDirectory()) {
+					JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
+				} else {
+					if (!FilenameUtils.getExtension(file.getName()).equals(".png")) {
+						file = new File(file.getParentFile(), file.getName() + ".png");
+					}
+					try {	
+						int width = panel.getWidth();
+						int height = panel.getHeight();
+						
+						BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+						
+						Graphics2D graphics = (Graphics2D) image.getGraphics();
+						
+						graphics.setBackground(Color.WHITE);
+						
+						graphics.clearRect(0, 0, width, height);
+						
+						self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
+						
+						ImageIO.write(image, "png", file);
+						
+						JOptionPane.showMessageDialog(getComponent(), "Diagram saved successfully!");
+					} catch (IOException e) {
+						e.printStackTrace();
+						
+						JOptionPane.showMessageDialog(getComponent(), "Diagram could not be saved!");
+					}
+				}
 			}
 		});
 		
@@ -234,7 +261,7 @@ public abstract class CanvasPart extends Part
 		});
 		panel.setBackground(Color.white);
 		
-		getToolBar().add(save);
+		getToolBar().add(saveButton);
 	}
 	
 	protected String getDomainName() {
