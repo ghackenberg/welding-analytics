@@ -12,8 +12,6 @@ import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-
 public abstract class Dataset
 {
 	
@@ -1406,34 +1404,6 @@ public abstract class Dataset
 		// Return result
 		
 		return result;
-	}
-	
-	public SimpleRegression getRegression()
-	{
-		// Build data
-		
-		double[][] intermediate = new double[activeData.size()][2];
-		
-		int index = 0;
-
-		for (double[] line : activeData)
-		{
-			double current = line[CURRENT_INDEX];
-			double voltage = line[VOLTAGE_INDEX];
-			
-			intermediate[index][0] = current;
-			intermediate[index][1] = voltage;
-			
-			index++;
-		}
-		
-		// Build regression
-		
-		SimpleRegression regression = new SimpleRegression(true);
-		
-		regression.addData(intermediate);
-		
-		return regression;
 	}
 	
 	protected void cleanData()
