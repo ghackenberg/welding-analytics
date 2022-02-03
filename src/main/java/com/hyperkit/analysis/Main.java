@@ -19,6 +19,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import com.hyperkit.analysis.events.values.AverageChangeEvent;
+import com.hyperkit.analysis.events.values.FontChangeEvent;
 import com.hyperkit.analysis.events.values.FrameChangeEvent;
 import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
@@ -55,6 +56,7 @@ public class Main
 	private static int average = 0;
 	private static int histogram = 1000;
 	private static int stroke = 1;
+	private static int font = new JLabel().getFont().getSize();
 	
 	public static void main(String[] arguments)
 	{
@@ -138,7 +140,7 @@ public class Main
 			}
 		);
 		
-		// Thickness
+		// Stroke
 		
 		JSpinner strokeSpinner = new JSpinner(new SpinnerNumberModel(stroke, 1, 5, 1));
 		strokeSpinner.addChangeListener(
@@ -147,6 +149,18 @@ public class Main
 				stroke = (int) strokeSpinner.getValue();
 						
 				Bus.getInstance().broadcastEvent(new StrokeChangeEvent(stroke));
+			}
+		);
+		
+		// Stroke
+		
+		JSpinner fontSpinner = new JSpinner(new SpinnerNumberModel(font, 1, 16, 1));
+		fontSpinner.addChangeListener(
+			event ->
+			{
+				font = (int) fontSpinner.getValue();
+						
+				Bus.getInstance().broadcastEvent(new FontChangeEvent(font));
 			}
 		);
 		
@@ -258,6 +272,8 @@ public class Main
 		headbar.add(histogramSpinner);
 		headbar.add(new JLabel("Stroke:"));
 		headbar.add(strokeSpinner);
+		headbar.add(new JLabel("Font:"));
+		headbar.add(fontSpinner);
 		
 		headbar.add(button_play);
 		headbar.add(button_help);

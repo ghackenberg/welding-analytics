@@ -4,6 +4,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -40,6 +41,7 @@ import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
+import com.hyperkit.analysis.events.values.FontChangeEvent;
 import com.hyperkit.analysis.events.values.StrokeChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.helpers.ImageHelper;
@@ -93,6 +95,8 @@ public abstract class CanvasPart extends Part
 	private int mouse_current_y = Integer.MAX_VALUE;
 	
 	private int stroke = 1;
+	
+	private int font = new JLabel().getFont().getSize();
 	
 	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
@@ -173,6 +177,7 @@ public abstract class CanvasPart extends Part
 							int width = (int) diagramWidth.getValue();
 							int height = (int) diagramHeight.getValue();
 							int stroke = (int) diagramStroke.getValue();
+							int font = (int) diagramFont.getValue();
 							
 							BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 							
@@ -182,7 +187,7 @@ public abstract class CanvasPart extends Part
 							
 							graphics.clearRect(0, 0, width, height);
 							
-							self.paintCommon(graphics, width, height, stroke);
+							self.paintCommon(graphics, width, height, stroke, font);
 							
 							ImageIO.write(image, "png", file);
 							
@@ -210,7 +215,7 @@ public abstract class CanvasPart extends Part
 				
 				Graphics2D graphics2D = (Graphics2D) graphics;
 				
-				self.paintCommon(graphics2D, panel.getWidth(), panel.getHeight(), stroke);
+				self.paintCommon(graphics2D, panel.getWidth(), panel.getHeight(), stroke, font);
 			}
 		};
 		panel.addMouseListener(new MouseListener()
@@ -562,6 +567,15 @@ public abstract class CanvasPart extends Part
 		return true;
 	}
 	
+	public boolean handleEvent(FontChangeEvent event)
+	{
+		font = event.getValue();
+		
+		panel.repaint();
+		
+		return true;
+	}
+	
 	protected double projectDomain(int width, double x)
 	{
 		return padding_left + (width - padding_left - padding_right) * (x - domain_lower) / domain_delta;
@@ -779,10 +793,12 @@ public abstract class CanvasPart extends Part
 	protected abstract double getDomainValue(ASDFile file, int index);	
 	protected abstract double getRangeValue(ASDFile file, int index);
 	
-	protected void paintCommon(Graphics2D graphics, int width, int height, int stroke)
+	protected void paintCommon(Graphics2D graphics, int width, int height, int stroke, int font)
 	{
 		synchronized (files)
-		{	
+		{
+			graphics.setFont(new Font(new JLabel().getFont().getName(), Font.PLAIN, font));
+			
 			prepareData();
 			
 			domain_lower = +Double.MAX_VALUE;

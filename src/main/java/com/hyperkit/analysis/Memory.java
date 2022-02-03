@@ -41,7 +41,7 @@ public class Memory
 			width = 640;
 			height = 480;
 			stroke = 2;
-			font = 16;
+			font =  16;
 		}
 	}
 	
