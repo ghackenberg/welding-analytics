@@ -28,7 +28,7 @@ public class FilePart extends Part
 
 	public FilePart()
 	{
-		super("Files", FilePart.class.getClassLoader().getResource("icons/parts/file.png"));
+		super("Files", "icons/parts/file.png");
 		
 		addAction(new FilePartAddAction(this));
 		addAction(new FilePartRemoveAction(this));

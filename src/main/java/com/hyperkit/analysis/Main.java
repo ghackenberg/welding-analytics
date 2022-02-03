@@ -3,7 +3,6 @@ package com.hyperkit.analysis;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
-import java.awt.Image;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,6 +24,7 @@ import com.hyperkit.analysis.events.values.HistogramChangeEvent;
 import com.hyperkit.analysis.events.values.ProgressChangeEvent;
 import com.hyperkit.analysis.events.values.ThicknessChangeEvent;
 import com.hyperkit.analysis.events.values.WindowChangeEvent;
+import com.hyperkit.analysis.helpers.ImageHelper;
 import com.hyperkit.analysis.parts.FilePart;
 import com.hyperkit.analysis.parts.PropertyPart;
 import com.hyperkit.analysis.parts.canvas.clouds.CurrentVoltageCloudCanvasPart;
@@ -71,7 +71,7 @@ public class Main
 		
 		// Icon
 		
-		ImageIcon icon_analysis = new ImageIcon(Main.class.getClassLoader().getResource("icons/main.png"));
+		ImageIcon icon_analysis = ImageHelper.getImageIcon("icons/main.png", 64);
 		
 		// Progress
 		
@@ -195,24 +195,21 @@ public class Main
 		
 		// Play
 		
-		ImageIcon play_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/play.png"));
-		ImageIcon play_resized = new ImageIcon(play_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		ImageIcon icon_play = ImageHelper.getImageIcon("icons/parts/play.png");		
+		ImageIcon icon_pause = ImageHelper.getImageIcon("icons/parts/pause.png");
 		
-		ImageIcon pause_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/pause.png"));
-		ImageIcon pause_resized = new ImageIcon(pause_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-		
-		JToggleButton button_play = new JToggleButton(play_resized);
+		JToggleButton button_play = new JToggleButton(icon_play);
 		button_play.addActionListener(
 			event ->
 			{
 				if (button_play.isSelected())
 				{
-					button_play.setIcon(pause_resized);
+					button_play.setIcon(icon_pause);
 					timer.start();
 				}
 				else
 				{
-					button_play.setIcon(play_resized);
+					button_play.setIcon(icon_play);
 					timer.stop();
 				}
 			}
@@ -220,10 +217,9 @@ public class Main
 		
 		// Help
 		
-		ImageIcon help_original = new ImageIcon(Main.class.getClassLoader().getResource("icons/parts/help.png"));
-		ImageIcon help_resized = new ImageIcon(help_original.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+		ImageIcon icon_help = ImageHelper.getImageIcon("icons/parts/help.png");
 		
-		JButton button_help = new JButton(help_resized);
+		JButton button_help = new JButton(icon_help);
 		button_help.addActionListener(
 			event ->
 			{

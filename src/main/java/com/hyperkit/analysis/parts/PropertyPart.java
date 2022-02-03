@@ -28,6 +28,7 @@ import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
 import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
+import com.hyperkit.analysis.helpers.ImageHelper;
 
 public class PropertyPart extends Part
 {
@@ -55,7 +56,7 @@ public class PropertyPart extends Part
 
 	public PropertyPart()
 	{
-		super("Properties", PropertyPart.class.getClassLoader().getResource("icons/parts/property.png"));
+		super("Properties", "icons/parts/property.png");
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public class PropertyPart extends Part
 				}
 			});
 			
-			saveButton = new JButton("Save");
+			saveButton = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
 			saveButton.addActionListener(e -> {
 				JFileChooser chooser = new JFileChooser();
 				

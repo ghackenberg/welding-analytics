@@ -63,7 +63,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 	
 	public HistogramCanvasPart(String title, String domainName, String domainUnit, int frame, int average, int histogram)
 	{
-		super(title, domainName, domainUnit, "Probability", "%", HistogramCanvasPart.class.getClassLoader().getResource("icons/parts/histogram.png"), true, false);
+		super(title, domainName, domainUnit, "Probability", "%", "icons/parts/histogram.png", true, false);
 		
 		this.frame = frame;
 		this.average = average;

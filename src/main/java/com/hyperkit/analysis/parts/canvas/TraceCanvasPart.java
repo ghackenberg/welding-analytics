@@ -3,7 +3,6 @@ package com.hyperkit.analysis.parts.canvas;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,7 +29,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 	
 	private Map<ASDFile, Integer> marker;
 	
-	public TraceCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, URL icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
+	public TraceCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, String icon, boolean zoom_domain, boolean zoom_range, int frame, int window, int average, int padding)
 	{
 		super(title, domain, domainUnit, range, rangeUnit, icon, zoom_domain, zoom_range);
 		

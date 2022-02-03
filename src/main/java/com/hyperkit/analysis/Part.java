@@ -3,15 +3,14 @@ package com.hyperkit.analysis;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Image;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+
+import com.hyperkit.analysis.helpers.ImageHelper;
 
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.DefaultDockable;
@@ -21,7 +20,7 @@ public abstract class Part extends Handler
 {
 	
 	private String title;
-	private URL icon;
+	private String path;
 	private List<Action> actions = new LinkedList<>();
 	private DefaultDockActionSource source;
 	private DefaultDockable dockable;
@@ -31,13 +30,13 @@ public abstract class Part extends Handler
 	
 	public Part(String title)
 	{
-		this(title, Part.class.getClassLoader().getResource("icons/part.png"));
+		this(title, "icons/part.png");
 	}
 	
-	public Part(String title, URL icon)
+	public Part(String title, String path)
 	{
 		this.title = title;
-		this.icon = icon;
+		this.path = path;
 		
 		Bus.getInstance().addHandler(this);
 	}
@@ -59,7 +58,7 @@ public abstract class Part extends Handler
 	
 	public final Icon getIcon()
 	{
-		return new ImageIcon(new ImageIcon(icon).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+		return ImageHelper.getImageIcon(path, 24);
 	}
 	
 	public final List<Action> getActions()

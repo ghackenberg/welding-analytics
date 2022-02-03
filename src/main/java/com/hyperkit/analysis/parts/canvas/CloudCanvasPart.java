@@ -30,7 +30,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 	
 	public CloudCanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, int frame, int window, int average)
 	{
-		super(title, domain, domainUnit, range, rangeUnit, CloudCanvasPart.class.getClassLoader().getResource("icons/parts/scatter.png"), true, true);
+		super(title, domain, domainUnit, range, rangeUnit, "icons/parts/scatter.png", true, true);
 		
 		this.frame = frame;
 		this.window = window;

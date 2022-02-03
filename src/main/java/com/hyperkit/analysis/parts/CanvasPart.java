@@ -15,10 +15,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.hyperkit.analysis.Bus;
@@ -29,6 +29,7 @@ import com.hyperkit.analysis.events.parts.PropertyPartChangeEvent;
 import com.hyperkit.analysis.events.parts.ZoomChangeEvent;
 import com.hyperkit.analysis.events.values.ThicknessChangeEvent;
 import com.hyperkit.analysis.files.ASDFile;
+import com.hyperkit.analysis.helpers.ImageHelper;
 
 public abstract class CanvasPart extends Part
 {
@@ -45,6 +46,9 @@ public abstract class CanvasPart extends Part
 	private String rangeUnit;
 	private String rangeLabel;
 	
+	private boolean zoom_domain;
+	private boolean zoom_range;
+	
 	private List<ASDFile> files = new ArrayList<>();
 	
 	private JPanel panel;
@@ -56,7 +60,7 @@ public abstract class CanvasPart extends Part
 	private int padding_left = 50;
 	private int padding_right = 10;
 	private int padding_bottom = 50;
-	
+
 	private double domain_lower_custom = -Double.MAX_VALUE;
 	private double domain_upper_custom = +Double.MAX_VALUE;
 	
@@ -81,10 +85,10 @@ public abstract class CanvasPart extends Part
 	
 	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
-		this(title, domain, domainUnit, range, rangeUnit, CanvasPart.class.getClassLoader().getResource("icons/parts/canvas.png"), zoom_domain, zoom_range);
+		this(title, domain, domainUnit, range, rangeUnit, "icons/parts/canvas.png", zoom_domain, zoom_range);
 	}
 	
-	public CanvasPart(String title, String domainName, String domainUnit, String rangeName, String rangeUnit, URL icon, boolean zoom_domain, boolean zoom_range)
+	public CanvasPart(String title, String domainName, String domainUnit, String rangeName, String rangeUnit, String icon, boolean zoom_domain, boolean zoom_range)
 	{
 		super(title, icon);
 		
@@ -96,6 +100,9 @@ public abstract class CanvasPart extends Part
 		this.rangeUnit = rangeUnit;
 		this.rangeLabel = rangeName + " (in " + rangeUnit + ")";
 		
+		this.zoom_domain = zoom_domain;
+		this.zoom_range = zoom_range;
+		
 		CanvasPart self = this;
 		
 		panel = new JPanel()
@@ -105,248 +112,11 @@ public abstract class CanvasPart extends Part
 			@Override
 			protected void paintComponent(Graphics graphics)
 			{
-				synchronized (files)
-				{
-					super.paintComponent(graphics);
-					
-					Graphics2D graphics2D = (Graphics2D) graphics;
-					
-					width = panel.getWidth();
-					height = panel.getHeight();
-					
-					prepareData();
-					
-					domain_lower = +Double.MAX_VALUE;
-					domain_upper = -Double.MAX_VALUE;
-					
-					range_lower = +Double.MAX_VALUE;
-					range_upper = -Double.MAX_VALUE;
-					
-					for (ASDFile file : files)
-					{
-						domain_lower = Math.min(domain_lower, getDomainMinimum(file));
-						domain_upper = Math.max(domain_upper, getDomainMaximum(file));
-						
-						range_lower = Math.min(range_lower, getRangeMinimum(file));
-						range_upper = Math.max(range_upper, getRangeMaximum(file));
-					}
-					
-					if (domain_lower == Double.MAX_VALUE)
-					{
-						domain_lower = 0;
-						domain_upper = 1;
-						
-						range_lower = 0;
-						range_upper = 1;
-					}
-					
-					if (domain_lower == domain_upper)
-					{
-						domain_lower -= 0.5;
-						domain_upper += 0.5;
-					}
-					
-					if (range_lower == range_upper)
-					{
-						range_lower -= 0.5;
-						range_upper += 0.5;
-					}
-					
-					domain_delta = domain_upper - domain_lower;
-					range_delta = range_upper - range_lower;
-					
-					if (domain_lower >= 0 && domain_lower - domain_delta * 0.1 < 0)
-					{
-						domain_lower = 0;
-					}
-					else
-					{
-						domain_lower -= domain_delta * 0.1;
-					}
-					domain_upper += domain_delta * 0.1;
-					
-					if (range_lower >= 0 && range_lower - range_delta * 0.1 < 0)
-					{
-						range_lower = 0;
-					}
-					else
-					{
-						range_lower -= range_delta * 0.1;
-					}
-					range_upper += range_delta * 0.1;
-					
-					domain_lower = Math.max(domain_lower, domain_lower_custom);
-					domain_upper = Math.min(domain_upper, domain_upper_custom);
-					
-					range_lower = Math.max(range_lower, range_lower_custom);
-					range_upper = Math.min(range_upper, range_upper_custom);
-					
-					domain_delta = domain_upper - domain_lower;
-					range_delta = range_upper - range_lower;
-					
-					FontMetrics metrics = graphics.getFontMetrics();
-					String string;
-					Rectangle2D bounds;
-					AffineTransform transform;
-					
-					int xticks = 1;
-					int yticks = 1;
-					
-					double dx;
-					double dy;
-					
-					double unit;
-					
-					do
-					{
-						dx = crop((domain_upper - domain_lower) / xticks);
-						
-						string = String.format("%." + digits(dx) + "f", domain_upper);
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						unit = bounds.getWidth();
-						
-						string = String.format("%." + digits(dx) + "f", domain_lower);
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						unit = Math.max(unit, bounds.getWidth());
-					}
-					while (xticks++ < (width - padding_left - padding_right) / unit / 3);
-					
-					do
-					{
-						dy = crop((range_upper - range_lower) / yticks);
-						
-						string = String.format("%." + digits(dy) + "f", range_upper);
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						unit = bounds.getWidth();
-						
-						string = String.format("%." + digits(dy) + "f", range_lower);
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						unit = Math.max(unit, bounds.getWidth());
-					}
-					while (yticks++ < (height - padding_top - padding_bottom) / unit / 3);
-					
-					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
-					{	
-						graphics.setColor(x == 0 ? MEDIUM : HIGH);
-						graphics2D.setStroke(new BasicStroke(thickness));
-						graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower), (int) projectDomain(x * dx), (int) projectRange(range_upper));
-					}
-					
-					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
-					{
-						graphics.setColor(y == 0 ? MEDIUM : HIGH);
-						graphics2D.setStroke(new BasicStroke(thickness));
-						graphics.drawLine((int) projectDomain(domain_lower), (int) projectRange(y * dy), (int) projectDomain(domain_upper), (int) projectRange(y * dy));
-					}
-					
-					drawLine(graphics2D, LOW, domain_lower, range_lower, domain_upper, range_lower);
-					drawLine(graphics2D, LOW, domain_lower, range_upper, domain_lower, range_lower);
-					
-					graphics.setColor(LOW);
-					graphics.fillPolygon(new int[] {(int) projectDomain(domain_upper), (int) projectDomain(domain_upper), (int) projectDomain(domain_upper) + padding_right / 2 * thickness}, new int[] {(int) projectRange(range_lower) - padding_right / 3 * thickness, (int) projectRange(range_lower) + padding_right / 3 * thickness, (int) projectRange(range_lower)}, 3);
-					
-					graphics.setColor(LOW);
-					graphics.fillPolygon(new int[] {(int) projectDomain(domain_lower) - padding_top / 3 * thickness, (int) projectDomain(domain_lower) + padding_top / 3 * thickness, (int) projectDomain(domain_lower)}, new int[] {(int) projectRange(range_upper), (int) projectRange(range_upper), (int) projectRange(range_upper) - padding_top / 2 * thickness}, 3);
-					
-					for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
-					{
-						string = String.format("%." + digits(dx) + "f", x * dx);
-						
-						if (x == 0 && string.startsWith("-"))
-						{
-							string = string.substring(1);
-						}
-						
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						graphics.setColor(LOW);
-						graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower) - 2, (int) projectDomain(x * dx), (int) projectRange(range_lower) + 2);
-						graphics.drawString(string, (int) (projectDomain(x * dx) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + 2 + bounds.getHeight()));
-					}
-					
-					for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
-					{
-						string = String.format("%." + digits(dy) + "f", y * dy);
-						
-						if (y == 0 && string.startsWith("-"))
-						{
-							string = string.substring(1);
-						}
-						
-						bounds = metrics.getStringBounds(string, graphics);
-						
-						graphics.setColor(LOW);
-						graphics.drawLine((int) projectDomain(domain_lower) - 2, (int) projectRange(y * dy), (int) projectDomain(domain_lower) + 2, (int) projectRange(y * dy));
-						
-						transform = graphics2D.getTransform();
-						
-						graphics2D.translate(projectDomain(domain_lower) - bounds.getHeight() / 2, projectRange(y * dy) + bounds.getWidth() / 2);
-						graphics2D.rotate(- Math.PI / 2);
-						graphics.setColor(LOW);
-						graphics.drawString(string, 0, 0);
-						
-						graphics2D.setTransform(transform);
-					}
-					
-					bounds = metrics.getStringBounds(self.domainLabel, graphics);
-					
-					graphics.setColor(LOW);
-					graphics.drawString(self.domainLabel, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
-					
-					bounds = metrics.getStringBounds(self.rangeLabel, graphics);
-					
-					transform = graphics2D.getTransform();
-					
-					graphics2D.translate(projectDomain(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(range_lower + range_delta / 2) + bounds.getWidth() / 2);
-					graphics2D.rotate(- Math.PI / 2);
-					graphics.setColor(LOW);
-					graphics.drawString(self.rangeLabel, 0, 0);
-					
-					graphics2D.setTransform(transform);
-					
-					// Draw chart
-					
-					self.paintComponent(graphics2D);
-
-					// Draw selection marker
-					
-					if (mouse_previous_x != Integer.MAX_VALUE && mouse_previous_y != Integer.MAX_VALUE)
-					{
-						int x1 = Math.min(Math.max(mouse_previous_x, padding_left), panel.getWidth() - padding_right);
-						int y1 = Math.min(Math.max(mouse_previous_y, padding_top), panel.getHeight() - padding_bottom);
-
-						int x2 = Math.min(Math.max(mouse_current_x, padding_left), panel.getWidth() - padding_right);
-						int y2 = Math.min(Math.max(mouse_current_y, padding_top), panel.getHeight() - padding_bottom);
-						
-						if (!zoom_domain)
-						{
-							x1 = padding_left;
-							x2 = panel.getWidth() - padding_right;
-						}
-						if (!zoom_range)
-						{
-							y1 = padding_top;
-							y2 = panel.getHeight() - padding_bottom;
-						}
-						
-						drawRectangle(graphics2D, Color.BLACK, x1, y1, x2, y2);
-						
-						if (zoom_domain)
-						{
-							drawLine(graphics2D, Color.BLACK, x1, y1, x1, y2);
-							drawLine(graphics2D, Color.BLACK, x2, y1, x2, y2);
-						}
-						if (zoom_range)
-						{
-							drawLine(graphics2D, Color.BLACK, x1, y1, x2, y1);
-							drawLine(graphics2D, Color.BLACK, x1, y2, x2, y2);
-						}
-					}
-				}
+				super.paintComponent(graphics);
+				
+				Graphics2D graphics2D = (Graphics2D) graphics;
+				
+				self.paintCommon(graphics2D);
 			}
 		};
 		panel.addMouseListener(new MouseListener()
@@ -439,6 +209,8 @@ public abstract class CanvasPart extends Part
 			}
 		});
 		panel.setBackground(Color.white);
+		
+		getToolBar().add(new JButton(ImageHelper.getImageIcon("icons/parts/save.png")));
 	}
 	
 	protected String getDomainName() {
@@ -923,6 +695,248 @@ public abstract class CanvasPart extends Part
 	
 	protected abstract double getDomainValue(ASDFile file, int index);	
 	protected abstract double getRangeValue(ASDFile file, int index);
+	
+	protected void paintCommon(Graphics2D graphics)
+	{
+		synchronized (files)
+		{	
+			width = panel.getWidth();
+			height = panel.getHeight();
+			
+			prepareData();
+			
+			domain_lower = +Double.MAX_VALUE;
+			domain_upper = -Double.MAX_VALUE;
+			
+			range_lower = +Double.MAX_VALUE;
+			range_upper = -Double.MAX_VALUE;
+			
+			for (ASDFile file : files)
+			{
+				domain_lower = Math.min(domain_lower, getDomainMinimum(file));
+				domain_upper = Math.max(domain_upper, getDomainMaximum(file));
+				
+				range_lower = Math.min(range_lower, getRangeMinimum(file));
+				range_upper = Math.max(range_upper, getRangeMaximum(file));
+			}
+			
+			if (domain_lower == Double.MAX_VALUE)
+			{
+				domain_lower = 0;
+				domain_upper = 1;
+				
+				range_lower = 0;
+				range_upper = 1;
+			}
+			
+			if (domain_lower == domain_upper)
+			{
+				domain_lower -= 0.5;
+				domain_upper += 0.5;
+			}
+			
+			if (range_lower == range_upper)
+			{
+				range_lower -= 0.5;
+				range_upper += 0.5;
+			}
+			
+			domain_delta = domain_upper - domain_lower;
+			range_delta = range_upper - range_lower;
+			
+			if (domain_lower >= 0 && domain_lower - domain_delta * 0.1 < 0)
+			{
+				domain_lower = 0;
+			}
+			else
+			{
+				domain_lower -= domain_delta * 0.1;
+			}
+			domain_upper += domain_delta * 0.1;
+			
+			if (range_lower >= 0 && range_lower - range_delta * 0.1 < 0)
+			{
+				range_lower = 0;
+			}
+			else
+			{
+				range_lower -= range_delta * 0.1;
+			}
+			range_upper += range_delta * 0.1;
+			
+			domain_lower = Math.max(domain_lower, domain_lower_custom);
+			domain_upper = Math.min(domain_upper, domain_upper_custom);
+			
+			range_lower = Math.max(range_lower, range_lower_custom);
+			range_upper = Math.min(range_upper, range_upper_custom);
+			
+			domain_delta = domain_upper - domain_lower;
+			range_delta = range_upper - range_lower;
+			
+			FontMetrics metrics = graphics.getFontMetrics();
+			String string;
+			Rectangle2D bounds;
+			AffineTransform transform;
+			
+			int xticks = 1;
+			int yticks = 1;
+			
+			double dx;
+			double dy;
+			
+			double unit;
+			
+			do
+			{
+				dx = crop((domain_upper - domain_lower) / xticks);
+				
+				string = String.format("%." + digits(dx) + "f", domain_upper);
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				unit = bounds.getWidth();
+				
+				string = String.format("%." + digits(dx) + "f", domain_lower);
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				unit = Math.max(unit, bounds.getWidth());
+			}
+			while (xticks++ < (width - padding_left - padding_right) / unit / 3);
+			
+			do
+			{
+				dy = crop((range_upper - range_lower) / yticks);
+				
+				string = String.format("%." + digits(dy) + "f", range_upper);
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				unit = bounds.getWidth();
+				
+				string = String.format("%." + digits(dy) + "f", range_lower);
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				unit = Math.max(unit, bounds.getWidth());
+			}
+			while (yticks++ < (height - padding_top - padding_bottom) / unit / 3);
+			
+			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
+			{	
+				graphics.setColor(x == 0 ? MEDIUM : HIGH);
+				graphics.setStroke(new BasicStroke(thickness));
+				graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower), (int) projectDomain(x * dx), (int) projectRange(range_upper));
+			}
+			
+			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
+			{
+				graphics.setColor(y == 0 ? MEDIUM : HIGH);
+				graphics.setStroke(new BasicStroke(thickness));
+				graphics.drawLine((int) projectDomain(domain_lower), (int) projectRange(y * dy), (int) projectDomain(domain_upper), (int) projectRange(y * dy));
+			}
+			
+			drawLine(graphics, LOW, domain_lower, range_lower, domain_upper, range_lower);
+			drawLine(graphics, LOW, domain_lower, range_upper, domain_lower, range_lower);
+			
+			graphics.setColor(LOW);
+			graphics.fillPolygon(new int[] {(int) projectDomain(domain_upper), (int) projectDomain(domain_upper), (int) projectDomain(domain_upper) + padding_right / 2 * thickness}, new int[] {(int) projectRange(range_lower) - padding_right / 3 * thickness, (int) projectRange(range_lower) + padding_right / 3 * thickness, (int) projectRange(range_lower)}, 3);
+			
+			graphics.setColor(LOW);
+			graphics.fillPolygon(new int[] {(int) projectDomain(domain_lower) - padding_top / 3 * thickness, (int) projectDomain(domain_lower) + padding_top / 3 * thickness, (int) projectDomain(domain_lower)}, new int[] {(int) projectRange(range_upper), (int) projectRange(range_upper), (int) projectRange(range_upper) - padding_top / 2 * thickness}, 3);
+			
+			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
+			{
+				string = String.format("%." + digits(dx) + "f", x * dx);
+				
+				if (x == 0 && string.startsWith("-"))
+				{
+					string = string.substring(1);
+				}
+				
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				graphics.setColor(LOW);
+				graphics.drawLine((int) projectDomain(x * dx), (int) projectRange(range_lower) - 2, (int) projectDomain(x * dx), (int) projectRange(range_lower) + 2);
+				graphics.drawString(string, (int) (projectDomain(x * dx) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + 2 + bounds.getHeight()));
+			}
+			
+			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
+			{
+				string = String.format("%." + digits(dy) + "f", y * dy);
+				
+				if (y == 0 && string.startsWith("-"))
+				{
+					string = string.substring(1);
+				}
+				
+				bounds = metrics.getStringBounds(string, graphics);
+				
+				graphics.setColor(LOW);
+				graphics.drawLine((int) projectDomain(domain_lower) - 2, (int) projectRange(y * dy), (int) projectDomain(domain_lower) + 2, (int) projectRange(y * dy));
+				
+				transform = graphics.getTransform();
+				
+				graphics.translate(projectDomain(domain_lower) - bounds.getHeight() / 2, projectRange(y * dy) + bounds.getWidth() / 2);
+				graphics.rotate(- Math.PI / 2);
+				graphics.setColor(LOW);
+				graphics.drawString(string, 0, 0);
+				
+				graphics.setTransform(transform);
+			}
+			
+			bounds = metrics.getStringBounds(domainLabel, graphics);
+			
+			graphics.setColor(LOW);
+			graphics.drawString(domainLabel, (int) (projectDomain(domain_lower + domain_delta / 2) - bounds.getWidth() / 2), (int) (projectRange(range_lower) + padding_bottom / 3 * 2 + bounds.getHeight() / 2));
+			
+			bounds = metrics.getStringBounds(rangeLabel, graphics);
+			
+			transform = graphics.getTransform();
+			
+			graphics.translate(projectDomain(domain_lower) - padding_left / 3 * 2 - bounds.getHeight() / 2, projectRange(range_lower + range_delta / 2) + bounds.getWidth() / 2);
+			graphics.rotate(- Math.PI / 2);
+			graphics.setColor(LOW);
+			graphics.drawString(rangeLabel, 0, 0);
+			
+			graphics.setTransform(transform);
+			
+			// Draw chart
+			
+			paintComponent(graphics);
+
+			// Draw selection marker
+			
+			if (mouse_previous_x != Integer.MAX_VALUE && mouse_previous_y != Integer.MAX_VALUE)
+			{
+				int x1 = Math.min(Math.max(mouse_previous_x, padding_left), panel.getWidth() - padding_right);
+				int y1 = Math.min(Math.max(mouse_previous_y, padding_top), panel.getHeight() - padding_bottom);
+
+				int x2 = Math.min(Math.max(mouse_current_x, padding_left), panel.getWidth() - padding_right);
+				int y2 = Math.min(Math.max(mouse_current_y, padding_top), panel.getHeight() - padding_bottom);
+				
+				if (!zoom_domain)
+				{
+					x1 = padding_left;
+					x2 = panel.getWidth() - padding_right;
+				}
+				if (!zoom_range)
+				{
+					y1 = padding_top;
+					y2 = panel.getHeight() - padding_bottom;
+				}
+				
+				drawRectangle(graphics, Color.BLACK, x1, y1, x2, y2);
+				
+				if (zoom_domain)
+				{
+					drawLine(graphics, Color.BLACK, x1, y1, x1, y2);
+					drawLine(graphics, Color.BLACK, x2, y1, x2, y2);
+				}
+				if (zoom_range)
+				{
+					drawLine(graphics, Color.BLACK, x1, y1, x2, y1);
+					drawLine(graphics, Color.BLACK, x1, y2, x2, y2);
+				}
+			}
+		}
+	}
 	
 	protected abstract void paintComponent(Graphics2D graphics);
 
