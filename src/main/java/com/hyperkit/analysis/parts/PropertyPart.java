@@ -22,8 +22,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.Part;
@@ -120,7 +118,7 @@ public class PropertyPart extends Part
 					}
 					else
 					{
-						if (!FilenameUtils.getExtension(excerpt.getName()).equals(".asd"))
+						if (!excerpt.getName().endsWith(".asd"))
 						{
 							excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");
 						}

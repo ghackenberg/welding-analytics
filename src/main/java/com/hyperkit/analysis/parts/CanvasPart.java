@@ -32,8 +32,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.hyperkit.analysis.Bus;
 import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.Part;
@@ -140,7 +138,7 @@ public abstract class CanvasPart extends Part
 				}
 				else
 				{
-					if (!FilenameUtils.getExtension(file.getName()).equals(".png"))
+					if (!file.getName().endsWith(".png"))
 					{
 						file = new File(file.getParentFile(), file.getName() + ".png");
 					}
@@ -229,11 +227,11 @@ public abstract class CanvasPart extends Part
 					}
 					else
 					{
-						int x1 = Math.min(Math.max(mouse_previous_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight());
-						int x2 = Math.min(Math.max(e.getX(), getPaddingLeft(font)), panel.getWidth() - getPaddingRight());
+						int x1 = Math.min(Math.max(mouse_previous_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight(stroke));
+						int x2 = Math.min(Math.max(e.getX(), getPaddingLeft(font)), panel.getWidth() - getPaddingRight(stroke));
 						
-						domain_lower_custom = projectScreenX(panel.getWidth(), font, x1);
-						domain_upper_custom = projectScreenX(panel.getWidth(), font, x2);	
+						domain_lower_custom = projectScreenX(panel.getWidth(), stroke, font, x1);
+						domain_upper_custom = projectScreenX(panel.getWidth(), stroke, font, x2);	
 					}
 				}
 				if (zoom_range)
@@ -245,11 +243,11 @@ public abstract class CanvasPart extends Part
 					}
 					else
 					{
-						int y1 = Math.min(Math.max(mouse_previous_y, getPaddingTop()), panel.getHeight() - getPaddingBottom(font));
-						int y2 = Math.min(Math.max(e.getY(), getPaddingTop()), panel.getHeight() - getPaddingBottom(font));
+						int y1 = Math.min(Math.max(mouse_previous_y, getPaddingTop(stroke)), panel.getHeight() - getPaddingBottom(font));
+						int y2 = Math.min(Math.max(e.getY(), getPaddingTop(stroke)), panel.getHeight() - getPaddingBottom(font));
 						
-						range_lower_custom = projectScreenY(panel.getHeight(), font, y2);
-						range_upper_custom = projectScreenY(panel.getHeight(), font, y1);
+						range_lower_custom = projectScreenY(panel.getHeight(), stroke, font, y2);
+						range_upper_custom = projectScreenY(panel.getHeight(), stroke, font, y1);
 					}
 				}
 				
@@ -343,29 +341,29 @@ public abstract class CanvasPart extends Part
 	{
 		return padding * 3 + font * 2;
 	}
-	protected int getPaddingRight()
+	protected int getPaddingRight(int stroke)
 	{
-		return padding;
+		return padding + padding * stroke / 2;
 	}
-	protected int getPaddingTop()
+	protected int getPaddingTop(int stroke)
 	{
-		return padding;
+		return padding + padding * stroke / 2;
 	}
 	protected int getPaddingBottom(int font)
 	{
 		return padding * 3 + font * 2;
 	}
 	
-	private double projectScreenX(int width, int font, double sx)
+	private double projectScreenX(int width, int stroke, int font, double sx)
 	{		
-		double px = (sx - getPaddingLeft(font)) / (width - getPaddingLeft(font) - getPaddingRight());
+		double px = (sx - getPaddingLeft(font)) / (width - getPaddingLeft(font) - getPaddingRight(stroke));
 		
 		return domain_lower + px * domain_delta;
 	}
 	
-	private double projectScreenY(int height, int font, double sy)
+	private double projectScreenY(int height, int stroke, int font, double sy)
 	{
-		double py = (sy - getPaddingTop()) / (height - getPaddingTop() - getPaddingBottom(font));
+		double py = (sy - getPaddingTop(stroke)) / (height - getPaddingTop(stroke) - getPaddingBottom(font));
 		
 		return range_upper - py * range_delta;
 	}
@@ -508,20 +506,20 @@ public abstract class CanvasPart extends Part
 	
 	protected double getMousePreviousDomainValue()
 	{
-		return projectScreenX(panel.getWidth(), font, mouse_previous_x);
+		return projectScreenX(panel.getWidth(), stroke, font, mouse_previous_x);
 	}
 	protected double getMousePreviousRangeValue()
 	{
-		return projectScreenY(panel.getHeight(), font, mouse_previous_y);
+		return projectScreenY(panel.getHeight(), stroke, font, mouse_previous_y);
 	}
 	
 	protected double getMouseCurrentDomainValue()
 	{
-		return projectScreenX(panel.getWidth(), font, mouse_current_x);
+		return projectScreenX(panel.getWidth(), stroke, font, mouse_current_x);
 	}
 	protected double getMouseCurrentRangeValue()
 	{
-		return projectScreenY(panel.getHeight(), font, mouse_current_y);
+		return projectScreenY(panel.getHeight(), stroke, font, mouse_current_y);
 	}
 	
 	public boolean handleEvent(FilePartAddEvent event)
@@ -573,14 +571,14 @@ public abstract class CanvasPart extends Part
 		return true;
 	}
 	
-	protected double projectDomain(int width, double x)
+	protected double projectDomain(int width, int stroke, int font, double x)
 	{
-		return getPaddingLeft(font) + (width - getPaddingLeft(font) - getPaddingRight()) * (x - domain_lower) / domain_delta;
+		return getPaddingLeft(font) + (width - getPaddingLeft(font) - getPaddingRight(stroke)) * (x - domain_lower) / domain_delta;
 	}
 	
-	protected double projectRange(int height, double y)
+	protected double projectRange(int height, int stroke, int font, double y)
 	{
-		return getPaddingTop() + (height - getPaddingTop() - getPaddingBottom(font)) - (height - getPaddingTop() - getPaddingBottom(font)) * (y - range_lower) / range_delta;
+		return getPaddingTop(stroke) + (height - getPaddingTop(stroke) - getPaddingBottom(font)) - (height - getPaddingTop(stroke) - getPaddingBottom(font)) * (y - range_lower) / range_delta;
 	}
 	
 	protected double calculateColor(int value, double shade, double progress)
@@ -602,12 +600,12 @@ public abstract class CanvasPart extends Part
 		return calculateColor(file.getColor(), shade, progress);
 	}
 	
-	protected void drawPoint(Graphics graphics, Color color, int width, int height, double x, double y)
+	protected void drawPoint(Graphics graphics, Color color, int width, int height, int stroke, int font, double x, double y)
 	{
 		if (check(x, y))
 		{
-			int sx = (int) projectDomain(width, x);
-			int sy = (int) projectRange(height, y);
+			int sx = (int) projectDomain(width, stroke, font, x);
+			int sy = (int) projectRange(height, stroke, font, y);
 			
 			drawPoint(graphics, color, sx, sy);	
 		}
@@ -620,32 +618,32 @@ public abstract class CanvasPart extends Part
 		graphics.fillOval(x - 2, y - 2, 4, 4);
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, int thickness, int width, int height, double x1, double y1, double x2, double y2)
+	protected void drawLine(Graphics2D graphics, Color color, int width, int height, int stroke, int font, double x1, double y1, double x2, double y2)
 	{
-		drawLine(graphics, color, new BasicStroke(thickness), width, height, x1, y1, x2, y2);
+		drawLine(graphics, color, new BasicStroke(stroke), width, height, stroke, font, x1, y1, x2, y2);
 	}
 	
-	protected void drawLine(Graphics2D graphics, Color color, Stroke stroke, int width, int height, double x1, double y1, double x2, double y2)
+	protected void drawLine(Graphics2D graphics, Color color, Stroke strokeObject, int width, int height, int stroke, int font, double x1, double y1, double x2, double y2)
 	{
 		boolean check1 = check(x1, y1);
 		boolean check2 = check(x2, y2);
 		
-		int sx1 = (int) projectDomain(width, x1);
-		int sy1 = (int) projectRange(height, y1);
+		int sx1 = (int) projectDomain(width, stroke, font, x1);
+		int sy1 = (int) projectRange(height, stroke, font, y1);
 		
-		int sx2 = (int) projectDomain(width, x2);
-		int sy2 = (int) projectRange(height, y2);
+		int sx2 = (int) projectDomain(width, stroke, font, x2);
+		int sy2 = (int) projectRange(height, stroke, font, y2);
 		
 		if (check1 && check2)
 		{	
-			drawLine(graphics, color, stroke, sx1, sy1, sx2, sy2);	
+			drawLine(graphics, color, strokeObject, sx1, sy1, sx2, sy2);	
 		}
 		else
 		{
-			int top = getPaddingTop();
+			int top = getPaddingTop(stroke);
 			int left = getPaddingLeft(font);
-			int right = panel.getWidth() - getPaddingRight();
-			int bottom = panel.getHeight() - getPaddingBottom(font);
+			int right = width - getPaddingRight(stroke);
+			int bottom = height - getPaddingBottom(font);
 			
 			// Cross left bar
 			if (sx1 < left && sx2 > left)
@@ -700,7 +698,7 @@ public abstract class CanvasPart extends Part
 			{
 				if (sx2 >= left && sx2 <= right && sy2 >= top && sy2 <= bottom)
 				{
-					drawLine(graphics, color, stroke, sx1, sy1, sx2, sy2);
+					drawLine(graphics, color, strokeObject, sx1, sy1, sx2, sy2);
 				}
 			}
 		}
@@ -714,9 +712,8 @@ public abstract class CanvasPart extends Part
 		graphics.drawLine(x1, y1, x2, y2);
 	}
 	
-	protected void drawMarker(Graphics2D graphics, Color color, int thickness, int width, int height, double x, double y)
+	protected void drawMarker(Graphics2D graphics, Color color, int width, int height, int stroke, int font, double x, double y)
 	{
-		
 		String sx = String.format("%.6f", x);
 		String sy = String.format("%.6f", y);
 		
@@ -726,8 +723,8 @@ public abstract class CanvasPart extends Part
 		
 		Rectangle2D bounds = metrics.getStringBounds(string, graphics);
 		
-		int px = (int) projectDomain(width, x);
-		int py = (int) projectRange(height, y);
+		int px = (int) projectDomain(width, stroke, font, x);
+		int py = (int) projectRange(height, stroke, font, y);
 		
 		int tw = (int) bounds.getWidth();
 		int th = (int) bounds.getHeight();
@@ -746,22 +743,22 @@ public abstract class CanvasPart extends Part
 		graphics.setColor(Color.BLACK);
 		graphics.drawRect(rx, ry, tw + 10, th + 10);
 		
-		drawLine(graphics, Color.BLACK, thickness, width, height, x, range_lower, x, range_upper);
-		drawLine(graphics, Color.BLACK, thickness, width, height, domain_lower, y, domain_upper, y);
+		drawLine(graphics, Color.BLACK, width, height, stroke, font, x, range_lower, x, range_upper);
+		drawLine(graphics, Color.BLACK, width, height, stroke, font, domain_lower, y, domain_upper, y);
 		
-		drawPoint(graphics, color, width, height, x, y);
+		drawPoint(graphics, color, width, height, stroke, font, x, y);
 
 		graphics.setColor(Color.BLACK);
 		graphics.drawString(string, (int) tx, (int) ty);
 	}
 	
-	protected void drawRectangle(Graphics2D graphics, Color color, int width, int height, double x1, double y1, double x2, double y2)
+	protected void drawRectangle(Graphics2D graphics, Color color, int width, int height, int stroke, int font, double x1, double y1, double x2, double y2)
 	{
-		int sx1 = (int) projectDomain(width, x1);
-		int sy1 = (int) projectRange(height, y1);
+		int sx1 = (int) projectDomain(width, stroke, font, x1);
+		int sy1 = (int) projectRange(height, stroke, font, y1);
 		
-		int sx2 = (int) projectDomain(width, x2);
-		int sy2 = (int) projectRange(height, y2);
+		int sx2 = (int) projectDomain(width, stroke, font, x2);
+		int sy2 = (int) projectRange(height, stroke, font, y2);
 		
 		drawRectangle(graphics, color, sx1, sy1, sx2, sy2);
 	}
@@ -893,7 +890,7 @@ public abstract class CanvasPart extends Part
 				
 				unit = Math.max(unit, bounds.getWidth());
 			}
-			while (xticks++ < (width - getPaddingLeft(font) - getPaddingRight()) / unit / 3);
+			while (xticks++ < (width - getPaddingLeft(font) - getPaddingRight(stroke)) / unit / 3);
 			
 			do
 			{
@@ -909,45 +906,45 @@ public abstract class CanvasPart extends Part
 				
 				unit = Math.max(unit, bounds.getWidth());
 			}
-			while (yticks++ < (height - getPaddingTop() - getPaddingBottom(font)) / unit / 3);
+			while (yticks++ < (height - getPaddingTop(stroke) - getPaddingBottom(font)) / unit / 3);
 			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
 			{	
 				graphics.setColor(x == 0 ? MEDIUM : HIGH);
 				graphics.setStroke(new BasicStroke(stroke));
-				graphics.drawLine((int) projectDomain(width, x * dx), (int) projectRange(height, range_lower), (int) projectDomain(width, x * dx), (int) projectRange(height, range_upper));
+				graphics.drawLine((int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower), (int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_upper));
 			}
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
 			{
 				graphics.setColor(y == 0 ? MEDIUM : HIGH);
 				graphics.setStroke(new BasicStroke(stroke));
-				graphics.drawLine((int) projectDomain(width, domain_lower), (int) projectRange(height, y * dy), (int) projectDomain(width, domain_upper), (int) projectRange(height, y * dy));
+				graphics.drawLine((int) projectDomain(width, stroke, font, domain_lower), (int) projectRange(height, stroke, font, y * dy), (int) projectDomain(width, stroke, font, domain_upper), (int) projectRange(height, stroke, font, y * dy));
 			}
 			
-			drawLine(graphics, LOW, stroke, width, height, domain_lower, range_lower, domain_upper, range_lower);
-			drawLine(graphics, LOW, stroke, width, height, domain_lower, range_upper, domain_lower, range_lower);
+			drawLine(graphics, LOW, width, height, stroke, font, domain_lower, range_lower, domain_upper, range_lower);
+			drawLine(graphics, LOW, width, height, stroke, font, domain_lower, range_upper, domain_lower, range_lower);
 			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
-				(int) projectDomain(width, domain_upper),
-				(int) projectDomain(width, domain_upper),
-				(int) projectDomain(width, domain_upper) + getPaddingRight() / 2 * stroke
+				(int) projectDomain(width, stroke, font, domain_upper),
+				(int) projectDomain(width, stroke, font, domain_upper),
+				(int) projectDomain(width, stroke, font, domain_upper) + padding * stroke / 2
 			}, new int[] {
-				(int) projectRange(height, range_lower) - getPaddingRight() / 3 * stroke,
-				(int) projectRange(height, range_lower) + getPaddingRight() / 3 * stroke,
-				(int) projectRange(height, range_lower)
+				(int) projectRange(height, stroke, font, range_lower) - padding * stroke / 3,
+				(int) projectRange(height, stroke, font, range_lower) + padding * stroke / 3,
+				(int) projectRange(height, stroke, font, range_lower)
 			}, 3);
 			
 			graphics.setColor(LOW);
 			graphics.fillPolygon(new int[] {
-				(int) projectDomain(width, domain_lower) - getPaddingTop() / 3 * stroke,
-				(int) projectDomain(width, domain_lower) + getPaddingTop() / 3 * stroke,
-				(int) projectDomain(width, domain_lower)
+				(int) projectDomain(width, stroke, font, domain_lower) - padding * stroke / 3,
+				(int) projectDomain(width, stroke, font, domain_lower) + padding * stroke / 3,
+				(int) projectDomain(width, stroke, font, domain_lower)
 			}, new int[] {
-				(int) projectRange(height, range_upper),
-				(int) projectRange(height, range_upper),
-				(int) projectRange(height, range_upper) - getPaddingTop() / 2 * stroke
+				(int) projectRange(height, stroke, font, range_upper),
+				(int) projectRange(height, stroke, font, range_upper),
+				(int) projectRange(height, stroke, font, range_upper) - padding * stroke / 2
 			}, 3);
 			
 			for (double x = Math.ceil(domain_lower / dx); x <= Math.floor(domain_upper / dx); x++)
@@ -962,8 +959,8 @@ public abstract class CanvasPart extends Part
 				bounds = metrics.getStringBounds(string, graphics);
 				
 				graphics.setColor(LOW);
-				graphics.drawLine((int) projectDomain(width, x * dx), (int) projectRange(height, range_lower) - 2, (int) projectDomain(width, x * dx), (int) projectRange(height, range_lower) + 2);
-				graphics.drawString(string, (int) (projectDomain(width, x * dx) - bounds.getWidth() / 2), (int) (projectRange(height, range_lower) + 2 + bounds.getHeight()));
+				graphics.drawLine((int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower) - 2, (int) projectDomain(width, stroke, font, x * dx), (int) projectRange(height, stroke, font, range_lower) + 2);
+				graphics.drawString(string, (int) (projectDomain(width, stroke, font, x * dx) - bounds.getWidth() / 2), (int) (projectRange(height, stroke, font, range_lower) + 2 + bounds.getHeight()));
 			}
 			
 			for (double y = Math.ceil(range_lower / dy); y <= Math.floor(range_upper / dy); y++)
@@ -978,11 +975,11 @@ public abstract class CanvasPart extends Part
 				bounds = metrics.getStringBounds(string, graphics);
 				
 				graphics.setColor(LOW);
-				graphics.drawLine((int) projectDomain(width, domain_lower) - 2, (int) projectRange(height, y * dy), (int) projectDomain(width, domain_lower) + 2, (int) projectRange(height, y * dy));
+				graphics.drawLine((int) projectDomain(width, stroke, font, domain_lower) - 2, (int) projectRange(height, stroke, font, y * dy), (int) projectDomain(width, stroke, font, domain_lower) + 2, (int) projectRange(height, stroke, font, y * dy));
 				
 				transform = graphics.getTransform();
 				
-				graphics.translate(projectDomain(width, domain_lower) - bounds.getHeight() / 2, projectRange(height, y * dy) + bounds.getWidth() / 2);
+				graphics.translate(projectDomain(width, stroke, font, domain_lower) - bounds.getHeight() / 2, projectRange(height, stroke, font, y * dy) + bounds.getWidth() / 2);
 				graphics.rotate(- Math.PI / 2);
 				graphics.setColor(LOW);
 				graphics.drawString(string, 0, 0);
@@ -993,13 +990,13 @@ public abstract class CanvasPart extends Part
 			bounds = metrics.getStringBounds(domainLabel, graphics);
 			
 			graphics.setColor(LOW);
-			graphics.drawString(domainLabel, (int) (projectDomain(width, domain_lower + domain_delta / 2) - bounds.getWidth() / 2), height - padding);
+			graphics.drawString(domainLabel, (int) (projectDomain(width, stroke, font, domain_lower + domain_delta / 2) - bounds.getWidth() / 2), height - padding);
 			
 			bounds = metrics.getStringBounds(rangeLabel, graphics);
 			
 			transform = graphics.getTransform();
 			
-			graphics.translate(padding + font, projectRange(height, range_lower + range_delta / 2) + bounds.getWidth() / 2);
+			graphics.translate(padding + font, projectRange(height, stroke, font, range_lower + range_delta / 2) + bounds.getWidth() / 2);
 			graphics.rotate(- Math.PI / 2);
 			graphics.setColor(LOW);
 			graphics.drawString(rangeLabel, 0, 0);
@@ -1014,20 +1011,20 @@ public abstract class CanvasPart extends Part
 			
 			if (mouse_previous_x != Integer.MAX_VALUE && mouse_previous_y != Integer.MAX_VALUE)
 			{
-				int x1 = Math.min(Math.max(mouse_previous_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight());
-				int y1 = Math.min(Math.max(mouse_previous_y, getPaddingTop()), panel.getHeight() - getPaddingBottom(font));
+				int x1 = Math.min(Math.max(mouse_previous_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight(stroke));
+				int y1 = Math.min(Math.max(mouse_previous_y, getPaddingTop(stroke)), panel.getHeight() - getPaddingBottom(font));
 
-				int x2 = Math.min(Math.max(mouse_current_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight());
-				int y2 = Math.min(Math.max(mouse_current_y, getPaddingTop()), panel.getHeight() - getPaddingBottom(font));
+				int x2 = Math.min(Math.max(mouse_current_x, getPaddingLeft(font)), panel.getWidth() - getPaddingRight(stroke));
+				int y2 = Math.min(Math.max(mouse_current_y, getPaddingTop(stroke)), panel.getHeight() - getPaddingBottom(font));
 				
 				if (!zoom_domain)
 				{
 					x1 = getPaddingLeft(font);
-					x2 = panel.getWidth() - getPaddingRight();
+					x2 = panel.getWidth() - getPaddingRight(stroke);
 				}
 				if (!zoom_range)
 				{
-					y1 = getPaddingTop();
+					y1 = getPaddingTop(stroke);
 					y2 = panel.getHeight() - getPaddingBottom(font);
 				}
 				
@@ -1035,13 +1032,13 @@ public abstract class CanvasPart extends Part
 				
 				if (zoom_domain)
 				{
-					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y1, x1, y2);
-					drawLine(graphics, Color.BLACK, stroke, width, height, x2, y1, x2, y2);
+					drawLine(graphics, Color.BLACK, width, height, stroke, font, x1, y1, x1, y2);
+					drawLine(graphics, Color.BLACK, width, height, stroke, font, x2, y1, x2, y2);
 				}
 				if (zoom_range)
 				{
-					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y1, x2, y1);
-					drawLine(graphics, Color.BLACK, stroke, width, height, x1, y2, x2, y2);
+					drawLine(graphics, Color.BLACK, width, height, stroke, font, x1, y1, x2, y1);
+					drawLine(graphics, Color.BLACK, width, height, stroke, font, x1, y2, x2, y2);
 				}
 			}
 		}

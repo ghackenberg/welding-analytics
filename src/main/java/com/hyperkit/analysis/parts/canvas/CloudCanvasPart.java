@@ -181,12 +181,12 @@ public abstract class CloudCanvasPart extends CanvasPart
 			
 			for (int index = start; index <= end; index++)
 			{	
-				double x = projectDomain(width, getDomainValue(file, index));
-				double y = projectRange(height, getRangeValue(file, index));
+				double x = projectDomain(width, stroke, font, getDomainValue(file, index));
+				double y = projectRange(height, stroke, font, getRangeValue(file, index));
 
-				if (x >= getPaddingLeft(font) && x <= getPanel().getWidth() - getPaddingRight())
+				if (x >= getPaddingLeft(font) && x <= getPanel().getWidth() - getPaddingRight(stroke))
 				{
-					if (y >= getPaddingTop() && y <= getPanel().getHeight() - getPaddingBottom(font))
+					if (y >= getPaddingTop(stroke) && y <= getPanel().getHeight() - getPaddingBottom(font))
 					{
 						max[number] = Math.max(max[number], ++count[number][(int) x][(int) y]);
 					}

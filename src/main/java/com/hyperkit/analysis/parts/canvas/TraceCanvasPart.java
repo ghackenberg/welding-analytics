@@ -175,7 +175,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 				
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), stroke, width, height, x1, y1, x2, y2);
+				drawLine(graphics, calculateColor(file, 1, Math.pow(progress, 10)), width, height, stroke, font, x1, y1, x2, y2);
 			}
 			
 			for (int index = Math.max(getDataLength(file) - 1 - padding, padding); index < getDataLength(file) - padding; index++)
@@ -185,7 +185,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 
 				double progress = 1 - (index + 1.0) / getDataLength(file);
 				
-				drawPoint(graphics, calculateColor(file, 0.5, Math.pow(progress, 10)), width, height, x, y);
+				drawPoint(graphics, calculateColor(file, 0.5, Math.pow(progress, 10)), width, height, stroke, font, x, y);
 			}
 		}
 		
@@ -207,8 +207,8 @@ public abstract class TraceCanvasPart extends CanvasPart
 					
 					if (check(x, y))
 					{
-						double domain_delta = getMouseCurrentX() - projectDomain(width, x);
-						double range_delta = getMouseCurrentY() - projectRange(height, y);
+						double domain_delta = getMouseCurrentX() - projectDomain(width, stroke, font, x);
+						double range_delta = getMouseCurrentY() - projectRange(height, stroke, font, y);
 						
 						double temp = Math.sqrt(domain_delta * domain_delta + range_delta * range_delta);
 						
@@ -241,7 +241,7 @@ public abstract class TraceCanvasPart extends CanvasPart
 				
 				if (index >= padding && starts.containsKey(file))
 				{
-					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), stroke, width, height, getRawDomainValue(file, index), getRawRangeValue(file, index));
+					drawMarker(graphics, calculateColor(file, 0.5, Math.pow(0, 10)), width, height, stroke, font, getRawDomainValue(file, index), getRawRangeValue(file, index));
 				}
 			}
 		}

@@ -117,6 +117,7 @@ public class Memory
 			
 			object.put("diagramWidth", width);
 			object.put("diagramHeight", height);
+			object.put("diagramStroke", stroke);
 			object.put("diagramFont", font);
 			
 			writer.write(object.toString());
