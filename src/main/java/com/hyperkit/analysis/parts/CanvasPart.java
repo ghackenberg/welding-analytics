@@ -81,7 +81,7 @@ public abstract class CanvasPart extends Part
 	
 	public CanvasPart(String title, String domain, String domainUnit, String range, String rangeUnit, boolean zoom_domain, boolean zoom_range)
 	{
-		this(title, domain, domainUnit, range, rangeUnit, ChartPart.class.getClassLoader().getResource("icons/parts/canvas.png"), zoom_domain, zoom_range);
+		this(title, domain, domainUnit, range, rangeUnit, CanvasPart.class.getClassLoader().getResource("icons/parts/canvas.png"), zoom_domain, zoom_range);
 	}
 	
 	public CanvasPart(String title, String domainName, String domainUnit, String rangeName, String rangeUnit, URL icon, boolean zoom_domain, boolean zoom_range)
