@@ -102,7 +102,7 @@ public class HDFDataset extends Dataset {
 			
 			for (io.jhdf.api.Dataset dataset: datasets)
 			{
-				if (dataset.getPath().contains("channels") && dataset.getPath().contains("blocks") && !dataset.getPath().contains("@"))
+				if (dataset.getPath().contains("measurements") && dataset.getPath().contains("channels") && dataset.getPath().contains("blocks") && !dataset.getPath().contains("@"))
 				{
 					options.add(new Option(dataset));
 				}
