@@ -8,14 +8,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import bibliothek.gui.Dockable;
-
 import com.hyperkit.analysis.Bus;
-import com.hyperkit.analysis.Main;
+import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.actions.PartAction;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.files.ASDFile;
 import com.hyperkit.analysis.parts.FilePart;
+
+import bibliothek.gui.Dockable;
 
 public class FilePartAddAction extends PartAction<FilePart>
 {
@@ -30,7 +30,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 	{
 		JFileChooser chooser = new JFileChooser();
 		
-		chooser.setCurrentDirectory(Main.currentDirectory);
+		chooser.setCurrentDirectory(Memory.getCurrentDirectory());
 		
 		chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
 		
@@ -40,14 +40,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 		{
 			File file = chooser.getSelectedFile();
 			
-			if (file.isDirectory())
-			{
-				Main.currentDirectory = file;
-			}
-			else
-			{
-				Main.currentDirectory = file.getParentFile();
-			}
+			Memory.setCurrentDirectory(file);
 			
 			Enumeration<ASDFile> file_existing = getPart().getModel().elements();
 			

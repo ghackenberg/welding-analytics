@@ -25,7 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FilenameUtils;
 
 import com.hyperkit.analysis.Bus;
-import com.hyperkit.analysis.Main;
+import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
@@ -102,7 +102,7 @@ public class PropertyPart extends Part
 			saveButton.addActionListener(e -> {
 				JFileChooser chooser = new JFileChooser();
 				
-				chooser.setCurrentDirectory(Main.currentDirectory);
+				chooser.setCurrentDirectory(Memory.getCurrentDirectory());
 				
 				chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
 				
@@ -112,16 +112,14 @@ public class PropertyPart extends Part
 				{
 					File excerpt = chooser.getSelectedFile();
 					
+					Memory.setCurrentDirectory(excerpt);
+					
 					if (excerpt.isDirectory())
 					{
-						Main.currentDirectory = excerpt;
-						
 						JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
 					}
 					else
 					{
-						Main.currentDirectory = excerpt.getParentFile();
-						
 						if (!FilenameUtils.getExtension(excerpt.getName()).equals(".asd"))
 						{
 							excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");

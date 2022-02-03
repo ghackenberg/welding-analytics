@@ -31,7 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FilenameUtils;
 
 import com.hyperkit.analysis.Bus;
-import com.hyperkit.analysis.Main;
+import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -117,7 +117,7 @@ public abstract class CanvasPart extends Part
 		saveButton.addActionListener(event -> {
 			JFileChooser chooser = new JFileChooser();
 		
-			chooser.setCurrentDirectory(Main.currentDirectory);
+			chooser.setCurrentDirectory(Memory.getCurrentDirectory());
 			
 			chooser.setFileFilter(new FileNameExtensionFilter("PNG file", "png"));
 			
@@ -127,16 +127,14 @@ public abstract class CanvasPart extends Part
 			{	
 				File file = chooser.getSelectedFile();
 				
+				Memory.setCurrentDirectory(file);
+				
 				if (file.isDirectory())
 				{
-					Main.currentDirectory = file;
-					
 					JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
 				}
 				else
 				{
-					Main.currentDirectory = file.getParentFile();
-					
 					if (!FilenameUtils.getExtension(file.getName()).equals(".png"))
 					{
 						file = new File(file.getParentFile(), file.getName() + ".png");
