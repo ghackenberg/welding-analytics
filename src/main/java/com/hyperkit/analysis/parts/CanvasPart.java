@@ -158,7 +158,7 @@ public abstract class CanvasPart extends Part
 					myPanel.add(new JLabel("Font (in px):"));
 					myPanel.add(diagramFont);
 					
-					int option = JOptionPane.showConfirmDialog(null, myPanel, "Configure diagram", JOptionPane.OK_CANCEL_OPTION);
+					int option = JOptionPane.showConfirmDialog(getComponent(), myPanel, "Configure diagram", JOptionPane.OK_CANCEL_OPTION);
 					
 					if (option == JOptionPane.OK_OPTION)
 					{

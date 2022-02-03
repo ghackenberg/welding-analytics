@@ -67,7 +67,7 @@ public class FilePartAddAction extends PartAction<FilePart>
 					}
 					else if (file.getName().endsWith(".tdp"))
 					{
-						absFile = new HDFDataset(file);
+						absFile = new HDFDataset(file, getPart().getComponent());
 					}
 					
 					if (absFile != null && absFile.getLengthMeasured() > 0)
