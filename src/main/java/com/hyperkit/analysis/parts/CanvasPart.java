@@ -31,6 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FilenameUtils;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Main;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
@@ -116,21 +117,32 @@ public abstract class CanvasPart extends Part
 		saveButton.addActionListener(event -> {
 			JFileChooser chooser = new JFileChooser();
 		
+			chooser.setCurrentDirectory(Main.currentDirectory);
+			
 			chooser.setFileFilter(new FileNameExtensionFilter("PNG file", "png"));
 			
 			int result = chooser.showSaveDialog(getComponent());
 			
 			if (result == JFileChooser.APPROVE_OPTION)
-			{
+			{	
 				File file = chooser.getSelectedFile();
 				
-				if (file.isDirectory()) {
+				if (file.isDirectory())
+				{
+					Main.currentDirectory = file;
+					
 					JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
-				} else {
-					if (!FilenameUtils.getExtension(file.getName()).equals(".png")) {
+				}
+				else
+				{
+					Main.currentDirectory = file.getParentFile();
+					
+					if (!FilenameUtils.getExtension(file.getName()).equals(".png"))
+					{
 						file = new File(file.getParentFile(), file.getName() + ".png");
 					}
-					try {	
+					try
+					{
 						int width = panel.getWidth();
 						int height = panel.getHeight();
 						
@@ -147,7 +159,9 @@ public abstract class CanvasPart extends Part
 						ImageIO.write(image, "png", file);
 						
 						JOptionPane.showMessageDialog(getComponent(), "Diagram saved successfully!");
-					} catch (IOException e) {
+					}
+					catch (IOException e)
+					{
 						e.printStackTrace();
 						
 						JOptionPane.showMessageDialog(getComponent(), "Diagram could not be saved!");

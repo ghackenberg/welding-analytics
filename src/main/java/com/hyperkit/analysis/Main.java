@@ -49,6 +49,8 @@ import bibliothek.gui.dock.station.split.SplitDockGrid;
 
 public class Main
 {
+
+	public static java.io.File currentDirectory = new java.io.File(System.getProperty("user.home"));
 	
 	private static int frame = 0;
 	private static int window = 5000;

@@ -11,6 +11,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import bibliothek.gui.Dockable;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Main;
 import com.hyperkit.analysis.actions.PartAction;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.files.ASDFile;
@@ -29,6 +30,8 @@ public class FilePartAddAction extends PartAction<FilePart>
 	{
 		JFileChooser chooser = new JFileChooser();
 		
+		chooser.setCurrentDirectory(Main.currentDirectory);
+		
 		chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
 		
 		int result = chooser.showOpenDialog(getPart().getComponent());
@@ -36,6 +39,15 @@ public class FilePartAddAction extends PartAction<FilePart>
 		if (result == JFileChooser.APPROVE_OPTION)
 		{
 			File file = chooser.getSelectedFile();
+			
+			if (file.isDirectory())
+			{
+				Main.currentDirectory = file;
+			}
+			else
+			{
+				Main.currentDirectory = file.getParentFile();
+			}
 			
 			Enumeration<ASDFile> file_existing = getPart().getModel().elements();
 			
@@ -49,32 +61,25 @@ public class FilePartAddAction extends PartAction<FilePart>
 				}
 			}
 			
-			Thread thread = new Thread(new Runnable()
+			Thread thread = new Thread(() -> {
+				try
 				{
-					@Override
-					public void run()
+					ASDFile asdFile = new ASDFile(file);
+					
+					if (asdFile.getLengthMeasured() > 0)
 					{
-						try
-						{
-							ASDFile asdFile = new ASDFile(file);
-							
-							if (asdFile.getLengthMeasured() > 0)
-							{
-								Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), asdFile));
-							}
-							else
-							{
-								JOptionPane.showMessageDialog(getPart().getComponent(), "File does not contain readable data!");
-							}
-						}
-						catch (IOException exception)
-						{
-							JOptionPane.showMessageDialog(getPart().getComponent(), "File could not be loaded!");
-						}
+						Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), asdFile));
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(getPart().getComponent(), "File does not contain readable data!");
 					}
 				}
-			);
-			
+				catch (IOException exception)
+				{
+					JOptionPane.showMessageDialog(getPart().getComponent(), "File could not be loaded!");
+				}
+			});
 			thread.start();
 		}
 	}

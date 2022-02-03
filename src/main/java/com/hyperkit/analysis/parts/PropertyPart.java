@@ -25,6 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FilenameUtils;
 
 import com.hyperkit.analysis.Bus;
+import com.hyperkit.analysis.Main;
 import com.hyperkit.analysis.Part;
 import com.hyperkit.analysis.events.parts.FilePartRemoveEvent;
 import com.hyperkit.analysis.events.parts.FilePartSelectEvent;
@@ -101,6 +102,8 @@ public class PropertyPart extends Part
 			saveButton.addActionListener(e -> {
 				JFileChooser chooser = new JFileChooser();
 				
+				chooser.setCurrentDirectory(Main.currentDirectory);
+				
 				chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
 				
 				int result = chooser.showSaveDialog(getComponent());
@@ -109,14 +112,24 @@ public class PropertyPart extends Part
 				{
 					File excerpt = chooser.getSelectedFile();
 					
-					if (excerpt.isDirectory()) {
+					if (excerpt.isDirectory())
+					{
+						Main.currentDirectory = excerpt;
+						
 						JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
-					} else {
-						if (!FilenameUtils.getExtension(excerpt.getName()).equals(".asd")) {
+					}
+					else
+					{
+						Main.currentDirectory = excerpt.getParentFile();
+						
+						if (!FilenameUtils.getExtension(excerpt.getName()).equals(".asd"))
+						{
 							excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");
 						}
-						try (FileWriter writer = new FileWriter(excerpt, true)) {
-							for (int i = 0; i < file.getLengthDisplayed(); i++) {
+						try (FileWriter writer = new FileWriter(excerpt, true))
+						{
+							for (int i = 0; i < file.getLengthDisplayed(); i++)
+							{
 								double timestamp = file.getTimestampDisplayed(i);
 								double voltage = file.getVoltageDisplayed(i);
 								double current = file.getCurrentDisplayed(i);
@@ -126,7 +139,9 @@ public class PropertyPart extends Part
 								writer.write(output.replace(".", ","));
 							}
 							JOptionPane.showMessageDialog(getComponent(), "Excerpt saved successfully!");
-						} catch (Exception ex) {
+						}
+						catch (Exception ex)
+						{
 							ex.printStackTrace();
 							JOptionPane.showMessageDialog(getComponent(), "Excerpt could not be saved!");
 						}
