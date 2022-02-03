@@ -74,7 +74,8 @@ public abstract class Dataset
 	{
 		return name;
 	}
-	
+
+	public abstract int getLengthMeasured();
 	public abstract int getLengthDisplayed();
 	
 	public abstract double getTimestampDisplayed(int index);

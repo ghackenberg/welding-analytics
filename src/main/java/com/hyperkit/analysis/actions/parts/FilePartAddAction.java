@@ -13,6 +13,7 @@ import com.hyperkit.analysis.Dataset;
 import com.hyperkit.analysis.Memory;
 import com.hyperkit.analysis.actions.PartAction;
 import com.hyperkit.analysis.datasets.ASDDataset;
+import com.hyperkit.analysis.datasets.HDFDataset;
 import com.hyperkit.analysis.events.parts.FilePartAddEvent;
 import com.hyperkit.analysis.parts.FilePart;
 
@@ -58,11 +59,20 @@ public class FilePartAddAction extends PartAction<FilePart>
 			Thread thread = new Thread(() -> {
 				try
 				{
-					ASDDataset asdFile = new ASDDataset(file);
+					Dataset absFile = null;
 					
-					if (asdFile.getLengthMeasured() > 0)
+					if (file.getName().endsWith(".asd"))
 					{
-						Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), asdFile));
+						absFile = new ASDDataset(file);	
+					}
+					else if (file.getName().endsWith(".tpd"))
+					{
+						absFile = new HDFDataset(file);
+					}
+					
+					if (absFile != null && absFile.getLengthMeasured() > 0)
+					{
+						Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), absFile));
 					}
 					else
 					{

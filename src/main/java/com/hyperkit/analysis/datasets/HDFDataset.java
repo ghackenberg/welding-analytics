@@ -11,6 +11,12 @@ public class HDFDataset extends Dataset
 	}
 
 	@Override
+	public int getLengthMeasured() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public int getLengthDisplayed() {
 		// TODO Auto-generated method stub
 		return 0;
