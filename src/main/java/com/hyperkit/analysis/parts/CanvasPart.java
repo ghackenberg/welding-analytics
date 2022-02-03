@@ -24,8 +24,11 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
@@ -115,6 +118,7 @@ public abstract class CanvasPart extends Part
 		
 		saveButton = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
 		saveButton.addActionListener(event -> {
+			
 			JFileChooser chooser = new JFileChooser();
 		
 			chooser.setCurrentDirectory(Memory.getCurrentDirectory());
@@ -139,30 +143,56 @@ public abstract class CanvasPart extends Part
 					{
 						file = new File(file.getParentFile(), file.getName() + ".png");
 					}
-					try
+					
+					JSpinner diagramWidth = new JSpinner(new SpinnerNumberModel(Memory.getDiagramWidth(), 1, 4096, 1));
+					JSpinner diagramHeight = new JSpinner(new SpinnerNumberModel(Memory.getDiagramHeight(), 1, 4096, 1));
+					JSpinner diagramStroke = new JSpinner(new SpinnerNumberModel(Memory.getDiagramStroke(), 1, 4, 1));
+					JSpinner diagramFont = new JSpinner(new SpinnerNumberModel(Memory.getDiagramFont(), 1, 64, 1));
+					
+					JPanel myPanel = new JPanel();
+					myPanel.add(new JLabel("Width (in px):"));
+					myPanel.add(diagramWidth);
+					myPanel.add(new JLabel("Height (in px):"));
+					myPanel.add(diagramHeight);
+					myPanel.add(new JLabel("Stroke (in px):"));
+					myPanel.add(diagramStroke);
+					myPanel.add(new JLabel("Font (in px):"));
+					myPanel.add(diagramFont);
+					
+					int option = JOptionPane.showConfirmDialog(null, myPanel, "Configure diagram", JOptionPane.OK_CANCEL_OPTION);
+					
+					if (option == JOptionPane.OK_OPTION)
 					{
-						int width = panel.getWidth();
-						int height = panel.getHeight();
+						Memory.setDiagramWidth((int) diagramWidth.getValue());
+						Memory.setDiagramHeight((int) diagramHeight.getValue());
+						Memory.setDiagramStroke((int) diagramStroke.getValue());
+						Memory.setDiagramFont((int) diagramFont.getValue());
 						
-						BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-						
-						Graphics2D graphics = (Graphics2D) image.getGraphics();
-						
-						graphics.setBackground(Color.WHITE);
-						
-						graphics.clearRect(0, 0, width, height);
-						
-						self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
-						
-						ImageIO.write(image, "png", file);
-						
-						JOptionPane.showMessageDialog(getComponent(), "Diagram saved successfully!");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						
-						JOptionPane.showMessageDialog(getComponent(), "Diagram could not be saved!");
+						try
+						{
+							int width = (int) diagramWidth.getValue();
+							int height = (int) diagramHeight.getValue();
+							
+							BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+							
+							Graphics2D graphics = (Graphics2D) image.getGraphics();
+							
+							graphics.setBackground(Color.WHITE);
+							
+							graphics.clearRect(0, 0, width, height);
+							
+							self.paintCommon(graphics, panel.getWidth(), panel.getHeight());
+							
+							ImageIO.write(image, "png", file);
+							
+							JOptionPane.showMessageDialog(getComponent(), "Diagram saved successfully!");
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+							
+							JOptionPane.showMessageDialog(getComponent(), "Diagram could not be saved!");
+						}
 					}
 				}
 			}
