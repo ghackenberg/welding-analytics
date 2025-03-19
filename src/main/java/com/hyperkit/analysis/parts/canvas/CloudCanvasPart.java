@@ -40,7 +40,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 		
 		JSpinner offsetSpinner = new JSpinner(new SpinnerNumberModel(offset, 0, 100, 1));
 		offsetSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				this.handleEvent(new OffsetChangeEvent((int) offsetSpinner.getValue()));
 			}
@@ -50,7 +50,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 		
 		JSpinner exponentSpinner = new JSpinner(new SpinnerNumberModel(exponent, 1, 100, 1));
 		exponentSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				this.handleEvent(new ExponentChangeEvent((int) exponentSpinner.getValue()));
 			}
@@ -60,7 +60,7 @@ public abstract class CloudCanvasPart extends CanvasPart
 		
 		JCheckBox animateCheck = new JCheckBox("", animate);
 		animateCheck.addChangeListener(
-			event ->
+			_ ->
 			{
 				this.handleEvent(new AnimateChangeEvent(animateCheck.isSelected()));
 			}

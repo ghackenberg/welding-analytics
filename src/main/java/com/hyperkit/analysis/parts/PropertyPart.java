@@ -82,67 +82,73 @@ public class PropertyPart extends Part
 			// Buttons
 			
 			colorButton = new JButton(file.getIcon());
-			colorButton.addActionListener(e -> {
-				Color newColor = JColorChooser.showDialog(colorButton, "Choose color", file.getColor());
-				
-				if (newColor != null)
+			colorButton.addActionListener(
+				_ ->
 				{
-					file.setColor(newColor);
+					Color newColor = JColorChooser.showDialog(colorButton, "Choose color", file.getColor());
 					
-					colorButton.setIcon(file.getIcon());
-					
-					Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					if (newColor != null)
+					{
+						file.setColor(newColor);
+						
+						colorButton.setIcon(file.getIcon());
+						
+						Bus.getInstance().broadcastEvent(new PropertyPartChangeEvent(self, file));
+					}
 				}
-			});
+			);
 			
 			saveButton = new JButton(ImageHelper.getImageIcon("icons/parts/save.png"));
-			saveButton.addActionListener(e -> {
-				JFileChooser chooser = new JFileChooser();
-				
-				chooser.setCurrentDirectory(Memory.getCurrentDirectory());
-				
-				chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
-				
-				int result = chooser.showSaveDialog(getComponent());
-				
-				if (result == JFileChooser.APPROVE_OPTION)
+			saveButton.addActionListener(
+				_ ->
 				{
-					File excerpt = chooser.getSelectedFile();
+					JFileChooser chooser = new JFileChooser();
 					
-					Memory.setCurrentDirectory(excerpt);
+					chooser.setCurrentDirectory(Memory.getCurrentDirectory());
 					
-					if (excerpt.isDirectory())
+					chooser.setFileFilter(new FileNameExtensionFilter("ASD file", "asd"));
+					
+					int result = chooser.showSaveDialog(getComponent());
+					
+					if (result == JFileChooser.APPROVE_OPTION)
 					{
-						JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
-					}
-					else
-					{
-						if (!excerpt.getName().endsWith(".asd"))
+						File excerpt = chooser.getSelectedFile();
+						
+						Memory.setCurrentDirectory(excerpt);
+						
+						if (excerpt.isDirectory())
 						{
-							excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");
+							JOptionPane.showMessageDialog(getComponent(), "Directory cannot be selected!");
 						}
-						try (FileWriter writer = new FileWriter(excerpt, true))
+						else
 						{
-							for (int i = 0; i < file.getLengthDisplayed(); i++)
+							if (!excerpt.getName().endsWith(".asd"))
 							{
-								double timestamp = file.getTimestampDisplayed(i);
-								double voltage = file.getVoltageDisplayed(i);
-								double current = file.getCurrentDisplayed(i);
-								
-								String output = "\n" + timestamp + "\t" + voltage + "\t" + current;
-								
-								writer.write(output.replace(".", ","));
+								excerpt = new File(excerpt.getParentFile(), excerpt.getName() + ".asd");
 							}
-							JOptionPane.showMessageDialog(getComponent(), "Excerpt saved successfully!");
-						}
-						catch (Exception ex)
-						{
-							ex.printStackTrace();
-							JOptionPane.showMessageDialog(getComponent(), "Excerpt could not be saved!");
+							try (FileWriter writer = new FileWriter(excerpt, true))
+							{
+								for (int i = 0; i < file.getLengthDisplayed(); i++)
+								{
+									double timestamp = file.getTimestampDisplayed(i);
+									double voltage = file.getVoltageDisplayed(i);
+									double current = file.getCurrentDisplayed(i);
+									
+									String output = "\n" + timestamp + "\t" + voltage + "\t" + current;
+									
+									writer.write(output.replace(".", ","));
+								}
+								JOptionPane.showMessageDialog(getComponent(), "Excerpt saved successfully!");
+							}
+							catch (Exception ex)
+							{
+								ex.printStackTrace();
+								JOptionPane.showMessageDialog(getComponent(), "Excerpt could not be saved!");
+							}
 						}
 					}
 				}
-			});
+			);
 			
 			// Text fields (1)
 			

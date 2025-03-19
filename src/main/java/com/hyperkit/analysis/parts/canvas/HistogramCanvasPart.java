@@ -71,11 +71,11 @@ public abstract class HistogramCanvasPart extends CanvasPart
 		
 		combo = new JComboBox<>(Statistics.values());
 		combo.setEnabled(false);
-		combo.addActionListener(action ->
+		combo.addActionListener(_ -> 
 		{
-			updateStatistics();
-			
-			getPanel().repaint();
+				updateStatistics();
+				
+				getPanel().repaint();
 		});
 		
 		percentage = new JTextField("", 8);
@@ -237,7 +237,7 @@ public abstract class HistogramCanvasPart extends CanvasPart
 				double mean = getMean(selected);
 				double stdev = getStdev(selected);
 				
-				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | Mean=" + String.format("%.6f", mean) + getDomainUnit() + "±" + String.format("%.6f", stdev) + getDomainUnit() + ")");
+				setDomainLabel(getDomainName() + " (in " + getDomainUnit() + " | Mean=" + String.format("%.6f", mean) + getDomainUnit() + "ï¿½" + String.format("%.6f", stdev) + getDomainUnit() + ")");
 				
 				break;
 			case MEDIAN:

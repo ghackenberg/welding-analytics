@@ -96,7 +96,7 @@ public class Main
 		
 		JSpinner progressSpinner = new JSpinner(new SpinnerNumberModel(frame, 0, 10000000, 1));
 		progressSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				frame = (int) progressSpinner.getValue();
 				
@@ -108,7 +108,7 @@ public class Main
 		
 		JSpinner windowSpinner = new JSpinner(new SpinnerNumberModel(window, 100, 100000, 100));
 		windowSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				window = (int) windowSpinner.getValue();
 				
@@ -120,7 +120,7 @@ public class Main
 		
 		JSpinner averageSpinner = new JSpinner(new SpinnerNumberModel(average, 0, 100, 1));
 		averageSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				average = (int) averageSpinner.getValue();
 				
@@ -132,7 +132,7 @@ public class Main
 		
 		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 10000, 100));
 		histogramSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				histogram = (int) histogramSpinner.getValue();
 						
@@ -144,7 +144,7 @@ public class Main
 		
 		JSpinner strokeSpinner = new JSpinner(new SpinnerNumberModel(stroke, 1, 5, 1));
 		strokeSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				stroke = (int) strokeSpinner.getValue();
 						
@@ -156,7 +156,7 @@ public class Main
 		
 		JSpinner fontSpinner = new JSpinner(new SpinnerNumberModel(font, 1, 16, 1));
 		fontSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				font = (int) fontSpinner.getValue();
 						
@@ -175,14 +175,14 @@ public class Main
 		deltaSlider.setPaintTicks(true);
 		deltaSlider.setPaintTrack(true);
 		deltaSlider.addChangeListener(
-			event ->
+			_ ->
 			{
 				deltaSpinner.setValue(deltaSlider.getValue());
 			}
 		);
 		
 		deltaSpinner.addChangeListener(
-			event ->
+			_ ->
 			{
 				deltaSlider.setValue((int) deltaSpinner.getValue());
 			}
@@ -191,7 +191,7 @@ public class Main
 		// Timer
 		
 		Timer timer = new Timer(10,
-			event ->
+			_ ->
 			{
 				progressSpinner.setValue((int) progressSpinner.getValue() + (int) deltaSlider.getValue());
 			}
@@ -201,7 +201,7 @@ public class Main
 		
 		JSpinner delay = new JSpinner(new SpinnerNumberModel(30, 1, 60, 1));
 		delay.addChangeListener(
-			event ->
+			_ ->
 			{
 				timer.setDelay(1000 / (int) delay.getValue());
 			}
@@ -214,7 +214,7 @@ public class Main
 		
 		JToggleButton button_play = new JToggleButton(icon_play);
 		button_play.addActionListener(
-			event ->
+			_ ->
 			{
 				if (button_play.isSelected())
 				{
@@ -235,7 +235,7 @@ public class Main
 		
 		JButton button_help = new JButton(icon_help);
 		button_help.addActionListener(
-			event ->
+			_ ->
 			{
 				try
 				{
@@ -283,7 +283,7 @@ public class Main
 		JToolBar footbar = new JToolBar("Footbar");
 		footbar.setFloatable(false);
 		footbar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		footbar.add(new JLabel("(c) 2021 Dr. Georg Hackenberg, Raimundstraße 9, 4701 Bad Schallerbach, Österreich"));
+		footbar.add(new JLabel("(c) 2021 Dr. Georg Hackenberg, Raimundstraï¿½e 9, 4701 Bad Schallerbach, ï¿½sterreich"));
 		
 		// Dock
 		
@@ -334,6 +334,12 @@ public class Main
 		grid.addDockable(4, 0, 2, 2, part_current_voltage_average_trace_canvas.getDockable());
 		grid.addDockable(4, 2, 2, 2, part_current_voltage_cloud_canvas.getDockable());
 		
+		// Quick fix for dockingframes
+		String version = System.getProperty("java.version");
+		if (!version.contains(".")) {
+			System.setProperty("java.version", "1." + version + ".0");	
+		}
+		
 		// Station
 		SplitDockStation station = new SplitDockStation();
 		station.dropTree(grid.toTree());
@@ -345,7 +351,7 @@ public class Main
 		
 		// Frame
 		
-		JFrame frame = new JFrame("Software für die Analyse von Messdaten");
+		JFrame frame = new JFrame("Welding Data Analysis Platform");
 		frame.setLayout(new BorderLayout());
 		frame.add(headbar, BorderLayout.PAGE_START);
 		frame.add(station.getComponent(), BorderLayout.CENTER);
