@@ -23,7 +23,7 @@ public abstract class Dataset
 	
 	private java.io.File file;
 	
-	private String name;
+	protected String name;
 	private Color color;
 	private Icon icon;
 	

@@ -5,6 +5,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JComboBox;
@@ -22,7 +24,7 @@ import io.jhdf.api.Node;
 
 public class HDFDataset extends Dataset {
 	
-	private class Option
+	private static class Option
 	{
 		private io.jhdf.api.Dataset dataset;
 		
@@ -72,7 +74,26 @@ public class HDFDataset extends Dataset {
 		}
 		public float[] getDatasetData()
 		{
-			return (float[]) dataset.getData();
+			Object data = dataset.getData();
+			if (data instanceof int[]) {
+				int[] ints = (int[]) data;
+				float[] floats = new float[ints.length];
+				for (int i = 0; i < ints.length; i++) {
+					floats[i] = ints[i];
+				}
+				return floats;
+			} else if (data instanceof float[]) {
+				return (float[]) dataset.getData();
+			} else if (data instanceof double[]) {
+				double[] doubles = (double[]) data;
+				float[] floats = new float[doubles.length];
+				for (int i = 0; i < doubles.length; i++) {
+					floats[i] = (float)doubles[i];
+				}
+				return floats;
+			} else {
+				throw new IllegalStateException();
+			}
 		}
 		
 		@Override
@@ -81,10 +102,9 @@ public class HDFDataset extends Dataset {
 			return getMeasurementName() + " - " + getChannelName() + " (" + getChannelRangeMin() + " to " + getChannelRangeMax() + " " + getChannelPhysicalUnit() + ")";
 		}
 	}
-
-	public HDFDataset(File file, Component parent)
-	{
-		super(file);
+	
+	public static List<Dataset> load(File file, Component parent) {
+		List<Dataset> result = new ArrayList<>();
 		
 		// Broadcast event
 		
@@ -164,6 +184,10 @@ public class HDFDataset extends Dataset {
 						float[] voltages = voltageOption.getDatasetData();
 						float[] currents = currentOption.getDatasetData();
 						
+						List<double[]> data = new ArrayList<>();
+						
+						int number = 0;
+						
 						for (int index = 0; index < voltages.length; index++)
 						{
 							double timestamp = index / voltageRate;
@@ -173,6 +197,16 @@ public class HDFDataset extends Dataset {
 							double power = voltage * current;
 							
 							data.add(new double[] {timestamp, voltage, current, resistance, power});
+							
+							if (data.size() > 100000) {
+								result.add(new HDFDataset(file, number++, data));
+								
+								data = new ArrayList<>();
+							}
+						}
+						
+						if (data.size() > 0) {
+							result.add(new HDFDataset(file, number, data));
 						}
 					}
 				}
@@ -187,13 +221,7 @@ public class HDFDataset extends Dataset {
 		
 		Bus.getInstance().broadcastEvent(new ProgressChangeEvent(100));
 		
-		// Clean data
-		
-		cleanData();
-		
-		// Update active data
-		
-		updateActiveData();
+		return result;
 	}
 
 	private static void findDatasets(Group group, Vector<io.jhdf.api.Dataset> result)
@@ -209,6 +237,27 @@ public class HDFDataset extends Dataset {
 				findDatasets((Group) node, result);
 			}
 		}
+	}
+
+	private HDFDataset(File file, int index, List<double[]> data)
+	{
+		super(file);
+		
+		// Set name
+
+		this.name = file.getAbsolutePath() + " - " + index;
+		
+		// Set data
+		
+		this.data = data;
+		
+		// Clean data
+		
+		cleanData();
+		
+		// Update active data
+		
+		updateActiveData();
 	}
 
 }

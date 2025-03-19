@@ -2,7 +2,9 @@ package com.hyperkit.analysis.actions.parts;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -59,20 +61,25 @@ public class FilePartAddAction extends PartAction<FilePart>
 			Thread thread = new Thread(() -> {
 				try
 				{
-					Dataset absFile = null;
+					List<Dataset> datasets = null;
 					
 					if (file.getName().endsWith(".asd"))
 					{
-						absFile = new ASDDataset(file);	
+						datasets = new ArrayList<>();
+						datasets.add(new ASDDataset(file));	
 					}
 					else if (file.getName().endsWith(".tdp"))
 					{
-						absFile = new HDFDataset(file, getPart().getComponent());
+						datasets = HDFDataset.load(file, getPart().getComponent());
 					}
 					
-					if (absFile != null && absFile.getLengthMeasured() > 0)
+					if (datasets != null)
 					{
-						Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), absFile));
+						for (Dataset dataset : datasets) {
+							if (dataset.getLengthMeasured() > 0) {
+								Bus.getInstance().broadcastEvent(new FilePartAddEvent(getPart(), dataset));	
+							}	
+						}
 					}
 					else
 					{

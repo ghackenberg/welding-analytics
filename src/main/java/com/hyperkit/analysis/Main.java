@@ -130,7 +130,7 @@ public class Main
 		
 		// Histogram
 		
-		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 100, 10000, 100));
+		JSpinner histogramSpinner = new JSpinner(new SpinnerNumberModel(histogram, 10, 10000, 10));
 		histogramSpinner.addChangeListener(
 			_ ->
 			{
